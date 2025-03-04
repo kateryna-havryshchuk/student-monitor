@@ -1,0 +1,37 @@
+body {
+    font-family: Arial, Sans-Serif;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: hsl(0, 0%, 61%);
+    color: white;
+    width: 100%;
+    padding: 7px 0; 
+    display: flex; 
+    justify-content: end; 
+    align-items: center;
+}
+
+header h4 {
+    margin: 0; 
+    margin-left: 5px;
+    font-size: 20px; 
+    font-weight: normal; 
+}
+
+.cms{
+    margin-left: 25px;
+    margin-right: auto;
+}
+
+button{
+    border-radius: 5px;
+    border: 1px solid hsl(0, 0%, 87%);
+    padding-top: 3px;
+    cursor: pointer;
+}
+button:hover{
+    background-color: hsl(0, 0%, 82%);
+}
