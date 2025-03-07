@@ -3,6 +3,17 @@ body {
     margin: 0;
     padding: 0;
 }
+button{
+    border-radius: 5px;
+    border: 1px solid hsl(0, 0%, 87%);
+    padding-top: 3px;
+    cursor: pointer;
+}
+button:hover{
+    background-color: hsl(0, 0%, 82%);
+}
+
+/* HEADER */
 
 header {
     background-color: hsl(0, 0%, 61%);
@@ -20,18 +31,218 @@ header h4 {
     font-size: 20px; 
     font-weight: normal; 
 }
-
-.cms{
+#cms{
     margin-left: 25px;
     margin-right: auto;
 }
+@media screen and (max-width: 600px) {
+    .user-dropdown h4 {
+        display: none; 
+    }
+    .user-dropdown{
+        pointer-events: none;
+        padding: 0; 
+    }
+    #userBtn{
+        padding: 0px;
+    }
+    .notify-content{
+        right: 60px;
+        left:auto;
+    }
+}
 
-button{
-    border-radius: 5px;
+/* MAIN */
+
+main h1{
+    font-weight: lighter;
+    margin-top: 15px;
+    margin-bottom: 0px;
+}
+main {
+    margin-left: 140px;
+    margin-right: 30px;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+#addBtn{
+    align-self: flex-end;
+    margin-bottom: 15px;
+}
+
+/* NAVIGATION BAR */
+
+.toggle, .toggle-label{
+    display: none;
+}
+.navbar{
+    margin-top: 56px;
+    height: 100%; 
+    width: 120px;
+    position: fixed; 
+    z-index: 1; 
+    top: 0;
+    left: 0;
+    overflow-x: hidden;
+}
+.navbar ul{
+    list-style-type: none;
+    padding: 15px;
+    margin: 0px;
+    overflow: hidden;
+} 
+.navbar a{
+    color: black;
+    text-decoration: none;
+    padding: 8px;
+    display: block;
+    text-align: center;
+}
+.navbar a.active,
+.navbar a:hover{
+    font-weight: bold;
+}
+.navbar li{
+    float: left;
+}
+@media screen and (min-width: 600px) {
+    .navbar li:first-child,
+    .navbar li:last-child {
+        display: none;
+    }
+}
+@media screen and (max-width: 600px) {
+    main{
+        margin-left: 30px;
+    }
+    #cms{
+        margin-left: 70px;
+    }
+    .toggle{
+        display: none;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+    .toggle-label{
+        display: block;
+        margin-left: 30px;
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        color: #ffffff;
+    }
+    .navbar{
+        transition: 0.5s ease;
+        transform: translateX(-120px);
+    }
+    .toggle:checked + .toggle-label {
+        background-color: hsl(0, 0%, 70%);
+    }
+    .toggle:checked + .toggle-label ~ .navbar {
+        transform: translateX(0px);
+        background-color: #ffffff;
+        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+    }
+}
+
+/* TABLE */
+
+.table-container{
+    overflow: auto;
+    position: relative;
+}
+#studentsTable {
+    border-collapse: collapse;
+    width: 100%;
+}
+th, td {
     border: 1px solid hsl(0, 0%, 87%);
-    padding-top: 3px;
-    cursor: pointer;
+    text-align: center;
+    padding: 8px;
+    white-space: nowrap;
 }
-button:hover{
-    background-color: hsl(0, 0%, 82%);
+@media screen and (min-height: 415px) {
+    .table-container {
+        max-height: 415px;
+    }
 }
+
+/* DROPDOWN MENU */
+
+.dropdown-container{
+    overflow: hidden;
+    display: flex;
+}
+.dropdown-container button{
+    background-color: hsla(0, 0%, 0%, 0);
+    border-radius: 5px;
+    color: white;
+    padding-right: 20px;
+    margin-right: 10px;
+    border: none;
+    display: flex;
+    align-items: center;
+}
+.dropdown-container a{
+    display: block;
+    color: black;
+    text-decoration: none;
+    padding: 10px 15px;
+}
+.user-content, 
+.notify-content{
+    display: none;
+    border-radius: 5px;
+    background-color: hsl(0, 0%, 95%);
+    position: absolute;
+    min-width: 130px;
+    box-shadow: 2px 2px 5px hsla(0, 0%, 0%, 0.2);
+}
+.notify-dropdown:hover .notify-content, 
+.user-dropdown:hover .user-content{
+    display: block;
+}
+.notify-dropdown:hover button, 
+.user-dropdown:hover button{
+    background-color:  hsl(0, 0%, 70%);
+}
+.notify-dropdown a:hover, 
+.user-dropdown a:hover{
+    border-radius: 5px;
+    background-color: hsl(0, 0%, 90%);
+}
+.notify-dropdown button{
+    height: 42px;
+    padding-right: 7px;
+    padding-left: 17px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.icon-button-badge {
+    position: absolute;
+    top: 8px;
+    right: 13px;
+    width: 10px;
+    height: 10px;
+    background: red;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+}
+#bellIcon{
+    margin-right: 10px;
+}
+#profilePicture{
+    width: 40px;
+    border-radius: 20px;
+}
+

@@ -1,46 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Students</title>
-        <link rel="stylesheet" href="style.css">
-        <script src="https://kit.fontawesome.com/d9209b8d96.js" crossorigin="anonymous"></script>
-        <script type="module" src="index.js"></script>
-    </head>
-    
-    <body>
-        <header class="header">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/d9209b8d96.js" crossorigin="anonymous"></script>
+    <script type="module" src="index.js"></script>
+</head>
 
-            <div class="logo">
-                <h1>CMS</h1>
+<body>
+    <div id="wrapper">
+
+    <header>
+        <h4 id="cms">CMS</h4>
+        
+        <div class="dropdown-container">
+
+            <div class="notify-dropdown">
+                <button id="notificationBtn">
+                    <i class="fa-regular fa-bell fa-xl" id="bellIcon"></i>
+                    <span class="icon-button-badge"></span>
+                </button>
+                <div class="notify-content">
+                    <a href="messages.html">
+                        <i class="fa-regular fa-user"></i> 
+                        Victor: What`s up?
+                    </a>
+                    <a href="messages.html">
+                        <i class="fa-regular fa-user"></i>
+                        Mike: See you!
+                    </a>
+                </div>
             </div>
-                <div class="notification-dropdown">
-                    <div class="notify-dropdown">
-                        <button id="notificationBtn">
-                            <i class="fa-regular fa-bell fa-xl" id="bellIcon"></i>
-                            <span class="icon-button-badge"></span>
-                        </button>
-            
-                    </div>
+
+            <div class="user-dropdown">
+                <button id="userBtn">
+                    <img id="profilePicture" src="./images/user-icon.jpg" alt="Profile picture">
+                    <h4>Ket Jer</h4>
+                </button>
+                <div class="user-content">
+                    <a href="#">Profile</a>
+                    <a href="#">Log out</a>
                 </div>
+            </div>
     
-                <div class="user-dropdown">
-                    <button id="userBtn">
-                        <img id="profilePicture" src="/images/user.png" alt="Profile picture">
-                        <h4 id="username">Ket Jer</h4>
-                    </button>
-                    <div class="user-content">
-                        <a href="#">Profile</a>
-                        <a href="#">Log out</a>
-                    </div>
-                </div>
-        </header>
+        </div>
 
-        <main>
+    </header>
 
-        </main>
+    <main>
 
-    </body>
+       
+    </main>
+
+</div>
+</body>
+
 </html>
+

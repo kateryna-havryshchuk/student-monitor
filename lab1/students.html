@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 
 <head>
     <meta charset="UTF-8">
@@ -7,44 +7,118 @@
 
     <title>Students</title>
     <link rel="stylesheet" href="style.css">
-
-    <script src="https://kit.fontawesome.com/d9209b8d96.js" crossorigin="anonymous"></script> <!-- без куків -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>  <!-- зручні функції для роботи з DOM -->
-    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script> <!-- більше інтерактивних елементів на веб-сторінці, -->
+    <script src="https://kit.fontawesome.com/d9209b8d96.js" crossorigin="anonymous"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script> 
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script src="pagination.js"></script>
     <script type="module" src="index.js"></script>
 </head>
 
 <body>
+    <div id="wrapper">
 
-    <header class="header">
+    <header>
 
-        <div class="logo">
-            <h1>CMS</h1>
-        </div>
-            <div class="notification-dropdown">
-                <div class="notify-dropdown">
-                    <button id="notificationBtn">
-                        <i class="fa-regular fa-bell fa-xl" id="bellIcon"></i>
-                        <span class="icon-button-badge"></span>
-                    </button>
-                    <div class="notify-content">
-                   
-                    </div>
+        <h4 id="cms">CMS</h4>
+        
+        <div class="dropdown-container">
+
+            <div class="notify-dropdown">
+                <button id="notificationBtn">
+                    <i class="fa-regular fa-bell fa-xl" id="bellIcon"></i>
+                    <span class="icon-button-badge"></span>
+                </button>
+                <div class="notify-content">
+                    <a href="messages.html">
+                        <i class="fa-regular fa-user"></i> 
+                        Victor: What`s up?
+                    </a>
+                    <a href="messages.html">
+                        <i class="fa-regular fa-user"></i>
+                        Mike: See you!
+                    </a>
                 </div>
             </div>
 
             <div class="user-dropdown">
                 <button id="userBtn">
-                    <img id="profilePicture" src="/images/user.png" alt="Profile picture">
-                    <h4 id="username">Ket Jer</h4>
+                    <img id="profilePicture" src="./images/user-icon.jpg" alt="Profile picture">
+                    <h4>Ket Jer</h4>
                 </button>
                 <div class="user-content">
                     <a href="#">Profile</a>
                     <a href="#">Log out</a>
                 </div>
             </div>
+    
+        </div>
+
+
     </header>
 
+    <main>
+
+        <h1>Students</h1>
+        
+
+        <button id="addBtn"><i class="fa-solid fa-plus"></i></button>
+
+        <div class="table-container">
+            <table id="studentsTable">
+
+                <thead id="tableHead">
+                    <tr>
+                        <th><input type="checkbox" id="selectAll"></th>
+                        <th>Group</th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>Birthday</th>
+                        <th>Status</th>
+                        <th>Options</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tableBody">
+                    <tr class="tableRow">
+                        <th><input type="checkbox"></th>
+                        <td>KN-21</td>
+                        <td>John Smith</td>
+                        <td>M</td>
+                        <td>11.05.2004</td>
+                        <td><span class="inactive-dot"></span></td>
+                        <td>
+                            <button class="editRowBtn">
+                                <i class="fa-solid fa-pencil"></i>
+                            </button>
+                            <button class="deleteRowBtn"> 
+                                <i class="fa-solid fa-xmark fa-lg"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr class="tableRow">
+                        <th><input type="checkbox"></th>
+                        <td>KN-22</td>
+                        <td>Ann Bond</td>
+                        <td>F</td>
+                        <td>24.04.2004</td>
+                        <td><span class="active-dot"></span></td>
+                        <td>
+                            <button class="editRowBtn">
+                                <i class="fa-solid fa-pencil"></i>
+                            </button>
+                            <button class="deleteRowBtn">
+                                <i class="fa-solid fa-xmark fa-lg"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+</div>
 </body>
+</html>
+
 
