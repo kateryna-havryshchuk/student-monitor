@@ -24,7 +24,6 @@ header {
     justify-content: end; 
     align-items: center;
 }
-
 header h4 {
     margin: 0; 
     margin-left: 5px;
@@ -172,6 +171,32 @@ th, td {
     }
 }
 
+/* PAGINATION */
+.paging-nav {
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 42px;
+    position: fixed;
+    bottom: 0px;
+    left: 50%;
+    transform: translateX(-50%); 
+    z-index: 1000;
+}
+.paging-nav a {
+    margin: 0 5px;
+    padding: 5px 10px;
+    border: 1px solid hsl(0, 0%, 87%);
+    border-radius: 5px;
+    text-decoration: none;
+    color: hsl(0, 0%, 20%);
+}
+.paging-nav a:hover,
+.paging-nav a.selected-page {
+    background-color: hsl(0, 0%, 82%);
+}
+
 /* DROPDOWN MENU */
 
 .dropdown-container{
@@ -246,3 +271,30 @@ th, td {
     border-radius: 20px;
 }
 
+/* ANIMATION */
+
+.icon-button-badge{
+    animation-name: fade;
+    animation-iteration-count: infinite;
+    animation-duration: 1.5s;
+}
+@keyframes fade{
+    50% {opacity:0};
+}
+
+/* STATUS DOTS FOR TABLE */
+
+.active-dot {
+    height: 20px;
+    width: 20px;
+    background-color: hsl(144, 77%, 42%);
+    border-radius: 50%;
+    display: inline-block;
+}
+.inactive-dot {
+    height: 20px;
+    width: 20px;
+    background-color: hsl(0, 0%, 61%);
+    border-radius: 50%;
+    display: inline-block;
+}
