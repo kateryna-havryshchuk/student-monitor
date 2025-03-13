@@ -1,3 +1,11 @@
+document.getElementById('cms-logo').addEventListener('click', function() {
+    window.location.href = 'students.html';
+});
+
+document.getElementById('notificationBtn').addEventListener('click', function() {
+    window.location.href = 'messages.html';
+});
+
 document.getElementById("addBtn").addEventListener("click", function() {
     document.getElementById("addModal").style.display = "block";
 });

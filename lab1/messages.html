@@ -7,63 +7,64 @@
     <title>Messages</title>
     <link rel="stylesheet" href="messageStyle.css">
     <script src="https://kit.fontawesome.com/d9209b8d96.js" crossorigin="anonymous"></script>
-    <script type="module" src="index.js"></script>
+    <script type="module" src="messagesFunctional.js"></script>
 </head>
 
 <body>
     <div id="wrapper">
-
-    <header>
-        <div class="logo">
-            <div class="cms-link" id="cms-logo">
-                <h4 id="cms">CMS</h4>
-            </div>
-        </div>
-        
-        <div class="dropdown-container">
-            <div class="notify-dropdown">
-                <button id="notificationBtn">
-                    <i class="fa-regular fa-bell fa-xl" id="bellIcon"></i>
-                </button>
-            </div>
-    
-            <div class="user-dropdown">
-                <button id="userBtn">
-                    <img id="profilePicture" src="/images/user-icon.jpg" alt="Profile picture">
-                    <span id="username">Ket Jer</span>
-                </button>
-                <div class="user-content">
-                    <a href="#">Profile</a>
-                    <a href="#">Log out</a>
+        <header>
+            <div class="logo">
+                <div class="cms-link" id="cms-logo">
+                    <h4 id="cms">CMS</h4>
                 </div>
             </div>
-    
-        </div>
-
-    </header>
-
-    <main>
-        <div class="navigation">
-            <input type="checkbox" class="toggle" id="toggle-checkbox">
-            <label for="toggle-checkbox" class="toggle-label"><i class="fa-solid fa-bars"></i></label>
-    
-            <nav class="navbar">
-                <ul>
-                    <li><a href="dashboard.html">Dashboard</a></li>
-                    <li><a href="students.html">Students</a></li>
-                    <li><a href="tasks.html">Tasks</a></li>
-                    <li><a href="messages.html" class="active">Messages</a></li>
-                </ul>
-            </nav>
-        </div>
-        <!-- Chat container -->
+            
+            <div class="dropdown-container">
+                <div class="notify-dropdown">
+                    <button id="notificationBtn">
+                        <i class="fa-regular fa-bell fa-xl" id="bellIcon"></i>
+                    </button>
+                    <div class="notify-content">
+                        <a href="#">No new notifications</a>
+                    </div>
+                </div>
+        
+                <div class="user-dropdown">
+                    <button id="userBtn">
+                        <img id="profilePicture" src="/images/user-icon.jpg" alt="Profile picture">
+                        <span id="username">Ket Jer</span>
+                    </button>
+                    <div class="user-content">
+                        <a href="#">Profile</a>
+                        <a href="#">Log out</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <main>
+            <div class="navigation">
+                <input type="checkbox" class="toggle" id="toggle-checkbox">
+                <label for="toggle-checkbox" class="toggle-label"><i class="fa-solid fa-bars"></i></label>
+        
+                <nav class="navbar">
+                    <ul>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="students.html">Students</a></li>
+                        <li><a href="tasks.html">Tasks</a></li>
+                        <li><a href="messages.html" class="active">Messages</a></li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <!-- Chat container -->
             <div class="table-container chat-container">
                 <!-- Chat sidebar -->
                 <div class="chat-sidebar">
                     <div class="chat-header">
                         <h3>Chat room</h3>
                         <button class="new-chat-btn" id="addBtn">
-                            <i class="fa-solid fa-plus"></i> New chat room
+                            <i class="fa-solid fa-plus"></i>New chat room
                         </button>
                     </div>
                     
@@ -129,18 +130,28 @@
                     
                     <div class="chat-messages">
                         <div class="message message-received">
-                            <div class="message-sender">Admin</div>
-                            <div class="message-content">Hello everyone! Welcome to our new chat room.</div>
-                            <div class="message-time">10:30 AM</div>
+                            <div class="message-avatar">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <div class="message-bubble">
+                                <div class="message-sender">Admin</div>
+                                <div class="message-content">Hello everyone! Welcome to our new chat room.</div>
+                                <div class="message-time">10:30 AM</div>
+                            </div>
                         </div>
                         
                         <div class="message message-sent">
-                            <div class="message-sender">Me</div>
-                            <div class="message-content">Thank you for the invitation!</div>
-                            <div class="message-time">10:32 AM</div>
+                            <div class="message-bubble">
+                                <div class="message-sender">Me</div>
+                                <div class="message-content">Thank you for the invitation!</div>
+                                <div class="message-time">10:32 AM</div>
+                            </div>
+                            <div class="message-avatar">
+                                <img src="/images/user-icon.jpg" alt="Me">
+                            </div>
                         </div>
                     </div>
-                    
+
                     <div class="chat-input">
                         <input type="text" placeholder="Type your message...">
                         <button>
@@ -151,8 +162,6 @@
             </div>
         </main>
     </div>
-
-    </main>
-    </div>
+    
 </body>
 </html>
