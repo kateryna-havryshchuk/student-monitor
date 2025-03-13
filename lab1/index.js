@@ -1,3 +1,6 @@
+document.getElementById('cms-logo').addEventListener('click', function() {
+    window.location.href = 'students.html'; // Замените на нужный URL
+});
 
 // Add modal functionality for adding students
 document.getElementById('addBtn').onclick = function() {
@@ -92,31 +95,26 @@ function createModal() {
         modal.style.display = 'none';
     }
 
-
-    // Fix the okBtn functionality
     const okBtn = document.getElementById('okBtn');
     okBtn.onclick = function() {
-        const group = document.getElementById('group').value;
-        const firstName = document.getElementById('firstName').value;
-        const lastName = document.getElementById('lastName').value;
-        const gender = document.getElementById('gender').value;
-        const birthday = document.getElementById('birthday').value;
-        
-        // Check if ALL fields are filled
-        if (group && firstName && lastName && gender && birthday) {
-            // All fields are filled, so save the data
-            const formattedDate = formatDate(birthday);
-            addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
-            
-            // Reset the form after successful submission
-            document.getElementById('studentForm').reset();
-
-            closeModal();
-        } 
-
-        closeModal();
-    };
+    const group = document.getElementById('group').value;
+    const firstName = document.getElementById('firstName').value;
+    const lastName = document.getElementById('lastName').value;
+    const gender = document.getElementById('gender').value;
+    const birthday = document.getElementById('birthday').value;
     
+    // Check if ALL fields are filled
+    if (group && firstName && lastName && gender && birthday) {
+        // All fields are filled, so save the data
+        const formattedDate = formatDate(birthday);
+        addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
+        
+        // Reset the form after successful submission
+        document.getElementById('studentForm').reset();
+    }
+    closeModal();
+};
+
     // Create button functionality - validate and add new row
     const createBtn = document.getElementById('createBtn');
     createBtn.onclick = function() {
@@ -163,7 +161,7 @@ function formatDate(dateString) {
 // Function to add new row to the table
 function addNewRow(group, name, gender, birthday) {
     const newRow = document.createElement('tr');
-    
+
     newRow.innerHTML = `
         <th><input type="checkbox"></th>
         <td>${group}</td>

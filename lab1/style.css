@@ -29,24 +29,45 @@ header {
 
 header h4 {
     margin: 0;
-    margin-left: 5px;
     font-size: 20px;
     font-weight: normal;
 }
 
-#cms {
-    margin-right: auto;
+.logo {
+    margin-left: 1%;
     display: flex;
     align-items: center;
 }
 
+.logo .cms-link {
+    margin-left: 0px;
+    font-size: 25px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    letter-spacing: 1px;
+    padding: 5px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    display: flex; /* Робить весь блок активним */
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.logo .cms-link:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+
 @media screen and (max-width: 600px) {
     .user-dropdown h4 {
-        display: none; 
+        display: none;
     }
     .user-dropdown{
         pointer-events: none;
-        padding: 0; 
+        padding: 0;
     }
     #userBtn{
         padding: 0px;
@@ -226,7 +247,7 @@ thead {
     padding: 10px 15px;
 }
 
-.user-content, 
+.user-content,
 .notify-content{
     display: none;
     border-radius: 15px;
@@ -236,17 +257,17 @@ thead {
     box-shadow: 2px 2px 5px hsla(0, 0%, 0%, 0.2);
 }
 
-.notify-dropdown:hover .notify-content, 
+.notify-dropdown:hover .notify-content,
 .user-dropdown:hover .user-content{
     display: block;
     border-radius: 15px;
 
 }
-.notify-dropdown:hover button, 
+.notify-dropdown:hover button,
 .user-dropdown:hover button{
     background-color:  hsl(0, 0%, 70%);
 }
-.notify-dropdown a:hover, 
+.notify-dropdown a:hover,
 .user-dropdown a:hover{
     border-radius: 15px;
     background-color: hsl(0, 0%, 90%);
@@ -279,6 +300,7 @@ thead {
 }
 
 #profilePicture{
+    margin-right: 5px;
     width: 40px;
     border-radius: 20px;
 }
@@ -377,7 +399,7 @@ thead {
     font-weight: bold;
     width: 32px;
     height: 32px;
-    display: inline-flex; 
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
@@ -454,7 +476,7 @@ thead {
 
 #createBtn:hover {
     background-color: #3d8140;
-} 
+}
 
 /* RESPONSIVE DESIGN */
 
@@ -466,17 +488,17 @@ thead {
     main {
         margin-left: 30px;
     }
-    
+
     #cms {
         margin-left: 70px;
     }
-    
+
     .toggle {
         display: none;
         appearance: none;
         -webkit-appearance: none;
     }
-    
+
     .toggle-label {
         display: block;
         position: absolute;
@@ -488,38 +510,38 @@ thead {
         color: #ffffff;
         cursor: pointer;
     }
-    
+
     .navbar {
         transform: translateX(-120px);
     }
-    
+
     .toggle:checked + .toggle-label {
         background-color: hsl(0, 0%, 70%);
     }
-    
+
     .toggle:checked + .toggle-label ~ .navbar {
         transform: translateX(0px);
         box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
     }
-    
+
     .notify-content {
         right: 60px;
     }
-    
+
     th, td {
         padding: 8px 10px;
         font-size: 14px;
     }
-    
+
     .modal-content {
         margin: 5% auto;
         padding: 15px;
     }
-    
+
     .user-dropdown button {
         padding-right: 8px;
     }
-    
+
     .user-dropdown h4 {
         display: none;
     }
