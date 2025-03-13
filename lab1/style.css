@@ -1,39 +1,45 @@
-body {
-    font-family: Arial, Sans-Serif;
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
-button{
-    border-radius: 5px;
-    border: 1px solid hsl(0, 0%, 87%);
-    padding-top: 3px;
-    cursor: pointer;
+
+body {
+    font-family: Arial, Sans-Serif;
+    line-height: 1.6;
+    color: #333;
 }
-button:hover{
-    background-color: hsl(0, 0%, 82%);
-}
+
 
 /* HEADER */
-
 header {
     background-color: hsl(0, 0%, 61%);
     color: white;
     width: 100%;
-    padding: 7px 0; 
-    display: flex; 
-    justify-content: end; 
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+header h4 {
+    margin: 0;
+    margin-left: 5px;
+    font-size: 20px;
+    font-weight: normal;
+}
+
+#cms {
+    margin-right: auto;
+    display: flex;
     align-items: center;
 }
-header h4 {
-    margin: 0; 
-    margin-left: 5px;
-    font-size: 20px; 
-    font-weight: normal; 
-}
-#cms{
-    margin-left: 25px;
-    margin-right: auto;
-}
+
 @media screen and (max-width: 600px) {
     .user-dropdown h4 {
         display: none; 
@@ -51,150 +57,150 @@ header h4 {
     }
 }
 
-/* MAIN */
 
-main h1{
-    font-weight: lighter;
-    margin-top: 15px;
-    margin-bottom: 0px;
-}
-main {
-    margin-left: 140px;
-    margin-right: 30px;
-    display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
-}
-#addBtn{
-    align-self: flex-end;
-    margin-bottom: 15px;
-}
 
 /* NAVIGATION BAR */
 
-.toggle, .toggle-label{
-    display: none;
-}
-.navbar{
+.navbar {
     margin-top: 56px;
-    height: 100%; 
-    width: 120px;
-    position: fixed; 
-    z-index: 1; 
+    height: 100%;
+    width: 130px;
+    position: fixed;
+    z-index: 90;
     top: 0;
     left: 0;
     overflow-x: hidden;
+    background-color: #f8f9fa;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
 }
-.navbar ul{
+
+.navbar ul {
     list-style-type: none;
     padding: 15px;
-    margin: 0px;
+    margin: 0;
     overflow: hidden;
-} 
-.navbar a{
+}
+
+.navbar li {
+    margin-bottom: 10px;
+}
+
+.navbar a {
     color: black;
     text-decoration: none;
-    padding: 8px;
+    padding: 10px 8px;
     display: block;
     text-align: center;
+    transition: all 0.3s ease;
 }
+
 .navbar a.active,
-.navbar a:hover{
+.navbar a:hover {
     font-weight: bold;
+    background-color: hsl(0, 0%, 90%);
+    border-radius: 5px;
 }
-.navbar li{
-    float: left;
+
+/* MAIN CONTENT */
+main {
+    margin-left: 140px;
+    margin-top: 76px;
+    padding: 20px;
+    transition: margin-left 0.3s ease;
 }
-@media screen and (min-width: 600px) {
-    .navbar li:first-child,
-    .navbar li:last-child {
-        display: none;
-    }
+
+main h1 {
+    font-weight: lighter;
+    margin-bottom: 20px;
 }
-@media screen and (max-width: 600px) {
-    main{
-        margin-left: 30px;
-    }
-    #cms{
-        margin-left: 70px;
-    }
-    .toggle{
-        display: none;
-        appearance: none;
-        -webkit-appearance: none;
-    }
-    .toggle-label{
-        display: block;
-        margin-left: 30px;
-        margin-top: 10px;
-        padding: 10px;
-        border-radius: 5px;
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 9999;
-        color: #ffffff;
-    }
-    .navbar{
-        transition: 0.5s ease;
-        transform: translateX(-120px);
-    }
-    .toggle:checked + .toggle-label {
-        background-color: hsl(0, 0%, 70%);
-    }
-    .toggle:checked + .toggle-label ~ .navbar {
-        transform: translateX(0px);
-        background-color: #ffffff;
-        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
-    }
+
+.button-container {  /* Create or use the actual container class name */
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+}
+
+#addBtn {
+    /* Remove align-self and margin-bottom */
+    padding: 8px 16px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+}
+
+#addBtn:hover {
+    background-color: #3d8140;
+}
+
+/* Font Awesome icon styling */
+.fa-solid {
+    display: inline-block;
+    line-height: 1;
+}
+
+/* Pencil icon styling */
+.fa-pencil {
+    color: #819c88; /* Blue color for edit icon */
+    font-size: 16px;
+}
+
+/* X mark icon styling */
+.fa-xmark.fa-lg {
+    color: #bf6f7e; /* Red color for delete icon */
+    font-size: 18px; /* Slightly larger as it has fa-lg class */
+}
+
+/* Button styling for the icon buttons */
+.editRowBtn, .deleteRowBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    margin: 0 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.editRowBtn:hover, .deleteRowBtn:hover {
+    background-color: #d4dbda;
 }
 
 /* TABLE */
-
-.table-container{
+.table-container {
     overflow: auto;
     position: relative;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 5px;
 }
-#studentsTable {
-    border-collapse: collapse;
+
+table {
     width: 100%;
+    border-collapse: collapse;
 }
+
 th, td {
     border: 1px solid hsl(0, 0%, 87%);
-    text-align: center;
-    padding: 8px;
+    text-align: left;
+    padding: 12px;
     white-space: nowrap;
 }
+
+thead {
+    background-color: #f8f9fa;
+}
+
+.tableRow:hover {
+    background-color: #f5f5f5;
+}
+
 @media screen and (min-height: 415px) {
     .table-container {
         max-height: 415px;
     }
-}
-
-/* PAGINATION */
-.paging-nav {
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-    margin-bottom: 42px;
-    position: fixed;
-    bottom: 0px;
-    left: 50%;
-    transform: translateX(-50%); 
-    z-index: 1000;
-}
-.paging-nav a {
-    margin: 0 5px;
-    padding: 5px 10px;
-    border: 1px solid hsl(0, 0%, 87%);
-    border-radius: 5px;
-    text-decoration: none;
-    color: hsl(0, 0%, 20%);
-}
-.paging-nav a:hover,
-.paging-nav a.selected-page {
-    background-color: hsl(0, 0%, 82%);
 }
 
 /* DROPDOWN MENU */
@@ -205,7 +211,7 @@ th, td {
 }
 .dropdown-container button{
     background-color: hsla(0, 0%, 0%, 0);
-    border-radius: 5px;
+    border-radius: 17px;
     color: white;
     padding-right: 20px;
     margin-right: 10px;
@@ -219,18 +225,22 @@ th, td {
     text-decoration: none;
     padding: 10px 15px;
 }
+
 .user-content, 
 .notify-content{
     display: none;
-    border-radius: 5px;
+    border-radius: 15px;
     background-color: hsl(0, 0%, 95%);
     position: absolute;
     min-width: 130px;
     box-shadow: 2px 2px 5px hsla(0, 0%, 0%, 0.2);
 }
+
 .notify-dropdown:hover .notify-content, 
 .user-dropdown:hover .user-content{
     display: block;
+    border-radius: 15px;
+
 }
 .notify-dropdown:hover button, 
 .user-dropdown:hover button{
@@ -238,7 +248,7 @@ th, td {
 }
 .notify-dropdown a:hover, 
 .user-dropdown a:hover{
-    border-radius: 5px;
+    border-radius: 15px;
     background-color: hsl(0, 0%, 90%);
 }
 .notify-dropdown button{
@@ -263,9 +273,11 @@ th, td {
     align-items: center;
     border-radius: 50%;
 }
+
 #bellIcon{
     margin-right: 10px;
 }
+
 #profilePicture{
     width: 40px;
     border-radius: 20px;
@@ -282,19 +294,233 @@ th, td {
     50% {opacity:0};
 }
 
-/* STATUS DOTS FOR TABLE */
-
+/* STATUS DOTS */
 .active-dot {
-    height: 20px;
-    width: 20px;
+    height: 12px;
+    width: 12px;
     background-color: hsl(144, 77%, 42%);
     border-radius: 50%;
     display: inline-block;
 }
+
 .inactive-dot {
-    height: 20px;
-    width: 20px;
+    height: 12px;
+    width: 12px;
     background-color: hsl(0, 0%, 61%);
     border-radius: 50%;
     display: inline-block;
+}
+
+/* PAGINATION */
+.paging-nav {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.paging-nav a {
+    margin: 0 5px;
+    padding: 5px 10px;
+    border: 1px solid hsl(0, 0%, 87%);
+    border-radius: 5px;
+    text-decoration: none;
+    color: hsl(0, 0%, 20%);
+    transition: background-color 0.3s;
+}
+
+.paging-nav a:hover,
+.paging-nav a.selected-page {
+    background-color: hsl(0, 0%, 82%);
+}
+
+/* ANIMATION */
+@keyframes fade {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 5px;
+    width: 500px;
+    max-width: 80%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.close-btn {
+    cursor: pointer;
+    font-size: 24px;
+    font-weight: bold;
+    width: 32px;
+    height: 32px;
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.close-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+
+.modal-body {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 9L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.modal-footer button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#okBtn {
+    background-color: #e0e0e0;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
+
+#okBtn:hover {
+    background-color: #95a39e;
+}
+
+#createBtn {
+    background-color: #4CAF50;
+    border-radius: 10px;
+    color: white;
+    border: none;
+}
+
+#createBtn:hover {
+    background-color: #3d8140;
+} 
+
+/* RESPONSIVE DESIGN */
+
+.toggle, .toggle-label {
+    display: none;
+}
+
+@media screen and (max-width: 600px) {
+    main {
+        margin-left: 30px;
+    }
+    
+    #cms {
+        margin-left: 70px;
+    }
+    
+    .toggle {
+        display: none;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+    
+    .toggle-label {
+        display: block;
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 9999;
+        padding: 10px;
+        border-radius: 5px;
+        color: #ffffff;
+        cursor: pointer;
+    }
+    
+    .navbar {
+        transform: translateX(-120px);
+    }
+    
+    .toggle:checked + .toggle-label {
+        background-color: hsl(0, 0%, 70%);
+    }
+    
+    .toggle:checked + .toggle-label ~ .navbar {
+        transform: translateX(0px);
+        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+    }
+    
+    .notify-content {
+        right: 60px;
+    }
+    
+    th, td {
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+    
+    .modal-content {
+        margin: 5% auto;
+        padding: 15px;
+    }
+    
+    .user-dropdown button {
+        padding-right: 8px;
+    }
+    
+    .user-dropdown h4 {
+        display: none;
+    }
 }
