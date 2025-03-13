@@ -1,5 +1,14 @@
+
 document.getElementById('cms-logo').addEventListener('click', function() {
-    window.location.href = 'students.html'; // Замените на нужный URL
+    window.location.href = 'students.html';
+});
+
+document.getElementById('notificationBtn').addEventListener('click', function() {
+    window.location.href = 'messages.html';
+});
+
+document.getElementById('notificationBtn').addEventListener('click', function() {
+    window.location.href = 'messages.html';
 });
 
 // Add modal functionality for adding students
