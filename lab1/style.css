@@ -157,6 +157,22 @@ main h1 {
 
 #addBtn:hover {
     background-color: #3d8140;
+    transform: scale(1.1);
+}
+
+#deleteAllBtn{
+    padding-left: 25%;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+}
+
+#deleteAllBtn:hover {
+    background-color: #3d8140;
+    transform: scale(1.1);
 }
 
 /* Font Awesome icon styling */
@@ -173,7 +189,8 @@ main h1 {
 
 /* X mark icon styling */
 .fa-xmark.fa-lg {
-    color: #bf6f7e; /* Red color for delete icon */
+    margin-top: 2%;
+    color: #bd5467; /* Red color for delete icon */
     font-size: 18px; /* Slightly larger as it has fa-lg class */
 }
 
@@ -182,14 +199,20 @@ main h1 {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 5px;
-    margin: 0 10px;
-    border-radius: 4px;
+    padding: 7px;
+    margin: 0px 10px;
+    border-radius: 5px;
     transition: background-color 0.2s;
 }
 
-.editRowBtn:hover, .deleteRowBtn:hover {
+.editRowBtn:hover {
     background-color: #d4dbda;
+    transform: scale(1.1);
+}
+
+.deleteRowBtn:hover {
+    background-color: #d4a7a7;
+    transform: scale(1.1);
 }
 
 /* TABLE */
@@ -227,7 +250,13 @@ thead {
     }
 }
 
-/* DROPDOWN MENU */
+input[type='checkbox'] {
+    accent-color: #71c985; 
+    margin-left: 38%;
+  }
+
+
+/* DROPDOWN MENU AND NOTIFICATION*/
 
 #username{
     margin: 0;
@@ -301,7 +330,8 @@ thead {
     justify-content: center;
 }
 
-.icon-button-badge {
+
+/* .icon-button-badge {
     position: absolute;
     top: 8px;
     right: 13px;
@@ -313,7 +343,28 @@ thead {
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-}
+} */
+
+.icon-button-badge {
+    position: absolute;
+    top: 8px;
+    right: 13px;
+    width: 10px;
+    height: 10px;
+    background: red;
+    color: #ffffff;
+    display: none; /* Hide by default */
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+  }
+  
+  .icon-button-badge.show {
+    display: flex;
+    animation-name: fade;
+    animation-iteration-count: infinite;
+    animation-duration: 1.5s;
+  }
 
 #bellIcon {
     margin-right: 10px;
@@ -331,6 +382,19 @@ thead {
     animation-iteration-count: infinite;
     animation-duration: 1.5s;
 }
+
+.bell-ringing {
+    animation: bellRing 0.5s ease-in-out;
+  }
+
+  
+@keyframes bellRing {
+    0%, 100% { transform: rotate(0); }
+    20% { transform: rotate(15deg); }
+    40% { transform: rotate(-15deg); }
+    60% { transform: rotate(7deg); }
+    80% { transform: rotate(-7deg); }
+  }
 
 @keyframes fade {
     0% { opacity: 1; }
@@ -356,7 +420,7 @@ thead {
 }
 
 /* PAGINATION */
-.paging-nav {
+/* .paging-nav {
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -368,6 +432,7 @@ thead {
     transform: translateX(-50%); 
     z-index: 1000;
 }
+
 .paging-nav a {
     margin: 0 5px;
     padding: 5px 10px;
@@ -379,7 +444,7 @@ thead {
 .paging-nav a:hover,
 .paging-nav a.selected-page {
     background-color: hsl(0, 0%, 82%);
-}
+} */
 
 
 /* ANIMATION */
@@ -434,6 +499,7 @@ thead {
 
 .close-btn:hover {
     background-color: rgba(0, 0, 0, 0.1);
+    transform: scale(1.2);
 }
 
 
@@ -462,11 +528,13 @@ thead {
 }
 
 .form-group input,
-.form-group select {
+.form-group select, .birthday {
     width: 100%;
     padding: 8px;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 10px;
+    font-family: Arial, Sans-Serif;
+    letter-spacing: 0.7px;
 }
 
 .modal-footer {
@@ -479,18 +547,21 @@ thead {
 
 .modal-footer button {
     padding: 8px 16px;
-    border-radius: 4px;
+    border-radius: 10px;
     cursor: pointer;
 }
 
+
 #okBtn {
     background-color: #e0e0e0;
-    border: 1px solid #ccc;
     border-radius: 10px;
+    color: rgb(109, 110, 108);
+    border: none;
 }
 
 #okBtn:hover {
     background-color: #95a39e;
+    transform: scale(1.07);
 }
 
 #createBtn {
@@ -502,6 +573,7 @@ thead {
 
 #createBtn:hover {
     background-color: #3d8140;
+    transform: scale(1.07);
 }
 
 /* RESPONSIVE DESIGN */

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/d9209b8d96.js" crossorigin="anonymous"></script>
+    <script type="module" src="index.js"></script>
+</head>
+
+<body>
+
+<div class="modal-content">
+    <div class="modal-header">
+        <h2 id="modalTitle">Add student</h2>
+        <span class="close-btn">&times;</span>
+    </div>
+    <div class="modal-body">
+        <form id="studentForm">
+            <div class="form-group">
+                <label for="group">Group</label>
+                <select id="group" name="group">
+                    <option value="">Select Group</option>
+                    <option value="PZ-21">PZ-21</option>
+                    <option value="PZ-22">PZ-22</option>
+                    <option value="PZ-23">PZ-23</option>
+                    <option value="PZ-24">PZ-24</option>
+                    <option value="PZ-25">PZ-25</option>
+                    <option value="PZ-26">PZ-26</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="firstName">First name</label>
+                <input type="text" id="firstName" name="firstName">
+            </div>
+            <div class="form-group">
+                <label for="lastName">Last name</label>
+                <input type="text" id="lastName" name="lastName">
+            </div>
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender">
+                    <option value="">Select Gender</option>
+                    <option value="M">M</option>
+                    <option value="F">F</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="birthday">Birthday</label>
+                <input type="date" id="birthday" name="birthday">
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button id="okBtn">OK</button>
+        <button id="createBtn">Create</button>
+    </div>
+</div>
+
+</body>
+</html>
