@@ -29,7 +29,6 @@ header {
 
 
 header h4 {
-    margin: 0;
     font-size: 20px;
     font-weight: normal;
 }
@@ -41,8 +40,6 @@ header h4 {
 }
 
 .logo .cms-link {
-    font-size: 25px;
-    font-weight: bold;
     color: white;
     text-decoration: none;
     letter-spacing: 1px;
@@ -57,10 +54,13 @@ header h4 {
 
 .logo .cms-link:hover {
     background-color: rgba(255, 255, 255, 0.2);
-    transform: scale(1.05);
+    background-color: #5f5c5c;
+    border-color: #3d8140;
+    transform: scale(1.2);
+    animation: snakeBorderAnim 4s linear infinite;
 }
-
-
+  
+ 
 @media screen and (max-width: 600px) {
     .user-dropdown h4 {
         display: none;
@@ -256,6 +256,14 @@ input[type='checkbox'] {
   }
 
 
+
+
+
+
+
+
+
+
 /* DROPDOWN MENU AND NOTIFICATION*/
 
 #username{
@@ -420,7 +428,7 @@ input[type='checkbox'] {
 }
 
 /* PAGINATION */
-/* .paging-nav {
+.paging-nav {
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -441,10 +449,11 @@ input[type='checkbox'] {
     text-decoration: none;
     color: hsl(0, 0%, 20%);
 }
+
 .paging-nav a:hover,
 .paging-nav a.selected-page {
     background-color: hsl(0, 0%, 82%);
-} */
+}
 
 
 /* ANIMATION */

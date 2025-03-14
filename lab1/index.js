@@ -171,10 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
   });
 
-
-
-// Function to show modal with appropriate title and data
-function showModal(title, rowData) {
+  function showModal(title, rowData) {
     // Create modal if it doesn't exist yet
     if (!document.getElementById('studentModal')) {
         createModal();
@@ -182,11 +179,54 @@ function showModal(title, rowData) {
     
     // Set modal title
     document.getElementById('modalTitle').textContent = title;
+     document.getElementById('studentModal').style.display = 'block';
+    const okBtn = document.getElementById('okBtn');
+    const createBtn = document.getElementById('createBtn');
     
-    // Clear form fields if adding new student
-    if (!rowData) {
-        document.getElementById('studentForm').reset();
+    // Store original handlers if not already stored
+    if (!okBtn.originalOnclick) {
+        okBtn.originalOnclick = okBtn.onclick;
     }
+    
+    if (!createBtn.originalOnclick) {
+        createBtn.originalOnclick = createBtn.onclick;
+    }
+        document.getElementById('studentForm').reset();
+        
+        createBtn.onclick = function() {
+            const group = document.getElementById('group').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const gender = document.getElementById('gender').value;
+            const birthday = document.getElementById('birthday').value;
+            
+            if (!group || !firstName || !lastName || !gender || !birthday) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            const formattedDate = formatDate(birthday);
+            addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
+            document.getElementById('studentForm').reset();
+        };
+        // Set up behavior for adding new student
+        okBtn.onclick = function() {
+            const group = document.getElementById('group').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const gender = document.getElementById('gender').value;
+            const birthday = document.getElementById('birthday').value;
+            
+            // Check if ALL fields are filled
+            if (group && firstName && lastName && gender && birthday) {
+                const formattedDate = formatDate(birthday);
+                addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
+                document.getElementById('studentForm').reset();
+                document.getElementById('studentModal').style.display = 'none';
+            } else {
+                document.getElementById('studentModal').style.display = 'none';
+            }
+        };
     
     document.getElementById('studentModal').style.display = 'block';
 }
@@ -223,9 +263,8 @@ function editButtonHandler(event) {
     }
 }
 
-// Function to show edit modal with pre-filled data
+
 function showEditModal(title, rowData, rowElement) {
-    // Set modal title
     document.getElementById('modalTitle').textContent = title;
     
     // Split the name into first and last name
@@ -233,7 +272,6 @@ function showEditModal(title, rowData, rowElement) {
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
     
-    // Convert date from DD.MM.YYYY to YYYY-MM-DD for input field
     const birthdayParts = rowData.birthday.split('.');
     const formattedBirthday = birthdayParts.length === 3 ? 
         `${birthdayParts[2]}-${birthdayParts[1]}-${birthdayParts[0]}` : '';
@@ -337,6 +375,7 @@ document.getElementById('addBtn').onclick = function() {
         // Modal already exists, show it directly
         showModal('Add student', null);
     }
+
 }
 
 // Modified createModal to return a promise
@@ -364,58 +403,58 @@ function createModal() {
     });
 }
 
+
+
 function setupModalEventListeners(modal) {
     // Close button functionality
     const closeBtn = modal.querySelector('.close-btn');
     closeBtn.onclick = function() {
-        closeModal();
-    }
-
-    function closeModal() {
         modal.style.display = 'none';
     }
 
-    const okBtn = document.getElementById('okBtn');
-    okBtn.onclick = function() {
     const group = document.getElementById('group').value;
     const firstName = document.getElementById('firstName').value;
     const lastName = document.getElementById('lastName').value;
     const gender = document.getElementById('gender').value;
     const birthday = document.getElementById('birthday').value;
-    
-    // Check if ALL fields are filled
-    if (group && firstName && lastName && gender && birthday) {
+
+    const okBtn = document.getElementById('okBtn');
+    okBtn.onclick = function() {
+        if (group && firstName && lastName && gender && birthday) {
+            const formattedDate = formatDate(birthday);
+            addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
+            console.log("huina");
+            // document.getElementById('studentForm').reset();
+            // Close the modal after adding student
+            modal.style.display = 'none';
+        } else {
+            document.getElementById('studentForm').reset();
+            modal.style.display = 'none';
+        }
+    };
+
+    // Create button functionality - validate and add new row
+    const createBtn = document.getElementById('createBtn');
+    createBtn.onclick = function() {
+        // Get form values
+        const group = document.getElementById('group').value;
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        const gender = document.getElementById('gender').value;
+        const birthday = document.getElementById('birthday').value;
+        
+        if (!group || !firstName || !lastName || !gender || !birthday) {
+            alert('Please fill in all fields');
+            return;
+        }
+        
         const formattedDate = formatDate(birthday);
+        
         addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
         
         document.getElementById('studentForm').reset();
-    }
-    closeModal();
-};
-
-  // Create button functionality - validate and add new row
-  const createBtn = document.getElementById('createBtn');
-  createBtn.onclick = function() {
-      // Get form values
-      const group = document.getElementById('group').value;
-      const firstName = document.getElementById('firstName').value;
-      const lastName = document.getElementById('lastName').value;
-      const gender = document.getElementById('gender').value;
-      const birthday = document.getElementById('birthday').value;
-      
-      if (!group || !firstName || !lastName || !gender || !birthday) {
-          alert('Please fill in all fields');
-          return;
-      }
-      
-      const formattedDate = formatDate(birthday);
-      
-      addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
-
-      document.getElementById('studentForm').reset();
-  };
-
-
+    };
+    
     
     // Close if clicking outside the modal
     window.onclick = function(event) {
@@ -434,10 +473,8 @@ function formatDate(dateString) {
     return `${day}.${month}.${year}`;
 }
 
-// Function to add new row to the table
 function addNewRow(group, name, gender, birthday) {
     const newRow = document.createElement('tr');
-
     newRow.innerHTML = `
         <th><input type="checkbox"></th>
         <td>${group}</td>
@@ -454,16 +491,11 @@ function addNewRow(group, name, gender, birthday) {
             </button>
         </td>
     `;
-
+    
     newRow.classList.add('tableRow');
     document.getElementById('tableBody').appendChild(newRow);
-    
-    // Add delete functionality to the new row's delete button
     const newDeleteButton = newRow.querySelector('.deleteRowBtn');
     addDeleteListener(newDeleteButton);
-    
-    // Refresh paging
-    $('#studentsTable').paging('refresh');
 }
 
 // Delete row functionality (keeping your existing code)

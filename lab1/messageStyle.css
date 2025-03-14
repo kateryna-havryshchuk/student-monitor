@@ -55,7 +55,8 @@ header h4 {
 
 .logo .cms-link:hover {
     background-color: rgba(255, 255, 255, 0.2);
-    transform: scale(1.05);
+    background-color: #5f5c5c;
+    transform: scale(1.2);
 }
 
 /* NAVIGATION BAR */
@@ -270,6 +271,8 @@ main h1 {
     }
 }
 
+
+
 /* CHAT SPECIFIC STYLES */
 .chat-container {
     display: flex;
@@ -299,16 +302,20 @@ main h1 {
 
 .new-chat-btn {
     background: none;
+    letter-spacing: 1px;
     border: none;
     color: #4CAF50;
     cursor: pointer;
     font-size: 14px;
     display: flex;
+    padding: 5px;
     align-items: center;
 }
 
 .new-chat-btn:hover {
     color: #3d8140;
+    background-color: #c7d4c9;
+    border-radius: 7px;
 }
 
 .chat-list {
