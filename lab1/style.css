@@ -256,14 +256,6 @@ input[type='checkbox'] {
   }
 
 
-
-
-
-
-
-
-
-
 /* DROPDOWN MENU AND NOTIFICATION*/
 
 #username{
@@ -581,6 +573,18 @@ input[type='checkbox'] {
 }
 
 #createBtn:hover {
+    background-color: #3d8140;
+    transform: scale(1.07);
+}
+
+#cancelDeleteBtn{
+    background-color: #4CAF50;
+    border-radius: 10px;
+    color: white;
+    border: none;
+}
+
+#cancelDeleteBtn:hover {
     background-color: #3d8140;
     transform: scale(1.07);
 }

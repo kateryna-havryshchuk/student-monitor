@@ -94,26 +94,25 @@ document.addEventListener('DOMContentLoaded', function() {
         deleteAllBtn.style.display = 'none';
         deleteAllBtn.style.marginLeft = '15px';
         
-        // Add event listener for delete all
         deleteAllBtn.addEventListener('click', function() {
             const selectedRows = document.querySelectorAll('#tableBody tr th input[type="checkbox"]:checked');
             if (selectedRows.length > 0) {
-                if (confirm(`Are you sure you want to delete ${selectedRows.length} selected students?`)) {
-                    selectedRows.forEach(checkbox => {
-                        checkbox.closest('tr').remove();
-                    });
-                    
-                    // Reset header checkbox
-                    if (headerCheckbox) {
-                        headerCheckbox.checked = false;
+                showDeleteConfirmModal(
+                    `Are you sure you want to delete ${selectedRows.length} selected students?`,
+                    function() {
+                        selectedRows.forEach(checkbox => {
+                            checkbox.closest('tr').remove();
+                        });
+                        
+                        // Reset header checkbox
+                        const headerCheckbox = document.querySelector('thead th input[type="checkbox"]');
+                        if (headerCheckbox) {
+                            headerCheckbox.checked = false;
+                        }
+                        
+                        deleteAllBtn.style.display = 'none';
                     }
-                    
-                    // Refresh paging
-                    $('#studentsTable').paging('refresh');
-                    
-                    // Hide delete all button
-                    deleteAllBtn.style.display = 'none';
-                }
+                );
             }
         });
         
@@ -496,22 +495,111 @@ function addNewRow(group, name, gender, birthday) {
     document.getElementById('tableBody').appendChild(newRow);
     const newDeleteButton = newRow.querySelector('.deleteRowBtn');
     addDeleteListener(newDeleteButton);
+
 }
 
-// Delete row functionality (keeping your existing code)
+
 let deleteButtons = document.querySelectorAll('.deleteRowBtn');
 deleteButtons.forEach(button => addDeleteListener(button));
 
+// function addDeleteListener(button) {
+//     button.addEventListener('click', function() {
+//         const row = button.closest('tr');
+//         const studentName = row.querySelector('td:nth-child(3)').textContent;
+        
+//         // Update the modal with the student's name
+//         document.getElementById('studentName').textContent = studentName;
+        
+//         // Show the modal
+//         const modal = document.getElementById('deleteModal');
+//         modal.style.display = 'block';
+        
+//         // Set up event listeners for modal buttons
+//         const okBtn = document.getElementById('okBtn');
+//         const cancelBtn = document.getElementById('cancelDeleteBtn');
+//         const closeBtn = modal.querySelector('.close-btn');
+        
+//         // Function to close the modal
+//         const closeModal = function() {
+//             modal.style.display = 'none';
+//             // Remove event listeners to prevent memory leaks
+//             okBtn.removeEventListener('click', handleDelete);
+//             cancelBtn.removeEventListener('click', closeModal);
+//             closeBtn.removeEventListener('click', closeModal);
+//         };
+        
+//         // Function to handle deletion
+//         const handleDelete = function() {
+//             row.remove();
+//             closeModal();
+//         };
+        
+//         // Add event listeners to buttons
+//         okBtn.addEventListener('click', handleDelete);
+//         cancelBtn.addEventListener('click', closeModal);
+//         closeBtn.addEventListener('click', closeModal);
+//     });
+// }
+
+// Function for individual row deletion
 function addDeleteListener(button) {
     button.addEventListener('click', function() {
         const row = button.closest('tr');
-        row.remove();
-        $('#studentsTable').paging('refresh');
+        const studentName = row.querySelector('td:nth-child(3)').textContent;
+        
+        // Show confirmation modal
+        showDeleteConfirmModal(
+            `Are you sure you want to delete user ${studentName} ?`,
+            function() {
+                row.remove();
+            }
+        );
     });
 }
+
+
 
 // Initialize paging (keeping your existing code)
 $(document).ready(function(){
     $('#studentsTable').paging({limit: 7});
 });
+
+
+// Global function to show delete confirmation modal
+function showDeleteConfirmModal(message, onConfirm) {
+    const modal = document.getElementById('deleteModal');
+    document.getElementById('deleteConfirmText').innerHTML = message;
+    
+    modal.style.display = 'block';
+    
+    // Set up event listeners for modal buttons
+    const okBtn = document.getElementById('okBtn');
+    const cancelBtn = document.getElementById('cancelDeleteBtn');
+    const closeBtn = modal.querySelector('.close-btn');
+    
+    // Remove any existing event listeners
+    okBtn.replaceWith(okBtn.cloneNode(true));
+    cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+    closeBtn.replaceWith(closeBtn.cloneNode(true));
+    
+    // Get the fresh references
+    const newOkBtn = document.getElementById('okBtn');
+    const newCancelBtn = document.getElementById('cancelDeleteBtn');
+    const newCloseBtn = modal.querySelector('.close-btn');
+    
+    // Function to close the modal
+    function closeModal() {
+        modal.style.display = 'none';
+    }
+    
+    // Add new event listeners
+    newOkBtn.addEventListener('click', function() {
+        onConfirm();
+        closeModal();
+    });
+    
+    newOkBtn.addEventListener('click', closeModal);
+    newCancelBtn.addEventListener('click', closeModal);
+    newCloseBtn.addEventListener('click', closeModal);
+}
 
