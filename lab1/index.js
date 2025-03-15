@@ -11,7 +11,6 @@ document.getElementById('notificationBtn').addEventListener('click', function ()
     window.location.href = 'messages.html';
 });
 
-
 //CHECKBOXES
 document.addEventListener('DOMContentLoaded', function () {
     const headerCheckbox = document.querySelector('thead th input[type="checkbox"]');
@@ -108,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return deleteAllBtn;
     }
 
+
     setupCheckboxListeners();
 
     const originalAddNewRow = window.addNewRow;
@@ -148,10 +148,12 @@ function showModal(title) {
         createModal();
     }
 
+
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('studentModal').style.display = 'block';
     const okBtn = document.getElementById('okBtn');
     const createBtn = document.getElementById('createBtn');
+
 
     if (!okBtn.originalOnclick) {
         okBtn.originalOnclick = okBtn.onclick;
@@ -230,6 +232,7 @@ function editButtonHandler(event) {
 function showEditModal(title, rowData, rowElement) {
     document.getElementById('modalTitle').textContent = title;
 
+
     const nameParts = rowData.name.split(' ');
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
@@ -276,17 +279,21 @@ function updateStudentData(rowElement) {
     const gender = document.getElementById('gender').value;
     const birthday = document.getElementById('birthday').value;
 
+
     if (!group || !firstName || !lastName || !gender || !birthday) {
         alert('Please fill in all fields');
         return;
     }
+
 
     rowElement.cells[1].textContent = group;
     rowElement.cells[2].textContent = firstName + ' ' + lastName;
     rowElement.cells[3].textContent = gender;
     rowElement.cells[4].textContent = formatDate(birthday);
 
+
     document.getElementById('studentForm').reset();
+
 
     const createBtn = document.getElementById('createBtn');
     const okBtn = document.getElementById('okBtn');
@@ -330,6 +337,8 @@ document.getElementById('addBtn').onclick = function () {
 
 
 // MODAL CREATION FUNCTION
+
+// MODAL CREATION FUNCTION
 function createModal() {
     return new Promise((resolve, reject) => {
         const modal = document.createElement('div');
@@ -342,7 +351,9 @@ function createModal() {
                 modal.innerHTML = html;
                 document.body.appendChild(modal);
 
+
                 setupModalEventListeners(modal);
+                resolve();
                 resolve();
             })
             .catch(error => {
@@ -407,7 +418,6 @@ function setupModalEventListeners(modal) {
     };
 }
 
-
 // DATE FORMATTING UTILITY
 function formatDate(dateString) {
     const date = new Date(dateString);
@@ -416,8 +426,6 @@ function formatDate(dateString) {
     const year = date.getFullYear();
     return `${day}.${month}.${year}`;
 }
-
-
 // ROW CREATION FUNCTION
 function addNewRow(group, name, gender, birthday) {
     const newRow = document.createElement('tr');
@@ -458,6 +466,7 @@ function addDeleteListener(button) {
         const row = button.closest('tr');
         const studentName = row.querySelector('td:nth-child(3)').textContent;
 
+
         showDeleteConfirmModal(
             `Are you sure you want to delete user ${studentName} ?`,
             function () {
@@ -479,6 +488,7 @@ function showDeleteConfirmModal(message, onConfirm) {
 
     modal.style.display = 'block';
 
+
     const newOkBtn = document.getElementById('newOkBtn');
     const cancelBtn = document.getElementById('cancelDeleteBtn');
     const closeBtn = modal.querySelector('.close-btn');
@@ -488,6 +498,7 @@ function showDeleteConfirmModal(message, onConfirm) {
 
     const newCancelBtn = document.getElementById('cancelDeleteBtn');
     const newCloseBtn = modal.querySelector('.close-btn');
+
 
     function closeModal() {
         modal.style.display = 'none';
