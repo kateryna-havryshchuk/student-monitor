@@ -565,6 +565,18 @@ input[type='checkbox'] {
     transform: scale(1.07);
 }
 
+#newOkBtn{
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    color: rgb(109, 110, 108);
+    border: none;
+}
+
+#newOkBtn:hover{
+    background-color: #95a39e;
+    transform: scale(1.07);
+}
+
 #createBtn {
     background-color: #4CAF50;
     border-radius: 10px;

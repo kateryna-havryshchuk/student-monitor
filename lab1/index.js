@@ -11,6 +11,7 @@ document.getElementById('notificationBtn').addEventListener('click', function() 
     window.location.href = 'messages.html';
 });
 
+
 //CHECKBOXES
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -27,13 +28,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Function to observe the table body for new rows and add checkbox event listeners
     function setupCheckboxListeners() {
         const tableCheckboxes = document.querySelectorAll('#tableBody tr th input[type="checkbox"]');
         tableCheckboxes.forEach(checkbox => {
-            // Remove existing listener first to prevent duplicates
             checkbox.removeEventListener('change', checkboxChangeHandler);
-            // Add the event listener
             checkbox.addEventListener('change', checkboxChangeHandler);
         });
     }
@@ -56,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const deleteButtons = document.querySelectorAll('.deleteRowBtn');
         const deleteAllBtn = document.getElementById('deleteAllBtn') || createDeleteAllButton();
         
-        // Show or hide delete all button
         if (selectedCheckboxes.length > 0) {
             deleteAllBtn.style.display = 'inline-block';
             deleteAllBtn.textContent = `Delete Selected (${selectedCheckboxes.length})`;
@@ -64,9 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
             deleteAllBtn.style.display = 'none';
         }
         
-        // Enable/disable individual edit buttons based on selection
         if (selectedCheckboxes.length === 1) {
-            // Enable edit only for the selected row
             const selectedRow = selectedCheckboxes[0].closest('tr');
             editButtons.forEach(button => {
                 if (button.closest('tr') === selectedRow) {
@@ -178,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Set modal title
     document.getElementById('modalTitle').textContent = title;
-     document.getElementById('studentModal').style.display = 'block';
+    document.getElementById('studentModal').style.display = 'block';
     const okBtn = document.getElementById('okBtn');
     const createBtn = document.getElementById('createBtn');
     
@@ -230,13 +225,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('studentModal').style.display = 'block';
 }
 
-// Add event listeners to edit buttons
+
 function setupEditButtons() {
     const editButtons = document.querySelectorAll('.editRowBtn');
     editButtons.forEach(button => {
-        // Remove existing listeners to prevent duplication
         button.removeEventListener('click', editButtonHandler);
-        // Add click event listener
         button.addEventListener('click', editButtonHandler);
     });
 }
@@ -250,14 +243,11 @@ function editButtonHandler(event) {
         birthday: row.cells[4].textContent
     };
     
-    // Check if modal already exists
     if (!document.getElementById('studentModal')) {
-        // Create modal first, then show it when ready
         createModal().then(() => {
             showEditModal('Edit student', rowData, row);
         });
     } else {
-        // Modal already exists, show it directly
         showEditModal('Edit student', rowData, row);
     }
 }
@@ -351,6 +341,8 @@ document.addEventListener('DOMContentLoaded', function() {
             setupEditButtons();
         });
         
+        // $('#studentsTable').paging('refresh');
+
         observer.observe(tableBody, { childList: true });
     }
     
@@ -474,13 +466,17 @@ function formatDate(dateString) {
 
 function addNewRow(group, name, gender, birthday) {
     const newRow = document.createElement('tr');
+    let dotClass = 'inactive-dot';
+    if(name === "Ket Jer"){
+        dotClass = 'active-dot';
+    }
     newRow.innerHTML = `
         <th><input type="checkbox"></th>
         <td>${group}</td>
         <td>${name}</td>
         <td>${gender}</td>
         <td>${birthday}</td>
-        <td><span class="active-dot"></span></td>
+        <td><span class="${dotClass}"></span></td>
         <td>
             <button class="editRowBtn">
                 <i class="fa-solid fa-pencil"></i>
@@ -552,6 +548,7 @@ function addDeleteListener(button) {
             `Are you sure you want to delete user ${studentName} ?`,
             function() {
                 row.remove();
+                // $('#studentsTable').paging('refresh');
             }
         );
     });
@@ -573,17 +570,14 @@ function showDeleteConfirmModal(message, onConfirm) {
     modal.style.display = 'block';
     
     // Set up event listeners for modal buttons
-    const okBtn = document.getElementById('okBtn');
+    const newOkBtn = document.getElementById('newOkBtn');
     const cancelBtn = document.getElementById('cancelDeleteBtn');
     const closeBtn = modal.querySelector('.close-btn');
     
     // Remove any existing event listeners
-    okBtn.replaceWith(okBtn.cloneNode(true));
     cancelBtn.replaceWith(cancelBtn.cloneNode(true));
     closeBtn.replaceWith(closeBtn.cloneNode(true));
-    
-    // Get the fresh references
-    const newOkBtn = document.getElementById('okBtn');
+
     const newCancelBtn = document.getElementById('cancelDeleteBtn');
     const newCloseBtn = modal.querySelector('.close-btn');
     
