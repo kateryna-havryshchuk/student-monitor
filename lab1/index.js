@@ -78,7 +78,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const deleteAllBtn = document.createElement('button');
         deleteAllBtn.id = 'deleteAllBtn';
-        // deleteAllBtn.className = 'btn-danger';
         deleteAllBtn.className = 'deleteAllBtn';
         deleteAllBtn.textContent = 'Delete Selected';
         deleteAllBtn.style.display = 'none';
