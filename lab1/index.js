@@ -1,22 +1,22 @@
 // NAVIGATION BUTTONS HANDLING
-document.getElementById('cms-logo').addEventListener('click', function() {
+document.getElementById('cms-logo').addEventListener('click', function () {
     window.location.href = 'students.html';
 });
 
-document.getElementById('notificationBtn').addEventListener('click', function() {
+document.getElementById('notificationBtn').addEventListener('click', function () {
     window.location.href = 'messages.html';
 });
 
-document.getElementById('notificationBtn').addEventListener('click', function() {
+document.getElementById('notificationBtn').addEventListener('click', function () {
     window.location.href = 'messages.html';
 });
 
 
 //CHECKBOXES
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const headerCheckbox = document.querySelector('thead th input[type="checkbox"]');
     if (headerCheckbox) {
-        headerCheckbox.addEventListener('change', function() {
+        headerCheckbox.addEventListener('change', function () {
             const allCheckboxes = document.querySelectorAll('#tableBody tr th input[type="checkbox"]');
             allCheckboxes.forEach(checkbox => {
                 checkbox.checked = headerCheckbox.checked;
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateActionButtonsState();
         });
     }
-    
+
     function setupCheckboxListeners() {
         const tableCheckboxes = document.querySelectorAll('#tableBody tr th input[type="checkbox"]');
         tableCheckboxes.forEach(checkbox => {
@@ -32,31 +32,30 @@ document.addEventListener('DOMContentLoaded', function() {
             checkbox.addEventListener('change', checkboxChangeHandler);
         });
     }
-    
+
     function checkboxChangeHandler() {
         updateActionButtonsState();
-        
+
         const allCheckboxes = document.querySelectorAll('#tableBody tr th input[type="checkbox"]');
         const allChecked = Array.from(allCheckboxes).every(checkbox => checkbox.checked);
-        
+
         if (headerCheckbox) {
             headerCheckbox.checked = allChecked;
         }
     }
-    
+
     function updateActionButtonsState() {
         const selectedCheckboxes = document.querySelectorAll('#tableBody tr th input[type="checkbox"]:checked');
         const editButtons = document.querySelectorAll('.editRowBtn');
-        const deleteButtons = document.querySelectorAll('.deleteRowBtn');
         const deleteAllBtn = document.getElementById('deleteAllBtn') || createDeleteAllButton();
-        
+
         if (selectedCheckboxes.length > 0) {
             deleteAllBtn.style.display = 'inline-block';
             deleteAllBtn.textContent = `Delete Selected (${selectedCheckboxes.length})`;
         } else {
             deleteAllBtn.style.display = 'none';
         }
-        
+
         if (selectedCheckboxes.length === 1) {
             const selectedRow = selectedCheckboxes[0].closest('tr');
             editButtons.forEach(button => {
@@ -72,10 +71,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
-    
+
     function createDeleteAllButton() {
         const actionsArea = document.querySelector('.table-actions') || document.getElementById('addBtn').parentElement;
-        
+
         const deleteAllBtn = document.createElement('button');
         deleteAllBtn.id = 'deleteAllBtn';
         // deleteAllBtn.className = 'btn-danger';
@@ -83,45 +82,36 @@ document.addEventListener('DOMContentLoaded', function() {
         deleteAllBtn.textContent = 'Delete Selected';
         deleteAllBtn.style.display = 'none';
         deleteAllBtn.style.marginLeft = '15px';
-        
-        deleteAllBtn.addEventListener('click', function() {
+
+        deleteAllBtn.addEventListener('click', function () {
             const selectedRows = document.querySelectorAll('#tableBody tr th input[type="checkbox"]:checked');
             if (selectedRows.length > 0) {
                 showDeleteConfirmModal(
                     `Are you sure you want to delete ${selectedRows.length} selected students?`,
-                    function() {
+                    function () {
                         selectedRows.forEach(checkbox => {
                             checkbox.closest('tr').remove();
                         });
-                        
+
                         const headerCheckbox = document.querySelector('thead th input[type="checkbox"]');
                         if (headerCheckbox) {
                             headerCheckbox.checked = false;
                         }
-                        
+
                         deleteAllBtn.style.display = 'none';
                     }
                 );
             }
         });
-        
+
         actionsArea.appendChild(deleteAllBtn);
         return deleteAllBtn;
     }
 
     setupCheckboxListeners();
-    
-    const tableBody = document.getElementById('tableBody');
-    if (tableBody) {
-        const observer = new MutationObserver(function(mutations) {
-            setupCheckboxListeners();
-        });
-        
-        observer.observe(tableBody, { childList: true });
-    }
 
     const originalAddNewRow = window.addNewRow;
-    window.addNewRow = function() {
+    window.addNewRow = function () {
         originalAddNewRow.apply(this, arguments);
         setupCheckboxListeners();
     };
@@ -129,31 +119,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 //ANIMATION BELL
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const bellButton = document.querySelector('.notify-dropdown button');
     const bellIcon = document.getElementById('bellIcon');
     const notificationBadge = document.querySelector('.icon-button-badge');
-    
+
     let notificationTriggered = false;
-    
-    bellButton.addEventListener('mouseenter', function() {
-      if (!notificationTriggered) {
-        bellIcon.classList.add('bell-ringing');
-        
-        bellIcon.addEventListener('animationend', function() {
-          bellIcon.classList.remove('bell-ringing');
-          
-          notificationBadge.classList.add('show');
-          notificationTriggered = true;
-        }, { once: true });
-      }
+
+    bellButton.addEventListener('mouseenter', function () {
+        if (!notificationTriggered) {
+            bellIcon.classList.add('bell-ringing');
+
+            bellIcon.addEventListener('animationend', function () {
+                bellIcon.classList.remove('bell-ringing');
+
+                notificationBadge.classList.add('show');
+                notificationTriggered = true;
+            }, { once: true });
+        }
     });
-    
-  });
+
+});
 
 
 // MODAL DISPLAY FUNCTIONS
-  function showModal(title, rowData) {
+function showModal(title) {
     if (!document.getElementById('studentModal')) {
         createModal();
     }
@@ -166,44 +156,44 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!okBtn.originalOnclick) {
         okBtn.originalOnclick = okBtn.onclick;
     }
-    
+
     if (!createBtn.originalOnclick) {
         createBtn.originalOnclick = createBtn.onclick;
     }
+    document.getElementById('studentForm').reset();
+
+    createBtn.onclick = function () {
+        const group = document.getElementById('group').value;
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        const gender = document.getElementById('gender').value;
+        const birthday = document.getElementById('birthday').value;
+
+        if (!group || !firstName || !lastName || !gender || !birthday) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        const formattedDate = formatDate(birthday);
+        addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
         document.getElementById('studentForm').reset();
-        
-        createBtn.onclick = function() {
-            const group = document.getElementById('group').value;
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const gender = document.getElementById('gender').value;
-            const birthday = document.getElementById('birthday').value;
-            
-            if (!group || !firstName || !lastName || !gender || !birthday) {
-                alert('Please fill in all fields');
-                return;
-            }
-            
+    };
+    okBtn.onclick = function () {
+        const group = document.getElementById('group').value;
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        const gender = document.getElementById('gender').value;
+        const birthday = document.getElementById('birthday').value;
+        if (group && firstName && lastName && gender && birthday) {
             const formattedDate = formatDate(birthday);
             addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
             document.getElementById('studentForm').reset();
-        };
-        okBtn.onclick = function() {
-            const group = document.getElementById('group').value;
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const gender = document.getElementById('gender').value;
-            const birthday = document.getElementById('birthday').value;
-            if (group && firstName && lastName && gender && birthday) {
-                const formattedDate = formatDate(birthday);
-                addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
-                document.getElementById('studentForm').reset();
-                document.getElementById('studentModal').style.display = 'none';
-            } else {
-                document.getElementById('studentModal').style.display = 'none';
-            }
-        };
-    
+            document.getElementById('studentModal').style.display = 'none';
+        } else {
+            document.getElementById('studentModal').style.display = 'none';
+        }
+    };
+
     document.getElementById('studentModal').style.display = 'block';
 }
 
@@ -225,7 +215,7 @@ function editButtonHandler(event) {
         gender: row.cells[3].textContent,
         birthday: row.cells[4].textContent
     };
-    
+
     if (!document.getElementById('studentModal')) {
         createModal().then(() => {
             showEditModal('Edit student', rowData, row);
@@ -243,9 +233,9 @@ function showEditModal(title, rowData, rowElement) {
     const nameParts = rowData.name.split(' ');
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
-    
+
     const birthdayParts = rowData.birthday.split('.');
-    const formattedBirthday = birthdayParts.length === 3 ? 
+    const formattedBirthday = birthdayParts.length === 3 ?
         `${birthdayParts[2]}-${birthdayParts[1]}-${birthdayParts[0]}` : '';
 
     document.getElementById('group').value = rowData.group;
@@ -258,20 +248,20 @@ function showEditModal(title, rowData, rowElement) {
 
     const createBtn = document.getElementById('createBtn');
     const okBtn = document.getElementById('okBtn');
- 
+
     if (!createBtn.originalOnclick) {
         createBtn.originalOnclick = createBtn.onclick;
     }
-    
+
     if (!okBtn.originalOnclick) {
         okBtn.originalOnclick = okBtn.onclick;
     }
 
-    createBtn.onclick = function() {
+    createBtn.onclick = function () {
         updateStudentData(rowElement);
     };
-    
-    okBtn.onclick = function() {
+
+    okBtn.onclick = function () {
         updateStudentData(rowElement);
         document.getElementById('studentModal').style.display = 'none';
     };
@@ -300,26 +290,26 @@ function updateStudentData(rowElement) {
 
     const createBtn = document.getElementById('createBtn');
     const okBtn = document.getElementById('okBtn');
-    
+
     createBtn.onclick = createBtn.originalOnclick;
     okBtn.onclick = okBtn.originalOnclick;
 }
 
 
 // EDIT BUTTONS INITIALIZATION
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     setupEditButtons();
-    
+
     const tableBody = document.getElementById('tableBody');
     if (tableBody) {
-        const observer = new MutationObserver(function(mutations) {
+        const observer = new MutationObserver(function () {
             setupEditButtons();
         });
         observer.observe(tableBody, { childList: true });
     }
-    
+
     const originalAddNewRow = window.addNewRow;
-    window.addNewRow = function() {
+    window.addNewRow = function () {
         originalAddNewRow.apply(this, arguments);
         setupEditButtons();
     };
@@ -327,10 +317,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // ADD BUTTON HANDLER
-document.getElementById('addBtn').onclick = function() {
+document.getElementById('addBtn').onclick = function () {
     if (!document.getElementById('studentModal')) {
         createModal().then(() => {
-            showModal('Add student', null);
+            showModal('Add student');
         });
     } else {
         showModal('Add student', null);
@@ -345,7 +335,7 @@ function createModal() {
         const modal = document.createElement('div');
         modal.id = 'studentModal';
         modal.classList.add('modal');
-        
+
         fetch('addEditModal.html')
             .then(response => response.text())
             .then(html => {
@@ -366,7 +356,7 @@ function createModal() {
 // MODAL EVENT LISTENERS SETUP
 function setupModalEventListeners(modal) {
     const closeBtn = modal.querySelector('.close-btn');
-    closeBtn.onclick = function() {
+    closeBtn.onclick = function () {
         modal.style.display = 'none';
     }
 
@@ -377,7 +367,7 @@ function setupModalEventListeners(modal) {
     const birthday = document.getElementById('birthday').value;
 
     const okBtn = document.getElementById('okBtn');
-    okBtn.onclick = function() {
+    okBtn.onclick = function () {
         if (group && firstName && lastName && gender && birthday) {
             const formattedDate = formatDate(birthday);
             addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
@@ -390,27 +380,27 @@ function setupModalEventListeners(modal) {
     };
 
     const createBtn = document.getElementById('createBtn');
-    createBtn.onclick = function() {
+    createBtn.onclick = function () {
         const group = document.getElementById('group').value;
         const firstName = document.getElementById('firstName').value;
         const lastName = document.getElementById('lastName').value;
         const gender = document.getElementById('gender').value;
         const birthday = document.getElementById('birthday').value;
-        
+
         if (!group || !firstName || !lastName || !gender || !birthday) {
             alert('Please fill in all fields');
             return;
         }
-        
+
         const formattedDate = formatDate(birthday);
-        
+
         addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
-        
+
         document.getElementById('studentForm').reset();
     };
-    
-    
-    window.onclick = function(event) {
+
+
+    window.onclick = function (event) {
         if (event.target === modal) {
             modal.style.display = 'none';
         }
@@ -432,7 +422,7 @@ function formatDate(dateString) {
 function addNewRow(group, name, gender, birthday) {
     const newRow = document.createElement('tr');
     let dotClass = 'inactive-dot';
-    if(name === "Ket Jer"){
+    if (name === "Ket Jer") {
         dotClass = 'active-dot';
     }
     newRow.innerHTML = `
@@ -451,7 +441,7 @@ function addNewRow(group, name, gender, birthday) {
             </button>
         </td>
     `;
-    
+
     newRow.classList.add('tableRow');
     document.getElementById('tableBody').appendChild(newRow);
     const newDeleteButton = newRow.querySelector('.deleteRowBtn');
@@ -464,13 +454,13 @@ let deleteButtons = document.querySelectorAll('.deleteRowBtn');
 deleteButtons.forEach(button => addDeleteListener(button));
 
 function addDeleteListener(button) {
-    button.addEventListener('click', function() {
+    button.addEventListener('click', function () {
         const row = button.closest('tr');
         const studentName = row.querySelector('td:nth-child(3)').textContent;
 
         showDeleteConfirmModal(
             `Are you sure you want to delete user ${studentName} ?`,
-            function() {
+            function () {
                 row.remove();
             }
         );
@@ -478,21 +468,21 @@ function addDeleteListener(button) {
 }
 
 
-$(document).ready(function(){
-    $('#studentsTable').paging({limit: 7});
-});
+// $(document).ready(function () {
+//     $('#studentsTable').paging({ limit: 7 });
+// });
 
 
 function showDeleteConfirmModal(message, onConfirm) {
     const modal = document.getElementById('deleteModal');
     document.getElementById('deleteConfirmText').innerHTML = message;
-    
+
     modal.style.display = 'block';
 
     const newOkBtn = document.getElementById('newOkBtn');
     const cancelBtn = document.getElementById('cancelDeleteBtn');
     const closeBtn = modal.querySelector('.close-btn');
-    
+
     cancelBtn.replaceWith(cancelBtn.cloneNode(true));
     closeBtn.replaceWith(closeBtn.cloneNode(true));
 
@@ -503,11 +493,11 @@ function showDeleteConfirmModal(message, onConfirm) {
         modal.style.display = 'none';
     }
 
-    newOkBtn.addEventListener('click', function() {
+    newOkBtn.addEventListener('click', function () {
         onConfirm();
         closeModal();
     });
-    
+
     newOkBtn.addEventListener('click', closeModal);
     newCancelBtn.addEventListener('click', closeModal);
     newCloseBtn.addEventListener('click', closeModal);
