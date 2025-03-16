@@ -62,29 +62,6 @@ header h4 {
 }
 
 
-/* 
-@media screen and (max-width: 600px) {
-    .user-dropdown h4 {
-        display: none;
-    }
-
-    .user-dropdown {
-        pointer-events: none;
-        padding: 0;
-    }
-
-    .userBtn {
-        padding: 0;
-    }
-
-    .notify-content {
-        right: 60px;
-        left: auto;
-    }
-} */
-
-
-
 /* NAVIGATION BAR */
 .navbar {
     margin-top: 70px;
@@ -666,14 +643,26 @@ input[type="checkbox"] {
 
 
 /* RESPONSIVE DESIGN */
+
 .toggle,
 .toggle-label {
     display: none;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 768px) {
     main {
-        margin-left: 30px;
+        margin-left: 0;
+        padding: 15px;
+        margin-top: 60px;
+    }
+
+    .navbar {
+        width: 180px;
+        transform: translateX(-180px);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        z-index: 1010; 
+        background-color: #f8f9fa;
+        height: 100vh;
     }
 
     .toggle {
@@ -682,50 +671,145 @@ input[type="checkbox"] {
     }
 
     .toggle-label {
-        display: block;
-        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        position: fixed;
         top: 10px;
-        left: 10px;
-        z-index: 9999;
-        padding: 10px;
+        left: 15px;
+        z-index: 1020;
         border-radius: 5px;
         color: #ffffff;
         cursor: pointer;
+        background-color: rgba(0, 0, 0, 0.1);
     }
 
-    .navbar {
-        transform: translateX(-120px);
+    .toggle-label span {
+        display: none;
     }
 
-    .toggle:checked+.toggle-label {
+    .toggle-label .fa-bars {
+        font-size: 20px;
+        color: #ffffff;
+        display: block;
+    }
+
+    .logo {
+        margin-left: 60px;
+    }
+
+    header {
+        padding: 10px;
+        height: 60px;
+    }
+
+    .toggle:checked + .toggle-label {
         background-color: #b3b3b3;
     }
 
-    .toggle:checked+.toggle-label~.navbar {
-        transform: translateX(0px);
-        box-shadow: 0 0 15px #00000080;
+    .toggle:checked + .toggle-label ~ .navbar {
+        transform: translateX(0);
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
     }
 
-    .notify-content {
-        right: 60px;
+    .paging-nav {
+        width: 100%;
+        padding: 0 10px;
+        z-index: 990;
     }
 
-    th,
-    td {
-        padding: 8px 10px;
-        font-size: 14px;
+    .paging-nav a {
+        padding: 3px 8px;
+        margin: 0 2px;
     }
 
-    .modal-content {
-        margin: 5% auto;
-        padding: 15px;
+    .user-dropdown h4 {
+        display: none;
     }
 
     .user-dropdown button {
         padding-right: 8px;
     }
 
-    .user-dropdown h4 {
-        display: none;
+    .notify-content {
+        right: 10px;
+        width: 200px;
+    }
+
+    .user-content {
+        right: 10px;
+        width: 150px;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    th, td {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+
+    .button-container {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+    }
+
+
+    .modal-content {
+        margin: 15% auto;
+        padding: 15px;
+        width: 90%;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+    }
+
+    .modal-footer button {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+}
+
+
+@media screen and (max-width: 480px) {
+    .dropdown-container {
+        gap: 5px;
+    }
+
+    .dropdown-container button {
+        padding: 5px;
+    }
+
+    .profilePicture {
+        width: 30px;
+        height: 30px;
+    }
+
+    .addBtn, .deleteAllBtn {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+
+    input[type="checkbox"] {
+        margin-left: 0;
+    }
+
+    header h4 {
+        font-size: 16px;
+    }
+
+    .editRowBtn, .deleteRowBtn {
+        padding: 5px;
+        margin: 0 3px;
+    }
+
+    .fa-pencil, .fa-xmark {
+        font-size: 14px;
     }
 }
