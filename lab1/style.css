@@ -28,10 +28,10 @@ header {
 }
 
 
-header h4 {
+/* header h4 {
     font-size: 20px;
     font-weight: normal;
-}
+} */
 
 /*LOGOTYPE*/
 .logo {
@@ -42,9 +42,10 @@ header h4 {
 
 .logo .cms-link {
     color: #ffffff;
+    font-size: 25px;
     text-decoration: none;
     letter-spacing: 1px;
-    padding: 10px;
+    padding: 5px;
     border-radius: 17px;
     transition: all 0.3s ease-out;
     display: flex;

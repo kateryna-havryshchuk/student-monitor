@@ -7,9 +7,9 @@ document.getElementById('notificationBtn').addEventListener('click', function ()
     window.location.href = 'messages.html';
 });
 
-document.getElementById('notificationBtn').addEventListener('click', function () {
-    window.location.href = 'messages.html';
-});
+// document.getElementById('notificationBtn').addEventListener('click', function () {
+//     window.location.href = 'messages.html';
+// });
 
 //CHECKBOXES
 document.addEventListener('DOMContentLoaded', function () {
@@ -110,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setupCheckboxListeners();
 
+    //щоб після додавання нового рядка оновлювалися чекбокси
     const originalAddNewRow = window.addNewRow;
     window.addNewRow = function () {
         originalAddNewRow.apply(this, arguments);
@@ -138,7 +139,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }, { once: true });
         }
     });
-
 });
 
 
@@ -147,7 +147,6 @@ function showModal(title) {
     if (!document.getElementById('studentModal')) {
         createModal();
     }
-
 
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('studentModal').style.display = 'block';
@@ -180,6 +179,7 @@ function showModal(title) {
         addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
         document.getElementById('studentForm').reset();
     };
+    
     okBtn.onclick = function () {
         const group = document.getElementById('group').value;
         const firstName = document.getElementById('firstName').value;
@@ -354,7 +354,6 @@ function createModal() {
 
                 setupModalEventListeners(modal);
                 resolve();
-                resolve();
             })
             .catch(error => {
                 console.error('Error loading modal content:', error);
@@ -429,6 +428,7 @@ function formatDate(dateString) {
 // ROW CREATION FUNCTION
 function addNewRow(group, name, gender, birthday) {
     const newRow = document.createElement('tr');
+    
     let dotClass = 'inactive-dot';
     if (name === "Ket Jer") {
         dotClass = 'active-dot';
@@ -475,12 +475,6 @@ function addDeleteListener(button) {
         );
     });
 }
-
-
-// $(document).ready(function () {
-//     $('#studentsTable').paging({ limit: 7 });
-// });
-
 
 function showDeleteConfirmModal(message, onConfirm) {
     const modal = document.getElementById('deleteModal');
