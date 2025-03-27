@@ -331,7 +331,7 @@ input[type="checkbox"] {
 
 .notify-dropdown:hover button,
 .user-dropdown:hover button {
-    background-color:#b3b3b3;
+    background-color:#ffffff33;
     transform: scale(1.05);
 }
 
@@ -497,6 +497,7 @@ input[type="checkbox"] {
 }
 
 /* MODAL STYLES*/
+/*backgruond*/
 .modal {
     display: none;
     position: fixed;
@@ -513,6 +514,8 @@ input[type="checkbox"] {
     margin: 10% auto;
     padding: 20px;
     border-radius: 5px;
+    margin-bottom: auto;
+    margin-top: 100px;
     width: 500px;
     max-width: 80%;
     box-shadow: 0 5px 15px #0000004d;

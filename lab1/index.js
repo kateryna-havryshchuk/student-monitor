@@ -24,29 +24,49 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function setupCheckboxListeners() {
-        const tableCheckboxes = document.querySelectorAll('#tableBody tr th input[type="checkbox"]');
-        tableCheckboxes.forEach(checkbox => {
-            checkbox.removeEventListener('change', checkboxChangeHandler);
-            checkbox.addEventListener('change', checkboxChangeHandler);
-        });
-    }
+    // function setupCheckboxListeners() {
+    //     const tableCheckboxes = document.querySelectorAll('#tableBody tr th input[type="checkbox"]');
+    //     tableCheckboxes.forEach(checkbox => {
+    //         checkbox.removeEventListener('change', checkboxChangeHandler);
+    //         checkbox.addEventListener('change', checkboxChangeHandler);
+    //     });
+    // }
 
-    function checkboxChangeHandler() {
-        updateActionButtonsState();
+    // function checkboxChangeHandler() {
+    //     updateActionButtonsState();
 
-        const allCheckboxes = document.querySelectorAll('#tableBody tr th input[type="checkbox"]');
-        const allChecked = Array.from(allCheckboxes).every(checkbox => checkbox.checked);
+    //     const allCheckboxes = document.querySelectorAll('#tableBody tr th input[type="checkbox"]');
+    //     const allChecked = Array.from(allCheckboxes).every(checkbox => checkbox.checked);
 
-        if (headerCheckbox) {
-            headerCheckbox.checked = allChecked;
+    //     if (headerCheckbox) {
+    //         headerCheckbox.checked = allChecked;
+    //     }
+    // }
+
+    document.getElementById('tableBody').addEventListener('change', function (event) {
+        // Check if the changed element is a checkbox
+        if (event.target.matches('th input[type="checkbox"]')) {
+            updateActionButtonsState();
+
+            const allCheckboxes = document.querySelectorAll('#tableBody tr th input[type="checkbox"]');
+            const allChecked = Array.from(allCheckboxes).every(checkbox => checkbox.checked);
+
+            if (headerCheckbox) {
+                headerCheckbox.checked = allChecked;
+            }
         }
-    }
+    });
 
     function updateActionButtonsState() {
         const selectedCheckboxes = document.querySelectorAll('#tableBody tr th input[type="checkbox"]:checked');
         const editButtons = document.querySelectorAll('.editRowBtn');
-        const deleteAllBtn = document.getElementById('deleteAllBtn') || createDeleteAllButton();
+
+        // const deleteAllBtn = document.getElementById('deleteAllBtn') || createDeleteAllButton();
+
+        let deleteAllBtn = document.getElementById('deleteAllBtn');
+        if (!deleteAllBtn) {
+            deleteAllBtn = createDeleteAllButton();
+        }
 
         if (selectedCheckboxes.length > 0) {
             deleteAllBtn.style.display = 'inline-block';
@@ -145,58 +165,36 @@ document.addEventListener('DOMContentLoaded', function () {
 // MODAL DISPLAY FUNCTIONS
 function showModal(title) {
     if (!document.getElementById('studentModal')) {
-        createModal();
-    }
-
-    document.getElementById('modalTitle').textContent = title;
-    document.getElementById('studentModal').style.display = 'block';
-    const okBtn = document.getElementById('okBtn');
-    const createBtn = document.getElementById('createBtn');
-
-
-    if (!okBtn.originalOnclick) {
-        okBtn.originalOnclick = okBtn.onclick;
-    }
-
-    if (!createBtn.originalOnclick) {
-        createBtn.originalOnclick = createBtn.onclick;
-    }
-    document.getElementById('studentForm').reset();
-
-    createBtn.onclick = function () {
-        const group = document.getElementById('group').value;
-        const firstName = document.getElementById('firstName').value;
-        const lastName = document.getElementById('lastName').value;
-        const gender = document.getElementById('gender').value;
-        const birthday = document.getElementById('birthday').value;
-
-        if (!group || !firstName || !lastName || !gender || !birthday) {
-            alert('Please fill in all fields');
-            return;
-        }
-
-        const formattedDate = formatDate(birthday);
-        addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
+        createModal().then(() => {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('studentModal').style.display = 'block';
+        });
+    } else {
+        document.getElementById('modalTitle').textContent = title;
         document.getElementById('studentForm').reset();
-    };
-    
-    okBtn.onclick = function () {
-        const group = document.getElementById('group').value;
-        const firstName = document.getElementById('firstName').value;
-        const lastName = document.getElementById('lastName').value;
-        const gender = document.getElementById('gender').value;
-        const birthday = document.getElementById('birthday').value;
-        if (group && firstName && lastName && gender && birthday) {
-            const formattedDate = formatDate(birthday);
-            addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
-            document.getElementById('studentForm').reset();
-            document.getElementById('studentModal').style.display = 'none';
-        } else {
-            document.getElementById('studentModal').style.display = 'none';
-        }
-    };
 
-    document.getElementById('studentModal').style.display = 'block';
+        // Clear any existing error messages
+        const errorMessages = document.querySelectorAll('.error-message');
+        errorMessages.forEach(msg => msg.remove());
+
+        // Remove invalid class from all inputs
+        const inputs = document.querySelectorAll('#studentForm input, #studentForm select');
+        inputs.forEach(input => input.classList.remove('invalid'));
+
+        const okBtn = document.getElementById('okBtn');
+        const createBtn = document.getElementById('createBtn');
+        createBtn.textContent = 'Create';
+
+        // Restore original handlers for "Add" mode
+        if (okBtn.originalOnclick) {
+            okBtn.onclick = okBtn.originalOnclick;
+        }
+        if (createBtn.originalOnclick) {
+            createBtn.onclick = createBtn.originalOnclick;
+        }
+
+        document.getElementById('studentModal').style.display = 'block';
+    }
 }
 
 
@@ -232,6 +230,11 @@ function editButtonHandler(event) {
 function showEditModal(title, rowData, rowElement) {
     document.getElementById('modalTitle').textContent = title;
 
+    const errorMessages = document.querySelectorAll('.error-message');
+    errorMessages.forEach(msg => msg.remove());
+
+    const inputs = document.querySelectorAll('#studentForm input, #studentForm select');
+    inputs.forEach(input => input.classList.remove('invalid'));
 
     const nameParts = rowData.name.split(' ');
     const firstName = nameParts[0] || '';
@@ -249,57 +252,56 @@ function showEditModal(title, rowData, rowElement) {
 
     document.getElementById('studentModal').style.display = 'block';
 
-    const createBtn = document.getElementById('createBtn');
+    const updateBtn = document.getElementById('createBtn');
     const okBtn = document.getElementById('okBtn');
 
-    if (!createBtn.originalOnclick) {
-        createBtn.originalOnclick = createBtn.onclick;
-    }
+    updateBtn.textContent = 'Update';
 
+    // Save original handlers for "Add" mode
+    if (!updateBtn.originalOnclick) {
+        updateBtn.originalOnclick = updateBtn.onclick;
+    }
     if (!okBtn.originalOnclick) {
         okBtn.originalOnclick = okBtn.onclick;
     }
 
-    createBtn.onclick = function () {
-        updateStudentData(rowElement);
+    updateBtn.onclick = function() {
+        if (validateForm(validationMethod)) {
+            const group = document.getElementById('group').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const gender = document.getElementById('gender').value;
+            const birthday = document.getElementById('birthday').value;
+
+            rowElement.cells[1].textContent = group;
+            rowElement.cells[2].textContent = firstName + ' ' + lastName;
+            rowElement.cells[3].textContent = gender;
+            rowElement.cells[4].textContent = formatDate(birthday);
+        }
     };
 
-    okBtn.onclick = function () {
-        updateStudentData(rowElement);
-        document.getElementById('studentModal').style.display = 'none';
+    okBtn.onclick = function() {
+        if (validateForm(validationMethod)) {
+            const group = document.getElementById('group').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const gender = document.getElementById('gender').value;
+            const birthday = document.getElementById('birthday').value;
+
+            rowElement.cells[1].textContent = group;
+            rowElement.cells[2].textContent = firstName + ' ' + lastName;
+            rowElement.cells[3].textContent = gender;
+            rowElement.cells[4].textContent = formatDate(birthday);
+
+            document.getElementById('studentForm').reset();
+
+            // Restore original handlers when closing
+            createBtn.onclick = createBtn.originalOnclick;
+            okBtn.onclick = okBtn.originalOnclick;
+
+            document.getElementById('studentModal').style.display = 'none';
+        }
     };
-}
-
-
-// DATA UPDATE FUNCTION
-function updateStudentData(rowElement) {
-    const group = document.getElementById('group').value;
-    const firstName = document.getElementById('firstName').value;
-    const lastName = document.getElementById('lastName').value;
-    const gender = document.getElementById('gender').value;
-    const birthday = document.getElementById('birthday').value;
-
-
-    if (!group || !firstName || !lastName || !gender || !birthday) {
-        alert('Please fill in all fields');
-        return;
-    }
-
-
-    rowElement.cells[1].textContent = group;
-    rowElement.cells[2].textContent = firstName + ' ' + lastName;
-    rowElement.cells[3].textContent = gender;
-    rowElement.cells[4].textContent = formatDate(birthday);
-
-
-    document.getElementById('studentForm').reset();
-
-
-    const createBtn = document.getElementById('createBtn');
-    const okBtn = document.getElementById('okBtn');
-
-    createBtn.onclick = createBtn.originalOnclick;
-    okBtn.onclick = okBtn.originalOnclick;
 }
 
 
@@ -337,8 +339,6 @@ document.getElementById('addBtn').onclick = function () {
 
 
 // MODAL CREATION FUNCTION
-
-// MODAL CREATION FUNCTION
 function createModal() {
     return new Promise((resolve, reject) => {
         const modal = document.createElement('div');
@@ -348,10 +348,15 @@ function createModal() {
         fetch('addEditModal.html')
             .then(response => response.text())
             .then(html => {
+                html = html.replace(
+                    '</form>',
+                    '<input type="hidden" id="studentId" name="studentId" value="">\n</form>'
+                );
+
                 modal.innerHTML = html;
                 document.body.appendChild(modal);
 
-
+                setupFormValidation();
                 setupModalEventListeners(modal);
                 resolve();
             })
@@ -362,60 +367,456 @@ function createModal() {
     });
 }
 
+// FORM VALIDATION METHODS
 
-// MODAL EVENT LISTENERS SETUP
-function setupModalEventListeners(modal) {
+// Options: 'javascript', 'html', 'regex'
+const validationMethod = 'javascript';
+
+// Initialize validation based on selected method
+document.addEventListener('DOMContentLoaded', function () {
+    setupValidation(validationMethod);
+
+    // Add form submission handler
+    const studentForm = document.getElementById('studentForm');
+    if (studentForm) {
+        studentForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            if (validateForm(validationMethod)) {
+                console.log('Form submitted successfully');
+            }
+        });
+    }
+});
+
+// Setup validation based on method
+function setupValidation(method) {
+    const form = document.getElementById('studentForm');
+    if (!form) return;
+
+    // Remove any previous validation attributes/listeners
+    clearValidationSetup();
+
+    switch (method) {
+        case 'html':
+            setupHtmlValidation();
+            break;
+        case 'regex':
+            setupRegexValidation();
+            break;
+        case 'javascript':
+        default:
+            setupJsValidation();
+            break;
+    }
+}
+
+// Clear previous validation setup
+function clearValidationSetup() {
+    const inputs = document.querySelectorAll('#studentForm input, #studentForm select');
+
+    // Remove all validation attributes
+    inputs.forEach(input => {
+        input.removeAttribute('required');
+        input.removeAttribute('pattern');
+        input.removeAttribute('min');
+        input.removeAttribute('max');
+        input.removeAttribute('minlength');
+        input.removeAttribute('maxlength');
+
+        // Remove event listeners (by cloning and replacing)
+        const newInput = input.cloneNode(true);
+        input.parentNode.replaceChild(newInput, input);
+    });
+
+    // Remove existing error messages
+    const errorMessages = document.querySelectorAll('.error-message');
+    errorMessages.forEach(msg => msg.remove());
+}
+
+// METHOD 1: JavaScript validation
+function setupJsValidation() {
+    const fields = getValidationFields();
+
+    Object.values(fields).forEach(field => {
+        if (field.element) {
+            field.element.addEventListener('input', function () {
+                validateFieldJs(field);
+            });
+
+            field.element.addEventListener('blur', function () {
+                validateFieldJs(field);
+            });
+        }
+    });
+}
+
+function validateFieldJs(field) {
+    if (!field.element) return true;
+
+    const value = field.element.value;
+    let isValid = true;
+
+    if (field.pattern) {
+        isValid = field.pattern.test(value);
+    } else if (field.validate) {
+        isValid = field.validate(value);
+    }
+
+    if (!isValid) {
+        field.element.classList.add('invalid');
+        showErrorMessage(field.element, field.errorMessage);
+    } else {
+        field.element.classList.remove('invalid');
+        hideErrorMessage(field.element);
+    }
+
+    return isValid;
+}
+
+
+// METHOD 2: HTML validation
+function setupHtmlValidation() {
+    const form = document.getElementById('studentForm');
+
+    // Group field
+    const groupField = document.getElementById('group');
+    groupField.setAttribute('required', 'true');
+
+    // First name field
+    const firstNameField = document.getElementById('firstName');
+    firstNameField.setAttribute('required', 'true');
+    firstNameField.setAttribute('pattern', '[A-Za-zА-Яа-я]{2,20}');
+    firstNameField.setAttribute('title', 'FirstName must be 2-20 letters long');
+
+    // Last name field
+    const lastNameField = document.getElementById('lastName');
+    lastNameField.setAttribute('required', 'true');
+    lastNameField.setAttribute('pattern', '[A-Za-zА-Яа-я]{2,20}');
+    lastNameField.setAttribute('title', 'Surname must be 2-20 letters long');
+
+    // Gender field
+    const genderField = document.getElementById('gender');
+    genderField.setAttribute('required', 'true');
+
+    // Birthday field
+    const birthdayField = document.getElementById('birthday');
+    birthdayField.setAttribute('required', 'true');
+
+    // Calculate valid date range (16-90 years old)
+    const today = new Date();
+    const minDate = new Date();
+    minDate.setFullYear(today.getFullYear() - 90);
+    const maxDate = new Date();
+    maxDate.setFullYear(today.getFullYear() - 16);
+
+    birthdayField.setAttribute('min', minDate.toISOString().split('T')[0]);
+    birthdayField.setAttribute('max', maxDate.toISOString().split('T')[0]);
+
+    // Add custom validation message display
+    form.addEventListener('invalid', function (event) {
+        event.preventDefault();
+        const element = event.target;
+        element.classList.add('invalid');
+        showErrorMessage(element, element.title || 'This field is required');
+    }, true);
+
+    // Clear validation message when input changes
+    const inputs = document.querySelectorAll('#studentForm input, #studentForm select');
+    inputs.forEach(input => {
+        input.addEventListener('input', function () {
+            this.classList.remove('invalid');
+            hideErrorMessage(this);
+        });
+    });
+}
+
+// METHOD 3: Regex validation
+function setupRegexValidation() {
+    const fields = {
+        group: {
+            element: document.getElementById('group'),
+            pattern: /^PZ-2[1-6]$/,
+            errorMessage: 'Choose a valid group (PZ-21 to PZ-26)'
+        },
+        firstName: {
+            element: document.getElementById('firstName'),
+            pattern: /^[A-Za-zА-Яа-я]{2,20}$/,
+            errorMessage: 'FirstName must be 2-20 letters long'
+        },
+        lastName: {
+            element: document.getElementById('lastName'),
+            pattern: /^[A-Za-zА-Яа-я]{2,20}$/,
+            errorMessage: 'Surname must be 2-20 letters long'
+        },
+        gender: {
+            element: document.getElementById('gender'),
+            pattern: /^[MF]$/,
+            errorMessage: 'Choose gender (M or F)'
+        },
+        birthday: {
+            element: document.getElementById('birthday'),
+            pattern: /^\d{4}-\d{2}-\d{2}$/,
+            validate: function (value) {
+                if (!value) return false;
+
+                // First check basic date format with regex
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+
+                // Then check age range
+                const today = new Date();
+                const birthDate = new Date(value);
+                const age = today.getFullYear() - birthDate.getFullYear();
+
+                // Ensure date is valid (not Feb 30, etc.)
+                if (isNaN(birthDate.getTime())) return false;
+
+                return age >= 16 && age <= 90;
+            },
+            errorMessage: 'Age must be between 16 and 90 years'
+        }
+    };
+
+    Object.values(fields).forEach(field => {
+        if (field.element) {
+            field.element.addEventListener('input', function () {
+                validateFieldRegex(field);
+            });
+
+            field.element.addEventListener('blur', function () {
+                validateFieldRegex(field);
+            });
+        }
+    });
+}
+
+function validateFieldRegex(field) {
+    if (!field.element) return true;
+
+    const value = field.element.value;
+    let isValid = true;
+
+    if (field.pattern) {
+        isValid = field.pattern.test(value);
+    }
+
+    if (isValid && field.validate) {
+        isValid = field.validate(value);
+    }
+
+    if (!isValid) {
+        field.element.classList.add('invalid');
+        showErrorMessage(field.element, field.errorMessage);
+    } else {
+        field.element.classList.remove('invalid');
+        hideErrorMessage(field.element);
+    }
+
+    return isValid;
+}
+
+// Get validation field definitions
+function getValidationFields() {
+    return {
+        group: {
+            element: document.getElementById('group'),
+            validate: function (value) {
+                return value !== "";
+            },
+            errorMessage: 'Choose group'
+        },
+        firstName: {
+            element: document.getElementById('firstName'),
+            pattern: /^[A-Za-zА-Яа-я]{2,20}$/,
+            errorMessage: 'First name must be 2-20 letters long'
+        },
+        lastName: {
+            element: document.getElementById('lastName'),
+            pattern: /^[A-Za-zА-Яа-я]{2,20}$/,
+            errorMessage: 'Surname must be 2-20 letters long'
+        },
+        gender: {
+            element: document.getElementById('gender'),
+            validate: function (value) {
+                return value !== "";
+            },
+            errorMessage: 'Choose gender'
+        },
+        birthday: {
+            element: document.getElementById('birthday'),
+            validate: function (value) {
+                if (!value) return false;
+                const today = new Date();
+                const birthDate = new Date(value);
+                const age = today.getFullYear() - birthDate.getFullYear();
+                return age >= 16 && age <= 90;
+            },
+            errorMessage: 'Age must be between 16 and 90 years'
+        }
+    };
+}
+
+// Validate form based on selected method
+function validateForm(method = validationMethod) {
+    switch (method) {
+        case 'html':
+            return validateFormHtml();
+        case 'regex':
+            return validateFormRegex();
+        case 'javascript':
+        default:
+            return validateFormJs();
+    }
+}
+
+function validateFormJs() {
+    const fields = getValidationFields();
+    let isFormValid = true;
+
+    Object.values(fields).forEach(field => {
+        if (!validateFieldJs(field)) {
+            isFormValid = false;
+        }
+    });
+
+    if (!isFormValid) {
+        console.log('Form validation failed');
+    }
+    return isFormValid;
+}
+
+function validateFormHtml() {
+    const form = document.getElementById('studentForm');
+    return form.checkValidity();
+}
+
+function validateFormRegex() {
+    const fields = {
+        group: {
+            element: document.getElementById('group'),
+            pattern: /^PZ-2[1-6]$/,
+            errorMessage: 'Choose a valid group (PZ-21 to PZ-26)'
+        },
+        firstName: {
+            element: document.getElementById('firstName'),
+            pattern: /^[A-Za-zА-Яа-я]{2,20}$/,
+            errorMessage: 'FirstName must be 2-20 letters long'
+        },
+        lastName: {
+            element: document.getElementById('lastName'),
+            pattern: /^[A-Za-zА-Яа-я]{2,20}$/,
+            errorMessage: 'Surname must be 2-20 letters long'
+        },
+        gender: {
+            element: document.getElementById('gender'),
+            pattern: /^[MF]$/,
+            errorMessage: 'Choose gender (M or F)'
+        },
+        birthday: {
+            element: document.getElementById('birthday'),
+            pattern: /^\d{4}-\d{2}-\d{2}$/,
+            validate: function (value) {
+                if (!value) return false;
+
+                // First check basic date format with regex
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+
+                // Then check age range
+                const today = new Date();
+                const birthDate = new Date(value);
+                const age = today.getFullYear() - birthDate.getFullYear();
+
+                // Ensure date is valid (not Feb 30, etc.)
+                if (isNaN(birthDate.getTime())) return false;
+
+                return age >= 16 && age <= 90;
+            },
+            errorMessage: 'Age must be between 16 and 90 years'
+        }
+    };
+
+    let isFormValid = true;
+
+    Object.values(fields).forEach(field => {
+        if (!validateFieldRegex(field)) {
+            isFormValid = false;
+        }
+    });
+
+    if (!isFormValid) {
+        console.log('Form validation failed');
+    }
+    return isFormValid;
+}
+
+function showErrorMessage(element, message) {
+    // If error message doesn't exist yet
+    if (!element.nextElementSibling || !element.nextElementSibling.classList.contains('error-message')) {
+        const errorElement = document.createElement('div');
+        errorElement.classList.add('error-message');
+        errorElement.textContent = message;
+        element.parentNode.insertBefore(errorElement, element.nextSibling);
+    }
+}
+
+function hideErrorMessage(element) {
+    const errorElement = element.nextElementSibling;
+    if (errorElement && errorElement.classList.contains('error-message')) {
+        errorElement.remove();
+    }
+}
+
+// This replaces your original validateForm function
+window.validateForm = validateForm;
+
+window.setupFormValidation = function () {
+    setupValidation(validationMethod);
+};
+
+const originalSetupModalEventListeners = window.setupModalEventListeners;
+window.setupModalEventListeners = function (modal) {
     const closeBtn = modal.querySelector('.close-btn');
     closeBtn.onclick = function () {
         modal.style.display = 'none';
     }
 
-    const group = document.getElementById('group').value;
-    const firstName = document.getElementById('firstName').value;
-    const lastName = document.getElementById('lastName').value;
-    const gender = document.getElementById('gender').value;
-    const birthday = document.getElementById('birthday').value;
-
     const okBtn = document.getElementById('okBtn');
     okBtn.onclick = function () {
-        if (group && firstName && lastName && gender && birthday) {
+        if (validateForm(validationMethod)) {
+            const group = document.getElementById('group').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const gender = document.getElementById('gender').value;
+            const birthday = document.getElementById('birthday').value;
+            
             const formattedDate = formatDate(birthday);
             addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
-            // document.getElementById('studentForm').reset();
-            modal.style.display = 'none';
-        } else {
             document.getElementById('studentForm').reset();
-            modal.style.display = 'none';
         }
+        // Always close the modal regardless of validation result
+        modal.style.display = 'none';
     };
 
     const createBtn = document.getElementById('createBtn');
     createBtn.onclick = function () {
-        const group = document.getElementById('group').value;
-        const firstName = document.getElementById('firstName').value;
-        const lastName = document.getElementById('lastName').value;
-        const gender = document.getElementById('gender').value;
-        const birthday = document.getElementById('birthday').value;
+        if (validateForm(validationMethod)) {
+            const group = document.getElementById('group').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const gender = document.getElementById('gender').value;
+            const birthday = document.getElementById('birthday').value;
 
-        if (!group || !firstName || !lastName || !gender || !birthday) {
-            alert('Please fill in all fields');
-            return;
+            const formattedDate = formatDate(birthday);
+            addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
+            document.getElementById('studentForm').reset();
         }
-
-        const formattedDate = formatDate(birthday);
-
-        addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
-
-        document.getElementById('studentForm').reset();
     };
-
 
     window.onclick = function (event) {
         if (event.target === modal) {
             modal.style.display = 'none';
         }
     };
-}
+};
 
 // DATE FORMATTING UTILITY
 function formatDate(dateString) {
@@ -425,16 +826,20 @@ function formatDate(dateString) {
     const year = date.getFullYear();
     return `${day}.${month}.${year}`;
 }
+
 // ROW CREATION FUNCTION
 function addNewRow(group, name, gender, birthday) {
     const newRow = document.createElement('tr');
-    
+
+    // Generate a unique ID for the student (e.g., using Date.now())
+    const studentId = Date.now().toString();
+
     let dotClass = 'inactive-dot';
     if (name === "Ket Jer") {
         dotClass = 'active-dot';
     }
     newRow.innerHTML = `
-        <th><input type="checkbox"></th>
+        <th><input type="checkbox" data-student-id="${studentId}"></th>
         <td>${group}</td>
         <td>${name}</td>
         <td>${gender}</td>
@@ -450,14 +855,44 @@ function addNewRow(group, name, gender, birthday) {
         </td>
     `;
 
+    // Json object to store student data
+    const studentData = {
+        id: studentId,
+        group: group,
+        name: name,
+        gender: gender,
+        birthday: birthday
+    };
+
+    // Log the student data to the console
+    console.log('New Student Data:', JSON.stringify(studentData, null, 2));
+
     newRow.classList.add('tableRow');
     document.getElementById('tableBody').appendChild(newRow);
     const newDeleteButton = newRow.querySelector('.deleteRowBtn');
-    addDeleteListener(newDeleteButton);
 
+
+    addDeleteListener(newDeleteButton);
 }
 
+// Додаємо CSS для інвалідної форми
+const style = document.createElement('style');
+style.textContent = `
+    .invalid {
+        border: 2px solid red;
+        background-color: #ffeeee;
+    }
+    .error-message {
+        color: red;
+        font-size: 0.8em;
+        margin-top: 2px;
+        margin-bottom: -2px;
+    }
+`;
+document.head.appendChild(style);
 
+
+// DELETE BUTTON HANDLER
 let deleteButtons = document.querySelectorAll('.deleteRowBtn');
 deleteButtons.forEach(button => addDeleteListener(button));
 
