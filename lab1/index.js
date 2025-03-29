@@ -1,3 +1,10 @@
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then(() => console.log("Service Worker registered"))
+      .catch((err) => console.error("Service Worker registration failed", err));
+  }
+
 // NAVIGATION BUTTONS HANDLING
 document.getElementById('cms-logo').addEventListener('click', function () {
     window.location.href = 'index.html';
@@ -128,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    setupCheckboxListeners();
+    // setupCheckboxListeners();
 
     //щоб після додавання нового рядка оновлювалися чекбокси
     const originalAddNewRow = window.addNewRow;
