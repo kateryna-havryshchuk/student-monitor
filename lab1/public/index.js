@@ -14,9 +14,6 @@ document.getElementById('notificationBtn').addEventListener('click', function ()
     window.location.href = 'messages.html';
 });
 
-// document.getElementById('notificationBtn').addEventListener('click', function () {
-//     window.location.href = 'messages.html';
-// });
 
 //CHECKBOXES
 document.addEventListener('DOMContentLoaded', function () {
@@ -31,27 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // function setupCheckboxListeners() {
-    //     const tableCheckboxes = document.querySelectorAll('#tableBody tr th input[type="checkbox"]');
-    //     tableCheckboxes.forEach(checkbox => {
-    //         checkbox.removeEventListener('change', checkboxChangeHandler);
-    //         checkbox.addEventListener('change', checkboxChangeHandler);
-    //     });
-    // }
-
-    // function checkboxChangeHandler() {
-    //     updateActionButtonsState();
-
-    //     const allCheckboxes = document.querySelectorAll('#tableBody tr th input[type="checkbox"]');
-    //     const allChecked = Array.from(allCheckboxes).every(checkbox => checkbox.checked);
-
-    //     if (headerCheckbox) {
-    //         headerCheckbox.checked = allChecked;
-    //     }
-    // }
-
     document.getElementById('tableBody').addEventListener('change', function (event) {
-        // Check if the changed element is a checkbox
         if (event.target.matches('th input[type="checkbox"]')) {
             updateActionButtonsState();
 
@@ -67,8 +44,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateActionButtonsState() {
         const selectedCheckboxes = document.querySelectorAll('#tableBody tr th input[type="checkbox"]:checked');
         const editButtons = document.querySelectorAll('.editRowBtn');
-
-        // const deleteAllBtn = document.getElementById('deleteAllBtn') || createDeleteAllButton();
 
         let deleteAllBtn = document.getElementById('deleteAllBtn');
         if (!deleteAllBtn) {
@@ -103,7 +78,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const deleteAllBtn = document.createElement('button');
         deleteAllBtn.id = 'deleteAllBtn';
-        // deleteAllBtn.className = 'btn-danger';
         deleteAllBtn.className = 'deleteAllBtn';
         deleteAllBtn.textContent = 'Delete Selected';
         deleteAllBtn.style.display = 'none';
@@ -134,10 +108,8 @@ document.addEventListener('DOMContentLoaded', function () {
         return deleteAllBtn;
     }
 
-
     // setupCheckboxListeners();
 
-    //щоб після додавання нового рядка оновлювалися чекбокси
     const originalAddNewRow = window.addNewRow;
     window.addNewRow = function () {
         originalAddNewRow.apply(this, arguments);
@@ -180,11 +152,9 @@ function showModal(title) {
         document.getElementById('modalTitle').textContent = title;
         document.getElementById('studentForm').reset();
 
-        // Clear any existing error messages
         const errorMessages = document.querySelectorAll('.error-message');
         errorMessages.forEach(msg => msg.remove());
 
-        // Remove invalid class from all inputs
         const inputs = document.querySelectorAll('#studentForm input, #studentForm select');
         inputs.forEach(input => input.classList.remove('invalid'));
 
@@ -192,7 +162,6 @@ function showModal(title) {
         const createBtn = document.getElementById('createBtn');
         createBtn.textContent = 'Create';
 
-        // Restore original handlers for "Add" mode
         if (okBtn.originalOnclick) {
             okBtn.onclick = okBtn.originalOnclick;
         }
@@ -264,7 +233,6 @@ function showEditModal(title, rowData, rowElement) {
 
     updateBtn.textContent = 'Update';
 
-    // Save original handlers for "Add" mode
     if (!updateBtn.originalOnclick) {
         updateBtn.originalOnclick = updateBtn.onclick;
     }
@@ -302,7 +270,6 @@ function showEditModal(title, rowData, rowElement) {
 
             document.getElementById('studentForm').reset();
 
-            // Restore original handlers when closing
             createBtn.onclick = createBtn.originalOnclick;
             okBtn.onclick = okBtn.originalOnclick;
 
@@ -310,7 +277,6 @@ function showEditModal(title, rowData, rowElement) {
         }
     };
 }
-
 
 // EDIT BUTTONS INITIALIZATION
 document.addEventListener('DOMContentLoaded', function () {
@@ -331,7 +297,6 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 });
 
-
 // ADD BUTTON HANDLER
 document.getElementById('addBtn').onclick = function () {
     if (!document.getElementById('studentModal')) {
@@ -343,7 +308,6 @@ document.getElementById('addBtn').onclick = function () {
     }
 
 }
-
 
 // MODAL CREATION FUNCTION
 function createModal() {
@@ -374,16 +338,14 @@ function createModal() {
     });
 }
 
+
 // FORM VALIDATION METHODS
-
 // Options: 'javascript', 'html', 'regex'
-const validationMethod = 'javascript';
+const validationMethod = 'regex';
 
-// Initialize validation based on selected method
 document.addEventListener('DOMContentLoaded', function () {
     setupValidation(validationMethod);
 
-    // Add form submission handler
     const studentForm = document.getElementById('studentForm');
     if (studentForm) {
         studentForm.addEventListener('submit', function (event) {
@@ -395,12 +357,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-// Setup validation based on method
 function setupValidation(method) {
     const form = document.getElementById('studentForm');
     if (!form) return;
 
-    // Remove any previous validation attributes/listeners
     clearValidationSetup();
 
     switch (method) {
@@ -417,11 +377,9 @@ function setupValidation(method) {
     }
 }
 
-// Clear previous validation setup
 function clearValidationSetup() {
     const inputs = document.querySelectorAll('#studentForm input, #studentForm select');
 
-    // Remove all validation attributes
     inputs.forEach(input => {
         input.removeAttribute('required');
         input.removeAttribute('pattern');
@@ -430,19 +388,17 @@ function clearValidationSetup() {
         input.removeAttribute('minlength');
         input.removeAttribute('maxlength');
 
-        // Remove event listeners (by cloning and replacing)
         const newInput = input.cloneNode(true);
         input.parentNode.replaceChild(newInput, input);
     });
 
-    // Remove existing error messages
     const errorMessages = document.querySelectorAll('.error-message');
     errorMessages.forEach(msg => msg.remove());
 }
 
 // METHOD 1: JavaScript validation
 function setupJsValidation() {
-    const fields = getValidationFields();
+    const fields = getValidationFieldsJS();
 
     Object.values(fields).forEach(field => {
         if (field.element) {
@@ -459,7 +415,6 @@ function setupJsValidation() {
 
 function validateFieldJs(field) {
     if (!field.element) return true;
-
     const value = field.element.value;
     let isValid = true;
 
@@ -485,31 +440,25 @@ function validateFieldJs(field) {
 function setupHtmlValidation() {
     const form = document.getElementById('studentForm');
 
-    // Group field
     const groupField = document.getElementById('group');
     groupField.setAttribute('required', 'true');
 
-    // First name field
     const firstNameField = document.getElementById('firstName');
     firstNameField.setAttribute('required', 'true');
-    firstNameField.setAttribute('pattern', '[A-Za-zА-Яа-я]{2,20}');
+    firstNameField.setAttribute('pattern', "[A-Za-zА-Яа-я-]{2,20}");
     firstNameField.setAttribute('title', 'FirstName must be 2-20 letters long');
 
-    // Last name field
     const lastNameField = document.getElementById('lastName');
     lastNameField.setAttribute('required', 'true');
-    lastNameField.setAttribute('pattern', '[A-Za-zА-Яа-я]{2,20}');
+    lastNameField.setAttribute('pattern', '[A-Za-zА-Яа-я-]{2,20}');
     lastNameField.setAttribute('title', 'Surname must be 2-20 letters long');
 
-    // Gender field
     const genderField = document.getElementById('gender');
     genderField.setAttribute('required', 'true');
 
-    // Birthday field
     const birthdayField = document.getElementById('birthday');
     birthdayField.setAttribute('required', 'true');
 
-    // Calculate valid date range (16-90 years old)
     const today = new Date();
     const minDate = new Date();
     minDate.setFullYear(today.getFullYear() - 90);
@@ -519,15 +468,13 @@ function setupHtmlValidation() {
     birthdayField.setAttribute('min', minDate.toISOString().split('T')[0]);
     birthdayField.setAttribute('max', maxDate.toISOString().split('T')[0]);
 
-    // Add custom validation message display
     form.addEventListener('invalid', function (event) {
         event.preventDefault();
         const element = event.target;
         element.classList.add('invalid');
-        showErrorMessage(element, element.title || 'This field is required');
+        showErrorMessage(element, element.title || 'This field is required. Age has to be between 16 and 90 years.');
     }, true);
 
-    // Clear validation message when input changes
     const inputs = document.querySelectorAll('#studentForm input, #studentForm select');
     inputs.forEach(input => {
         input.addEventListener('input', function () {
@@ -547,12 +494,18 @@ function setupRegexValidation() {
         },
         firstName: {
             element: document.getElementById('firstName'),
-            pattern: /^[A-Za-zА-Яа-я]{2,20}$/,
-            errorMessage: 'FirstName must be 2-20 letters long'
+            validate: function (value) {
+                if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)){
+                   showWarningMessage(this.element, 'this is email, be careful!');
+                   return true;
+                }
+                return /^[A-Za-zА-Яа-я]+(-[A-Za-zА-Яа-я]+)*$/.test(value);
+            },
+            // errorMessage: 'FirstName must be 2-20 letters long'
         },
         lastName: {
             element: document.getElementById('lastName'),
-            pattern: /^[A-Za-zА-Яа-я]{2,20}$/,
+            pattern: /^[A-Za-zА-Яа-я]+(-[A-Za-zА-Яа-я]+)*$/,
             errorMessage: 'Surname must be 2-20 letters long'
         },
         gender: {
@@ -566,15 +519,12 @@ function setupRegexValidation() {
             validate: function (value) {
                 if (!value) return false;
 
-                // First check basic date format with regex
                 if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
 
-                // Then check age range
                 const today = new Date();
                 const birthDate = new Date(value);
                 const age = today.getFullYear() - birthDate.getFullYear();
 
-                // Ensure date is valid (not Feb 30, etc.)
                 if (isNaN(birthDate.getTime())) return false;
 
                 return age >= 16 && age <= 90;
@@ -583,6 +533,7 @@ function setupRegexValidation() {
         }
     };
 
+    
     Object.values(fields).forEach(field => {
         if (field.element) {
             field.element.addEventListener('input', function () {
@@ -622,7 +573,7 @@ function validateFieldRegex(field) {
 }
 
 // Get validation field definitions
-function getValidationFields() {
+function getValidationFieldsJS() {
     return {
         group: {
             element: document.getElementById('group'),
@@ -633,12 +584,38 @@ function getValidationFields() {
         },
         firstName: {
             element: document.getElementById('firstName'),
-            pattern: /^[A-Za-zА-Яа-я]{2,20}$/,
+            validate: function (value) {
+                if (value.length < 2 || value.length > 20) return false;
+
+                for (let i = 0; i < value.length; i++) {
+                    const charCode = value.charCodeAt(i);
+                    const isLatin = (charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122);
+                    const isCyrillic = (charCode >= 1040 && charCode <= 1103);
+                    
+                    if (!isLatin && !isCyrillic) {
+                        return false;
+                    }
+                }
+                return true;
+            },
             errorMessage: 'First name must be 2-20 letters long'
         },
         lastName: {
             element: document.getElementById('lastName'),
-            pattern: /^[A-Za-zА-Яа-я]{2,20}$/,
+            validate: function (value) {
+                if (value.length < 2 || value.length > 20) return false;
+                
+                for (let i = 0; i < value.length; i++) {
+                    const charCode = value.charCodeAt(i);
+                    const isLatin = (charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122);
+                    const isCyrillic = (charCode >= 1040 && charCode <= 1103);
+                    
+                    if (!isLatin && !isCyrillic) {
+                        return false;
+                    }
+                }
+                return true;
+            },
             errorMessage: 'Surname must be 2-20 letters long'
         },
         gender: {
@@ -652,10 +629,32 @@ function getValidationFields() {
             element: document.getElementById('birthday'),
             validate: function (value) {
                 if (!value) return false;
+                
+                const parts = value.split('-');
+                if (parts.length !== 3) return false;
+                
+                const year = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                const day = parseInt(parts[2], 10);
+                
+                const date = new Date(year, month, day);
+                if (
+                    date.getFullYear() !== year || 
+                    date.getMonth() !== month || 
+                    date.getDate() !== day
+                ) {
+                    return false;
+                }
+                
                 const today = new Date();
-                const birthDate = new Date(value);
-                const age = today.getFullYear() - birthDate.getFullYear();
-                return age >= 16 && age <= 90;
+                const age = today.getFullYear() - date.getFullYear();
+                const monthDiff = today.getMonth() - date.getMonth();
+                
+                const adjustedAge = (monthDiff < 0 || (monthDiff === 0 && today.getDate() < date.getDate())) 
+                    ? age - 1 
+                    : age;
+                
+                return adjustedAge >= 16 && adjustedAge <= 90;
             },
             errorMessage: 'Age must be between 16 and 90 years'
         }
@@ -676,7 +675,7 @@ function validateForm(method = validationMethod) {
 }
 
 function validateFormJs() {
-    const fields = getValidationFields();
+    const fields = getValidationFieldsJS();
     let isFormValid = true;
 
     Object.values(fields).forEach(field => {
@@ -690,6 +689,7 @@ function validateFormJs() {
     }
     return isFormValid;
 }
+
 
 function validateFormHtml() {
     const form = document.getElementById('studentForm');
@@ -705,8 +705,15 @@ function validateFormRegex() {
         },
         firstName: {
             element: document.getElementById('firstName'),
-            pattern: /^[A-Za-zА-Яа-я]{2,20}$/,
-            errorMessage: 'FirstName must be 2-20 letters long'
+            validate: function (value) {
+                if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                    showWarningMessage(this.element, 'This looks like an email, not a name.');
+                    return true;
+                }
+                hideWarningMessage(this.element);
+                return /^[A-Za-zА-Яа-я]+(-[A-Za-zА-Яа-я]+)*$/.test(value);
+            },
+            errorMessage: 'FirstName must be 2-20 letters long or a valid email'
         },
         lastName: {
             element: document.getElementById('lastName'),
@@ -724,15 +731,12 @@ function validateFormRegex() {
             validate: function (value) {
                 if (!value) return false;
 
-                // First check basic date format with regex
                 if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
 
-                // Then check age range
                 const today = new Date();
                 const birthDate = new Date(value);
                 const age = today.getFullYear() - birthDate.getFullYear();
 
-                // Ensure date is valid (not Feb 30, etc.)
                 if (isNaN(birthDate.getTime())) return false;
 
                 return age >= 16 && age <= 90;
@@ -755,8 +759,18 @@ function validateFormRegex() {
     return isFormValid;
 }
 
+function showWarningMessage(element, message) {
+    if (!element.nextElementSibling || !element.nextElementSibling.classList.contains('warning-message')) {
+        const warningElement = document.createElement('div');
+        warningElement.classList.add('warning-message');
+        warningElement.textContent = message;
+        warningElement.style.color = 'orange';
+        warningElement.style.fontSize = '0.8em';
+        element.parentNode.insertBefore(warningElement, element.nextSibling);
+    }
+}
+
 function showErrorMessage(element, message) {
-    // If error message doesn't exist yet
     if (!element.nextElementSibling || !element.nextElementSibling.classList.contains('error-message')) {
         const errorElement = document.createElement('div');
         errorElement.classList.add('error-message');
@@ -772,7 +786,6 @@ function hideErrorMessage(element) {
     }
 }
 
-// This replaces your original validateForm function
 window.validateForm = validateForm;
 
 window.setupFormValidation = function () {
@@ -799,7 +812,6 @@ window.setupModalEventListeners = function (modal) {
             addNewRow(group, firstName + ' ' + lastName, gender, formattedDate);
             document.getElementById('studentForm').reset();
         }
-        // Always close the modal regardless of validation result
         modal.style.display = 'none';
     };
 
@@ -949,4 +961,6 @@ function showDeleteConfirmModal(message, onConfirm) {
     newCancelBtn.addEventListener('click', closeModal);
     newCloseBtn.addEventListener('click', closeModal);
 }
+
+
 
