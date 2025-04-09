@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/d9209b8d96.js" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+    <script type="module" src="index.js"></script>
+
+    <link rel="manifest" href="manifest.json"/>
+</head>
+
+<body>
+    <div id="wrapper">
+
+        <header>
+            <div class="logo">
+                <div class="cms-link" id="cms-logo">
+                    <h4 class="cms" id="cms">CMS</h4>
+                </div>
+            </div>
+
+            <div class="dropdown-container">
+
+                <div class="notify-dropdown">
+                    <button class="notificationBtn" id="notificationBtn" aria-label="notificationBtn">
+                        <i class="fa-regular fa-bell fa-xl" id="bellIcon"></i>
+                        <span class="icon-button-badge"></span>
+                    </button>
+                    <div class="notify-content">
+                        <a href="./messages.html">
+                            <i class="fa-regular fa-user"></i>
+                            Victor: How are you?
+                        </a>
+                        <a href="./messages.html">
+                            <i class="fa-regular fa-user"></i>
+                            Jess: See you then!
+                        </a>
+                        <a href="./messages.html">
+                            <i class="fa-regular fa-user"></i>
+                            Max: What's up!
+                        </a>
+                    </div>
+                </div>
+
+                <div class="user-dropdown">
+                    <button class="userBtn" id="userBtn">
+                        <img id="profilePicture" class="profilePicture" src="/images/user-icon.jpg" alt="Profile picture">
+                        <span class="username" id="username">Ket Jer</span>
+                    </button>
+                    <div class="user-content">
+                        <a href="#">Profile</a>
+                        <a href="#">Log out</a>
+                    </div>
+                </div>
+
+            </div>
+
+        </header>
+
+        <main>
+
+            <div class="navigation">
+                <input type="checkbox" class="toggle" id="toggle-checkbox" title="Check to toggle menu">
+
+                <label id="toggle-label" for="toggle-checkbox" class="toggle-label">
+                    <span>Toggle menu</span>
+                    <i class="fa-solid fa-bars"></i>
+                </label>
+
+                <nav class="navbar">
+                    <ul>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="index.html" class="active">Students</a></li>
+                        <li><a href="tasks.html">Tasks</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <h1 class="main-heading1">Students</h1>
+
+            <div class="button-container">
+                <button aria-label="addBtn" class="addBtn" id="addBtn"><i class="fa-solid fa-plus"></i></button>
+            </div>
+
+
+            <div class="table-container">
+                <table id="studentsTable">
+
+                    <thead id="tableHead">
+                        <tr>
+                            <th>
+                                <input label="checkbox" type="checkbox" id="selectAll">
+                                <label for="selectAll" class="visually-hidden">Select all</label>
+                            </th>
+                            <th>Group</th>
+                            <th>Name</th>
+                            <th>Gender</th>
+                            <th>Birthday</th>
+                            <th>Status</th>
+                            <th>Options</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tableBody">
+                        <tr class="tableRow">
+                            <th>
+                                <input label="checkbox" type="checkbox" id="selectFirst">
+                                <label for="selectFirst" class="visually-hidden">Select one</label>
+                            </th>
+                            <td>PZ-21</td>
+                            <td>Sam Clark</td>
+                            <td>M</td>
+                            <td>11.05.2004</td>
+                            <td><span class="inactive-dot"></span></td>
+                            <td>
+                                <button aria-label="editRowBtn" class="editRowBtn">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </button>
+                                <button aria-label="deleteRowBtn" class="deleteRowBtn">
+                                    <i class="fa-solid fa-xmark fa-lg"></i>
+                                </button>
+                            </td>
+                        </tr>
+
+                    
+                        <tr class="tableRow">
+                            <th>
+                                <input arial-label="checkbox" type="checkbox" id="selectSecond">
+                                <label for="selectSecond" class="visually-hidden">Select one</label>
+                            </th>
+                            <td>PZ-22</td>
+                            <td>Anna May</td>
+                            <td>F</td>
+                            <td>24.04.2004</td>
+                            <td><span class="inactive-dot"></span></td>
+                            <td>
+                                <button aria-label="editRowBtn" class="editRowBtn">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </button>
+                                <button aria-label="deleteRowBtn" class="deleteRowBtn">
+                                    <i class="fa-solid fa-xmark fa-lg"></i>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr class="tableRow">
+                            <th>
+                                <input arial-label="checkbox" type="checkbox" id="selectThird">
+                                <label for="selectThird" class="visually-hidden">Select one</label>
+                            </th>
+                            <td>PZ-24</td>
+                            <td>Ket Jer</td>
+                            <td>F</td>
+                            <td>14.05.2006</td>
+                            <td><span class="active-dot"></span></td>
+                            <td>
+                                <button aria-label="editRowBtn" class="editRowBtn">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </button>
+                                <button aria-label="deleteRowBtn" class="deleteRowBtn">
+                                    <i class="fa-solid fa-xmark fa-lg"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="paging-nav">
+                    <a href="#" class="selected-page">1</a>
+                    <a href="#">2</a>
+                    <a href="#">3</a>
+                    <a href="#">4</a>
+                    <a href="#">&gt;</a>
+                </div>
+
+                <div id="deleteModal" class="modal">
+                    <div class="modal-content delete-warning">
+                        <div class="modal-header">
+                            <h2>Warning</h2>
+                            <span class="close-btn">&times;</span>
+                        </div>
+
+                        <div class="modal-body">
+                            <p id="deleteConfirmText">Are you sure you want to delete user <span
+                                    id="studentName"></span> ?</p>
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <button class="newOkBtn" id="newOkBtn">OK</button>
+                            <button class="cancelDeleteBtn" id="cancelDeleteBtn">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>
