@@ -1,7 +1,8 @@
 <?php
 
-require_once '/../app/core/Router.php';
-require_once '/../app/core/Controller.php';
+require_once 'app/core/Router.php';
+require_once 'app/core/Database.php';
+require_once 'app/core/Controller.php';
 
 // Автозавантаження класів
 spl_autoload_register(function ($class) {
@@ -13,3 +14,4 @@ spl_autoload_register(function ($class) {
 
 $router = new Router();
 $router->route();
+
