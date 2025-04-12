@@ -9,19 +9,23 @@ class StudentController
     public function __construct()
     {
         $this->studentModel = new Student();
+        session_start(); // Ініціалізація сесії один раз
     }
 
     /**
-     * Show the main student list page
+     * Show the main student list page (доступний всім)
      */
     public function index()
     {
+        session_start();
+        $isLoggedIn = isset($_SESSION['user']);
+    
         $students = $this->studentModel->getAllStudents();
         require __DIR__ . '/../views/home/index.php';
     }
 
     /**
-     * Get a specific student by ID (for API)
+     * Get a specific student by ID (API, доступний всім)
      */
     public function getStudent($id)
     {
@@ -35,11 +39,15 @@ class StudentController
     }
 
     /**
-     * Add a new student (for API)
+     * Add a new student (доступно тільки залогіненим)
      */
     public function addStudent($data)
     {
-        // Validate data
+        if (!isset($_SESSION['user'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            return;
+        }
+
         if (empty($data['group']) || empty($data['firstName']) || 
             empty($data['lastName']) || empty($data['gender']) || 
             empty($data['birthday'])) {
@@ -63,11 +71,15 @@ class StudentController
     }
 
     /**
-     * Update an existing student (for API)
+     * Update an existing student (доступно тільки залогіненим)
      */
     public function updateStudent($data)
     {
-        // Validate data
+        if (!isset($_SESSION['user'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            return;
+        }
+
         if (empty($data['id']) || empty($data['group']) || empty($data['firstName']) || 
             empty($data['lastName']) || empty($data['gender']) || 
             empty($data['birthday'])) {
@@ -92,10 +104,15 @@ class StudentController
     }
 
     /**
-     * Delete a student (for API)
+     * Delete a student (доступно тільки залогіненим)
      */
     public function deleteStudent($id)
     {
+        if (!isset($_SESSION['user'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            return;
+        }
+
         if (empty($id)) {
             echo json_encode(['success' => false, 'message' => 'Student ID is required']);
             return;

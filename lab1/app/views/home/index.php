@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once __DIR__ . '/../../core/Database.php';
 
 try {
@@ -10,10 +11,13 @@ try {
     $stmt->execute();
     $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    $loggedIn = isset($_SESSION['user']);
+    $username = $loggedIn ? htmlspecialchars($_SESSION['user']['firstname'] . ' ' . $_SESSION['user']['lastname']) : null;
 } catch (PDOException $e) {
     $error = "Database error: " . $e->getMessage();
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -29,9 +33,10 @@ try {
     <link rel="manifest" href="manifest.json" />
 </head>
 
-<body>
+<>
     <div id="wrapper">
 
+        
         <header>
             <div class="logo">
                 <div class="cms-link" id="cms-logo">
@@ -62,16 +67,20 @@ try {
                 </div>
 
                 <div class="user-dropdown">
-                    <button class="userBtn" id="userBtn">
-                        <img id="profilePicture" class="profilePicture" src="public/images/user-icon.jpg"
-                            alt="Profile picture">
-                        <span class="username" id="username">Ket Jer</span>
-                    </button>
-                    <div class="user-content">
-                        <a href="#">Profile</a>
-                        <a href="#">Log out</a>
-                    </div>
+                <?php if ($loggedIn): ?>
+                <button class="userBtn" id="userBtn">
+                        <img id="profilePicture" class="profilePicture" src="public/images/user-icon.jpg" alt="Profile picture">
+                        <span class="username" id="username"><?= $username ?></span>
+                </button>
+                <div class="user-content">
+                    <a href="#">Profile</a>
+                    <a href="logout">Log out</a>
                 </div>
+                <?php else: ?>
+                <button type="button" class="login-btn" id="loginBtn">Login</button>
+                <?php endif; ?>
+            </div>
+
             </div>
         </header>
 
@@ -86,7 +95,7 @@ try {
 
                 <nav class="navbar">
                     <ul>
-                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="../dashboard">Dashboard</a></li>
                         <li><a href="index.html" class="active">Students</a></li>
                         <li><a href="tasks.html">Tasks</a></li>
                     </ul>
@@ -95,9 +104,13 @@ try {
 
             <h1 class="main-heading1">Students</h1>
 
-            <div class="button-container">
-                <button type="button" aria-label="addBtn" class="addBtn" id="addBtn"><i class="fa-solid fa-plus"></i></button>
-            </div>
+            <?php if ($loggedIn): ?>
+    <div class="button-container">
+        <button type="button" aria-label="addBtn" class="addBtn" id="addBtn">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+    </div>
+<?php endif; ?>
 
             <div class="table-container">
                 <table id="studentsTable">
@@ -134,13 +147,18 @@ try {
                                     <td><?= $formattedDate ?></td>
                                     <td><span class="inactive-dot"></span></td>
                                     <td>
-                                        <button class="editRowBtn" data-id="<?= $row['id'] ?>">
-                                            <i class="fa-solid fa-pencil"></i>
-                                        </button>
-                                        <button class="deleteRowBtn" data-id="<?= $row['id'] ?>" data-name="<?= $fullName ?>">
-                                            <i class="fa-solid fa-xmark fa-lg"></i>
-                                        </button>
-                                    </td>
+    <?php if ($loggedIn): ?>
+        <button class="editRowBtn" data-id="<?= $row['id'] ?>">
+            <i class="fa-solid fa-pencil"></i>
+        </button>
+        <button class="deleteRowBtn" data-id="<?= $row['id'] ?>" data-name="<?= $fullName ?>">
+            <i class="fa-solid fa-xmark fa-lg"></i>
+        </button>
+    <?php else: ?>
+        <span class="no-access">N/A</span>
+    <?php endif; ?>
+</td>
+
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -227,6 +245,35 @@ try {
             <div class="modal-footer">
                 <button class="newOkBtn" id="newOkBtn">OK</button>
                 <button class="cancelDeleteBtn" id="cancelDeleteBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+
+     <!-- Login Modal -->
+     <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Login</h2>
+                <span class="close-btn" id="closeLoginModalBtn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="loginForm" method="post" action="login">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <p>Don't have an account? <a href="signup">Sign up</a></p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+            <button type="button" id="loginSubmitBtn" class="okBtn">Login</button>
             </div>
         </div>
     </div>

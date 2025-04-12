@@ -1,9 +1,9 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /
-    
+    RewriteBase /lab1/
+
     # Redirect requests to index.php except for existing files or directories
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.php [L,QSA]
+    RewriteRule ^(.*)$ index.php [QSA,L]
 </IfModule>

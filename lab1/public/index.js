@@ -97,9 +97,11 @@ document.addEventListener("DOMContentLoaded", function() {
             deleteModal.style.display = 'block';
             
             // Confirm delete
-            newOkBtn.onclick = function() {
+            newOkBtn.replaceWith(newOkBtn.cloneNode(true));
+            const freshNewOkBtn = document.getElementById('newOkBtn');
+            freshNewOkBtn.addEventListener('click', function() {
                 deleteStudent(studentId);
-            };
+            });
         });
     });
     
@@ -185,6 +187,92 @@ document.addEventListener("DOMContentLoaded", function() {
             const checkboxes = document.querySelectorAll('input[type="checkbox"][data-id]');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = this.checked;
+            });
+        });
+    }
+
+});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const loginBtn = document.getElementById('loginBtn');
+    const loginModal = document.getElementById('loginModal');
+    const closeLoginModalBtn = document.getElementById('closeLoginModalBtn');
+    const loginForm = document.getElementById('loginForm');
+    const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+
+    // Open login modal
+    if (loginBtn && loginModal) {
+        loginBtn.addEventListener('click', () => {
+            loginModal.style.display = 'block';
+        });
+    }
+
+    // Close login modal
+    if (closeLoginModalBtn) {
+        closeLoginModalBtn.addEventListener('click', () => {
+            loginModal.style.display = 'none';
+        });
+    }
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (event) => {
+        if (event.target === loginModal) {
+            loginModal.style.display = 'none';
+        }
+    });
+
+    // Handle login submission
+    if (loginSubmitBtn && loginForm) {
+        loginSubmitBtn.addEventListener('click', function () {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                alert('Please fill in both fields.');
+                return;
+            }
+
+            fetch('/index.php?url=auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            })
+            .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Invalid login credentials.');
+                    } else if (response.status === 500) {
+                        throw new Error('Server error. Please try again later.');
+                    } else {
+                        throw new Error(`Unexpected error: ${response.status}`);
+                    }
+                }
+                const responseClone = response.clone();
+    
+                // Спершу спробуємо отримати текст відповіді для діагностики
+                responseClone.text().then(text => {
+                    console.log('Response text:', text.substring(0, 300)); // Показуємо перші 300 символів
+                });
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    alert(data.message || 'Invalid login credentials.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error.message || error);
+                alert(error.message || 'An error occurred during login. Please try again.');
             });
         });
     }
