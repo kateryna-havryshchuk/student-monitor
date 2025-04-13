@@ -21,6 +21,7 @@ try {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,249 +34,265 @@ try {
     <link rel="manifest" href="manifest.json" />
 </head>
 
-<>
-    <div id="wrapper">
+<div id="wrapper">
 
-        
-        <header>
-            <div class="logo">
-                <div class="cms-link" id="cms-logo">
-                    <h4 class="cms" id="cms">CMS</h4>
+
+    <header>
+        <div class="logo">
+            <div class="cms-link" id="cms-logo">
+                <h4 class="cms" id="cms">CMS</h4>
+            </div>
+        </div>
+
+        <div class="dropdown-container">
+            <div class="notify-dropdown">
+                <button class="notificationBtn" id="notificationBtn" aria-label="notificationBtn">
+                    <i class="fa-regular fa-bell fa-xl" id="bellIcon"></i>
+                    <span class="icon-button-badge"></span>
+                </button>
+                <div class="notify-content">
+                    <a href="./messages.html">
+                        <i class="fa-regular fa-user"></i>
+                        Victor: How are you?
+                    </a>
+                    <a href="./messages.html">
+                        <i class="fa-regular fa-user"></i>
+                        Jess: See you then!
+                    </a>
+                    <a href="./messages.html">
+                        <i class="fa-regular fa-user"></i>
+                        Max: What's up!
+                    </a>
                 </div>
             </div>
 
-            <div class="dropdown-container">
-                <div class="notify-dropdown">
-                    <button class="notificationBtn" id="notificationBtn" aria-label="notificationBtn">
-                        <i class="fa-regular fa-bell fa-xl" id="bellIcon"></i>
-                        <span class="icon-button-badge"></span>
-                    </button>
-                    <div class="notify-content">
-                        <a href="./messages.html">
-                            <i class="fa-regular fa-user"></i>
-                            Victor: How are you?
-                        </a>
-                        <a href="./messages.html">
-                            <i class="fa-regular fa-user"></i>
-                            Jess: See you then!
-                        </a>
-                        <a href="./messages.html">
-                            <i class="fa-regular fa-user"></i>
-                            Max: What's up!
-                        </a>
-                    </div>
-                </div>
-
-                <div class="user-dropdown">
+            <div class="user-dropdown">
                 <?php if ($loggedIn): ?>
-                <button class="userBtn" id="userBtn">
-                        <img id="profilePicture" class="profilePicture" src="public/images/user-icon.jpg" alt="Profile picture">
+                    <button class="userBtn" id="userBtn">
+                        <img id="profilePicture" class="profilePicture" src="public/images/user-icon.jpg"
+                            alt="Profile picture">
                         <span class="username" id="username"><?= $username ?></span>
-                </button>
-                <div class="user-content">
-                    <a href="#">Profile</a>
-                    <a href="logout">Log out</a>
-                </div>
+                    </button>
+                    <div class="user-content">
+                        <a href="#">Profile</a>
+                        <a href="logout">Log out</a>
+                    </div>
                 <?php else: ?>
-                <button type="button" class="login-btn" id="loginBtn">Login</button>
+                    <button type="button" class="login-btn" id="loginBtn">Login</button>
                 <?php endif; ?>
             </div>
 
+        </div>
+    </header>
+
+    <main>
+        <div class="navigation">
+            <input type="checkbox" class="toggle" id="toggle-checkbox" title="Check to toggle menu">
+
+            <label id="toggle-label" for="toggle-checkbox" class="toggle-label">
+                <span>Toggle menu</span>
+                <i class="fa-solid fa-bars"></i>
+            </label>
+
+            <nav class="navbar">
+                <ul>
+                    <li><a href="../dashboard">Dashboard</a></li>
+                    <li><a href="index.html" class="active">Students</a></li>
+                    <li><a href="tasks.html">Tasks</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <h1 class="main-heading1">Students</h1>
+
+        <?php if ($loggedIn): ?>
+            <div class="button-container">
+                <button type="button" aria-label="addBtn" class="addBtn" id="addBtn">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
             </div>
-        </header>
+        <?php endif; ?>
 
-        <main>
-            <div class="navigation">
-                <input type="checkbox" class="toggle" id="toggle-checkbox" title="Check to toggle menu">
+        <div class="table-container">
+            <table id="studentsTable">
+                <thead id="tableHead">
+                    <tr>
+                        <th>
+                            <input label="checkbox" type="checkbox" id="selectAll">
+                            <label for="selectAll" class="visually-hidden">Select all</label>
+                        </th>
+                        <th>Group</th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>Birthday</th>
+                        <th>Status</th>
+                        <th>Options</th>
+                    </tr>
+                </thead>
 
-                <label id="toggle-label" for="toggle-checkbox" class="toggle-label">
-                    <span>Toggle menu</span>
-                    <i class="fa-solid fa-bars"></i>
-                </label>
+                <tbody id="tableBody">
+                    <?php if (!empty($students)): ?>
+                        <?php foreach ($students as $row): ?>
+                            <?php
+                            $fullName = htmlspecialchars($row['firstname'] . ' ' . $row['lastname']);
+                            $formattedDate = date('d.m.Y', strtotime($row['birthday']));
+                            ?>
+                            <tr class="tableRow">
+                                <th>
+                                    <input type="checkbox" id="select<?= $row['id'] ?>" data-id="<?= $row['id'] ?>">
+                                    <label for="select<?= $row['id'] ?>" class="visually-hidden">Select one</label>
+                                </th>
+                                <td><?= htmlspecialchars($row['student_group']) ?></td>
+                                <td><?= $fullName ?></td>
+                                <td><?= htmlspecialchars($row['gender']) ?></td>
+                                <td><?= $formattedDate ?></td>
+                                <td><span class="inactive-dot"></span></td>
+                                <td>
+                                    <?php if ($loggedIn): ?>
+                                        <button class="editRowBtn" data-id="<?= $row['id'] ?>">
+                                            <i class="fa-solid fa-pencil"></i>
+                                        </button>
+                                        <button class="deleteRowBtn" data-id="<?= $row['id'] ?>" data-name="<?= $fullName ?>">
+                                            <i class="fa-solid fa-xmark fa-lg"></i>
+                                        </button>
+                                    <?php else: ?>
+                                        <span class="no-access">N/A</span>
+                                    <?php endif; ?>
+                                </td>
 
-                <nav class="navbar">
-                    <ul>
-                        <li><a href="../dashboard">Dashboard</a></li>
-                        <li><a href="index.html" class="active">Students</a></li>
-                        <li><a href="tasks.html">Tasks</a></li>
-                    </ul>
-                </nav>
-            </div>
-
-            <h1 class="main-heading1">Students</h1>
-
-            <?php if ($loggedIn): ?>
-    <div class="button-container">
-        <button type="button" aria-label="addBtn" class="addBtn" id="addBtn">
-            <i class="fa-solid fa-plus"></i>
-        </button>
-    </div>
-<?php endif; ?>
-
-            <div class="table-container">
-                <table id="studentsTable">
-                    <thead id="tableHead">
-                        <tr>
-                            <th>
-                                <input label="checkbox" type="checkbox" id="selectAll">
-                                <label for="selectAll" class="visually-hidden">Select all</label>
-                            </th>
-                            <th>Group</th>
-                            <th>Name</th>
-                            <th>Gender</th>
-                            <th>Birthday</th>
-                            <th>Status</th>
-                            <th>Options</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="tableBody">
-                        <?php if (!empty($students)): ?>
-                            <?php foreach ($students as $row): ?>
-                                <?php
-                                $fullName = htmlspecialchars($row['firstname'] . ' ' . $row['lastname']);
-                                $formattedDate = date('d.m.Y', strtotime($row['birthday']));
-                                ?>
-                                <tr class="tableRow">
-                                    <th>
-                                        <input type="checkbox" id="select<?= $row['id'] ?>" data-id="<?= $row['id'] ?>">
-                                        <label for="select<?= $row['id'] ?>" class="visually-hidden">Select one</label>
-                                    </th>
-                                    <td><?= htmlspecialchars($row['student_group']) ?></td>
-                                    <td><?= $fullName ?></td>
-                                    <td><?= htmlspecialchars($row['gender']) ?></td>
-                                    <td><?= $formattedDate ?></td>
-                                    <td><span class="inactive-dot"></span></td>
-                                    <td>
-    <?php if ($loggedIn): ?>
-        <button class="editRowBtn" data-id="<?= $row['id'] ?>">
-            <i class="fa-solid fa-pencil"></i>
-        </button>
-        <button class="deleteRowBtn" data-id="<?= $row['id'] ?>" data-name="<?= $fullName ?>">
-            <i class="fa-solid fa-xmark fa-lg"></i>
-        </button>
-    <?php else: ?>
-        <span class="no-access">N/A</span>
-    <?php endif; ?>
-</td>
-
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="7" class="no-data">No students found</td>
                             </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-                
-                <div class="paging-nav">
-                    <a href="#" class="selected-page">1</a>
-                    <a href="#">2</a>
-                    <a href="#">3</a>
-                    <a href="#">4</a>
-                    <a href="#">&gt;</a>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="7" class="no-data">No students found</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+
+            <div class="paging-nav">
+                <a href="#" class="selected-page">1</a>
+                <a href="#">2</a>
+                <a href="#">3</a>
+                <a href="#">4</a>
+                <a href="#">&gt;</a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Add/Edit Modal -->
+<div id="addEditModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Add student</h2>
+            <span class="close-btn" id="closeModalBtn">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="studentForm">
+                <input type="hidden" id="studentId" name="id">
+                <div class="form-group">
+                    <label for="group">Group</label>
+                    <select id="group" name="group" required>
+                        <option value="">Select Group</option>
+                        <option value="PZ-21">PZ-21</option>
+                        <option value="PZ-22">PZ-22</option>
+                        <option value="PZ-23">PZ-23</option>
+                        <option value="PZ-24">PZ-24</option>
+                        <option value="PZ-25">PZ-25</option>
+                        <option value="PZ-26">PZ-26</option>
+                    </select>
                 </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Add/Edit Modal -->
-    <div id="addEditModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Add student</h2>
-                <span class="close-btn" id="closeModalBtn">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="studentForm">
-                    <input type="hidden" id="studentId" name="id">
-                    <div class="form-group">
-                        <label for="group">Group</label>
-                        <select id="group" name="group" required>
-                            <option value="">Select Group</option>
-                            <option value="PZ-21">PZ-21</option>
-                            <option value="PZ-22">PZ-22</option>
-                            <option value="PZ-23">PZ-23</option>
-                            <option value="PZ-24">PZ-24</option>
-                            <option value="PZ-25">PZ-25</option>
-                            <option value="PZ-26">PZ-26</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="firstName">First name</label>
-                        <input type="text" id="firstName" name="firstName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="lastName">Last name</label>
-                        <input type="text" id="lastName" name="lastName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="gender">Gender</label>
-                        <select id="gender" name="gender" required>
-                            <option value="">Select Gender</option>
-                            <option value="M">M</option>
-                            <option value="F">F</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="birthday">Birthday</label>
-                        <input type="date" id="birthday" name="birthday" required>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="okBtn" id="okBtn">OK</button>
-            </div>
+                <div class="form-group">
+                    <label for="firstName">First name</label>
+                    <input type="text" id="firstName" name="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last name</label>
+                    <input type="text" id="lastName" name="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="M">M</option>
+                        <option value="F">F</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="birthday">Birthday</label>
+                    <input type="date" id="birthday" name="birthday" required>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="okBtn" id="okBtn">OK</button>
         </div>
     </div>
+</div>
 
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content delete-warning">
-            <div class="modal-header">
-                <h2>Warning</h2>
-                <span class="close-btn">&times;</span>
-            </div>
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content delete-warning">
+        <div class="modal-header">
+            <h2>Warning</h2>
+            <span class="close-btn">&times;</span>
+        </div>
 
-            <div class="modal-body">
-                <p id="deleteConfirmText">Are you sure you want to delete user <span id="studentName"></span>?</p>
-            </div>
+        <div class="modal-body">
+            <p id="deleteConfirmText">Are you sure you want to delete user <span id="studentName"></span>?</p>
+        </div>
 
-            <div class="modal-footer">
-                <button class="newOkBtn" id="newOkBtn">OK</button>
-                <button class="cancelDeleteBtn" id="cancelDeleteBtn">Cancel</button>
-            </div>
+        <div class="modal-footer">
+            <button class="newOkBtn" id="newOkBtn">OK</button>
+            <button class="cancelDeleteBtn" id="cancelDeleteBtn">Cancel</button>
         </div>
     </div>
+</div>
 
 
-     <!-- Login Modal -->
-     <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Login</h2>
-                <span class="close-btn" id="closeLoginModalBtn">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="loginForm" method="post" action="login">
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" required>
-                    </div>
-                    <div class="form-group">
-                        <p>Don't have an account? <a href="signup">Sign up</a></p>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-            <button type="button" id="loginSubmitBtn" class="okBtn">Login</button>
-            </div>
+<!-- Login Modal -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Login</h2>
+            <span class="close-btn" id="closeLoginModalBtn">&times;</span>
+        </div>
+        <div class="modal-body">
+            <!-- The action attribute is set to our controller endpoint -->
+            <form id="loginForm" method="post" action="/index.php?url=auth/login">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <p>Don't have an account? <a href="signup">Sign up</a></p>
+                </div>
+                <?php if (session_status() === PHP_SESSION_NONE)
+                    session_start(); ?>
+
+                <?php if (isset($_SESSION['login_error'])): ?>
+                    <div style="color:red;"><?= $_SESSION['login_error'];
+                    unset($_SESSION['login_error']); ?></div>
+                <?php endif; ?>
+
+                <?php if (isset($_SESSION['login_success'])): ?>
+                    <div style="color:green;"><?= $_SESSION['login_success'];
+                    unset($_SESSION['login_success']); ?></div>
+                <?php endif; ?>
+
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" form="loginForm" id="loginSubmitBtn" class="okBtn">Login</button>
         </div>
     </div>
+</div>
+
 </body>
+
 </html>

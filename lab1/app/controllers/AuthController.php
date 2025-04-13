@@ -3,71 +3,77 @@ require_once 'app/models/User.php';
 
 class AuthController
 {
-    public function showSignup()
-    {
-        include 'app/views/auth/signup.php';
-    }
-
     public function login()
     {
-        session_start();
-        $userModel = new User();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
-        header('Content-Type: application/json');
+        // Якщо не POST — редирект на головну (де форма)
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /home/index');
+            exit;
+        }
 
         try {
-            $input = json_decode(file_get_contents('php://input'), true);
-
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                echo json_encode(['success' => false, 'message' => 'Invalid JSON format']);
-                return;
-            }
-
-            $email = $input['email'] ?? '';
-            $password = $input['password'] ?? '';
+            $email = isset($_POST['email']) ? trim($_POST['email']) : '';
+            $password = $_POST['password'] ?? '';
 
             if (empty($email) || empty($password)) {
-                echo json_encode(['success' => false, 'message' => 'Email and password are required']);
-                return;
+                $_SESSION['login_error'] = 'Email and password are required';
+                header('Location: /home/index');
+                exit;
             }
 
+            $userModel = new User();
             $user = $userModel->findByEmail($email);
 
             if ($user && password_verify($password, $user['password'])) {
+                unset($user['password']);
                 $_SESSION['user'] = $user;
-                echo json_encode(['success' => true]);
+                $_SESSION['login_success'] = 'Login successful';
             } else {
-                echo json_encode(['success' => false, 'message' => 'Invalid email or password']);
+                $_SESSION['login_error'] = 'Invalid email or password';
             }
+
+            header('Location: /home/index');
+            exit;
         } catch (Exception $e) {
-            error_log('Login error: ' . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => 'Server error']);
+            $_SESSION['login_error'] = 'Server error: ' . $e->getMessage();
+            header('Location: /home/index');
+            exit;
         }
     }
-
-    public function signup()
-    {
-        $userModel = new User();
-        $hashedPassword = password_hash($_POST['password'], PASSWORD_BCRYPT);
-        if ($userModel->findByEmail($_POST['email'])) {
-            echo "User with this email already exists.";
-            return;
-        }
-
-        $userModel->create([
-            'firstname' => $_POST['firstname'],
-            'lastname' => $_POST['lastname'],
-            'email' => $_POST['email'],
-            'password' => $hashedPassword
-        ]);
-
-        header('Location: /');
-    }
-
+    
     public function logout()
     {
-        session_start();
+        // Start session if not already started
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        // Clear session data
+        $_SESSION = [];
+        
+        // Clear session cookie
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000,
+                $params["path"],
+                $params["domain"],
+                $params["secure"],
+                $params["httponly"]
+            );
+        }
+        
+        // Destroy session
         session_destroy();
-        header('Location: /');
+        
+        // Redirect to home page
+        header('Location: /home/index');
+        exit;
     }
 }
