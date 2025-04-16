@@ -1,4 +1,10 @@
 <?php
+error_log("AuthController.php loaded");
+
+if (!file_exists('app/models/User.php')) {
+    error_log("User.php not found at app/models/User.php");
+    die("Error: User.php not found");
+}
 require_once 'app/models/User.php';
 
 class AuthController
@@ -9,53 +15,145 @@ class AuthController
             session_start();
         }
 
-        // Якщо не POST — редирект на головну (де форма)
+        error_log("AuthController::login called, method: " . $_SERVER['REQUEST_METHOD']);
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /home/index');
-            exit;
+            error_log("Rendering login page (GET request)");
+            $this->renderLogin();
+            return;
         }
 
         try {
             $email = isset($_POST['email']) ? trim($_POST['email']) : '';
             $password = $_POST['password'] ?? '';
 
+            error_log("Login attempt: email=$email, password=$password");
+
             if (empty($email) || empty($password)) {
                 $_SESSION['login_error'] = 'Email and password are required';
-                header('Location: /home/index');
-                exit;
+                error_log("Login failed: Empty email or password");
+                $this->renderLogin();
+                return;
             }
 
             $userModel = new User();
             $user = $userModel->findByEmail($email);
 
-            if ($user && password_verify($password, $user['password'])) {
+            if (!$user) {
+                $_SESSION['login_error'] = 'User not found. Please sign up.';
+                error_log("Login failed: User not found for email=$email");
+                header('Location: /lab1/index.php?url=auth/signup');
+                exit;
+            }
+
+            error_log("User found: " . print_r($user, true));
+            error_log("Verifying password: input=$password, stored={$user['password']}");
+
+            if (password_verify($password, $user['password'])) {
                 unset($user['password']);
                 $_SESSION['user'] = $user;
                 $_SESSION['login_success'] = 'Login successful';
+                error_log("Login successful for email=$email, redirecting to student/index");
+                header('Location: /lab1/index.php?url=student/index');
+                exit;
             } else {
-                $_SESSION['login_error'] = 'Invalid email or password';
+                $_SESSION['login_error'] = 'Invalid password';
+                error_log("Login failed: Invalid password for email=$email");
+                $this->renderLogin();
             }
-
-            header('Location: /home/index');
-            exit;
         } catch (Exception $e) {
             $_SESSION['login_error'] = 'Server error: ' . $e->getMessage();
-            header('Location: /home/index');
-            exit;
+            error_log("Login error: " . $e->getMessage());
+            $this->renderLogin();
         }
     }
-    
-    public function logout()
+
+    private function renderLogin()
     {
-        // Start session if not already started
+        error_log("Rendering login template: app/views/auth/login.php");
+        if (!file_exists('app/views/auth/login.php')) {
+            error_log("Error: Login template not found at app/views/auth/login.php");
+            die("Error: Login template not found");
+        }
+        require 'app/views/auth/login.php';
+        exit;
+    }
+
+    public function signup()
+    {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        
-        // Clear session data
+
+        error_log("AuthController::signup called, method: " . $_SERVER['REQUEST_METHOD']);
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            error_log("Rendering signup page (GET request)");
+            require 'app/views/auth/signup.php';
+            return;
+        }
+
+        try {
+            $email = trim($_POST['email'] ?? '');
+            $password = $_POST['password'] ?? '';
+            $firstname = trim($_POST['firstname'] ?? '');
+            $lastname = trim($_POST['lastname'] ?? '');
+
+            error_log("Signup attempt: email=$email");
+
+            if (empty($email) || empty($password) || empty($firstname) || empty($lastname)) {
+                $_SESSION['signup_error'] = 'All fields are required';
+                error_log("Signup failed: Missing fields");
+                require 'app/views/auth/signup.php';
+                return;
+            }
+
+            $userModel = new User();
+            $existingUser = $userModel->findByEmail($email);
+            if ($existingUser) {
+                $_SESSION['signup_error'] = 'Email already registered';
+                error_log("Signup failed: Email already registered ($email)");
+                require 'app/views/auth/signup.php';
+                return;
+            }
+
+            // Хешування пароля перед збереженням
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            error_log("Hashed password for $email: $hashedPassword");
+
+            $userData = [
+                'firstname' => $firstname,
+                'lastname' => $lastname,
+                'email' => $email,
+                'password' => $hashedPassword
+            ];
+
+            if ($userModel->create($userData)) {
+                $_SESSION['login_success'] = 'Registration successful. Please log in.';
+                error_log("Signup successful for email=$email, redirecting to auth/login");
+                header('Location: /lab1/index.php?url=auth/login');
+                exit;
+            } else {
+                $_SESSION['signup_error'] = 'Failed to register user';
+                error_log("Signup failed: Could not create user");
+                require 'app/views/auth/signup.php';
+            }
+        } catch (Exception $e) {
+            $_SESSION['signup_error'] = 'Server error: ' . $e->getMessage();
+            error_log("Signup error: " . $e->getMessage());
+            require 'app/views/auth/signup.php';
+        }
+    }
+
+    public function logout()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        error_log("AuthController::logout called");
+
         $_SESSION = [];
-        
-        // Clear session cookie
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
             setcookie(
@@ -68,12 +166,10 @@ class AuthController
                 $params["httponly"]
             );
         }
-        
-        // Destroy session
+
         session_destroy();
-        
-        // Redirect to home page
-        header('Location: /home/index');
+        error_log("User logged out, redirecting to home/index");
+        header('Location: /lab1/index.php?url=home/index');
         exit;
     }
 }

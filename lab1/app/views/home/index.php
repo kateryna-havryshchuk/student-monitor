@@ -1,5 +1,8 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once __DIR__ . '/../../core/Database.php';
 
 try {
@@ -18,92 +21,75 @@ try {
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Students</title>
-    <link rel="stylesheet" href="public/style.css">
+    <link rel="stylesheet" href="/lab1/public/style.css">
     <script src="https://kit.fontawesome.com/d9209b8d96.js" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
-    <script type="module" src="public/index.js"></script>
-    <link rel="manifest" href="manifest.json" />
+    <script type="module" src="/lab1/public/index.js"></script>
 </head>
-
+<body>
 <div id="wrapper">
-
-
     <header>
         <div class="logo">
             <div class="cms-link" id="cms-logo">
                 <h4 class="cms" id="cms">CMS</h4>
             </div>
         </div>
-
         <div class="dropdown-container">
-            <div class="notify-dropdown">
-                <button class="notificationBtn" id="notificationBtn" aria-label="notificationBtn">
-                    <i class="fa-regular fa-bell fa-xl" id="bellIcon"></i>
-                    <span class="icon-button-badge"></span>
-                </button>
-                <div class="notify-content">
-                    <a href="./messages.html">
-                        <i class="fa-regular fa-user"></i>
-                        Victor: How are you?
-                    </a>
-                    <a href="./messages.html">
-                        <i class="fa-regular fa-user"></i>
-                        Jess: See you then!
-                    </a>
-                    <a href="./messages.html">
-                        <i class="fa-regular fa-user"></i>
-                        Max: What's up!
-                    </a>
-                </div>
-            </div>
-
-            <div class="user-dropdown">
                 <?php if ($loggedIn): ?>
+                    <div class="notify-dropdown">
+                        <button class="notificationBtn" id="notificationBtn" aria-label="notificationBtn">
+                            <i class="fa-regular fa-bell fa-xl bell-ringing" id="bellIcon"></i>
+                            <span class="icon-button-badge show"></span>
+                        </button>
+                        <div class="notify-content" id="notifyContent">
+                            <a href="#"><i class="fa-regular fa-user"></i> Victor: How are you?</a>
+                            <a href="#"><i class="fa-regular fa-user"></i> Jess: See you then!</a>
+                            <a href="#"><i class="fa-regular fa-user"></i> Max: What's up!</a>
+                        </div>
+                    </div>
+
+                    <div class="user-dropdown">
                     <button class="userBtn" id="userBtn">
-                        <img id="profilePicture" class="profilePicture" src="public/images/user-icon.jpg"
-                            alt="Profile picture">
+                        <img id="profilePicture" class="profilePicture" src="/lab1/public/images/user-icon.jpg" alt="Profile picture">
                         <span class="username" id="username"><?= $username ?></span>
                     </button>
                     <div class="user-content">
                         <a href="#">Profile</a>
-                        <a href="logout">Log out</a>
+                        <a href="/lab1/index.php?url=auth/logout">Log out</a>
                     </div>
                 <?php else: ?>
-                    <button type="button" class="login-btn" id="loginBtn">Login</button>
+                    <a href="/lab1/index.php?url=auth/login" class="login-btn">Login</a>
                 <?php endif; ?>
             </div>
-
         </div>
     </header>
 
     <main>
         <div class="navigation">
             <input type="checkbox" class="toggle" id="toggle-checkbox" title="Check to toggle menu">
-
             <label id="toggle-label" for="toggle-checkbox" class="toggle-label">
                 <span>Toggle menu</span>
                 <i class="fa-solid fa-bars"></i>
             </label>
-
             <nav class="navbar">
                 <ul>
-                    <li><a href="../dashboard">Dashboard</a></li>
-                    <li><a href="index.html" class="active">Students</a></li>
-                    <li><a href="tasks.html">Tasks</a></li>
+                    <li><a href="/lab1/index.php?url=dashboard/index">Dashboard</a></li>
+                    <li><a href="/lab1/index.php?url=student/index" class="active">Students</a></li>
+                    <li><a href="/lab1/tasks.html">Tasks</a></li>
                 </ul>
             </nav>
         </div>
 
-        <h1 class="main-heading1">Students</h1>
+        <h1 class="main-heading1">
+                Welcome, <?php echo isset($_SESSION['user']['firstname']) ? htmlspecialchars($_SESSION['user']['firstname']) : 'Guest'; ?>!
+        </h1>
 
         <?php if ($loggedIn): ?>
             <div class="button-container">
@@ -129,7 +115,6 @@ try {
                         <th>Options</th>
                     </tr>
                 </thead>
-
                 <tbody id="tableBody">
                     <?php if (!empty($students)): ?>
                         <?php foreach ($students as $row): ?>
@@ -159,7 +144,6 @@ try {
                                         <span class="no-access">N/A</span>
                                     <?php endif; ?>
                                 </td>
-
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -169,14 +153,6 @@ try {
                     <?php endif; ?>
                 </tbody>
             </table>
-
-            <div class="paging-nav">
-                <a href="#" class="selected-page">1</a>
-                <a href="#">2</a>
-                <a href="#">3</a>
-                <a href="#">4</a>
-                <a href="#">&gt;</a>
-            </div>
         </div>
     </main>
 </div>
@@ -186,7 +162,7 @@ try {
     <div class="modal-content">
         <div class="modal-header">
             <h2 id="modalTitle">Add student</h2>
-            <span class="close-btn" id="closeModalBtn">&times;</span>
+            <span class="close-btn" id="closeModalBtn">×</span>
         </div>
         <div class="modal-body">
             <form id="studentForm">
@@ -236,63 +212,16 @@ try {
     <div class="modal-content delete-warning">
         <div class="modal-header">
             <h2>Warning</h2>
-            <span class="close-btn">&times;</span>
+            <span class="close-btn">×</span>
         </div>
-
         <div class="modal-body">
             <p id="deleteConfirmText">Are you sure you want to delete user <span id="studentName"></span>?</p>
         </div>
-
         <div class="modal-footer">
             <button class="newOkBtn" id="newOkBtn">OK</button>
             <button class="cancelDeleteBtn" id="cancelDeleteBtn">Cancel</button>
         </div>
     </div>
 </div>
-
-
-<!-- Login Modal -->
-<div id="loginModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Login</h2>
-            <span class="close-btn" id="closeLoginModalBtn">&times;</span>
-        </div>
-        <div class="modal-body">
-            <!-- The action attribute is set to our controller endpoint -->
-            <form id="loginForm" method="post" action="/index.php?url=auth/login">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <div class="form-group">
-                    <p>Don't have an account? <a href="signup">Sign up</a></p>
-                </div>
-                <?php if (session_status() === PHP_SESSION_NONE)
-                    session_start(); ?>
-
-                <?php if (isset($_SESSION['login_error'])): ?>
-                    <div style="color:red;"><?= $_SESSION['login_error'];
-                    unset($_SESSION['login_error']); ?></div>
-                <?php endif; ?>
-
-                <?php if (isset($_SESSION['login_success'])): ?>
-                    <div style="color:green;"><?= $_SESSION['login_success'];
-                    unset($_SESSION['login_success']); ?></div>
-                <?php endif; ?>
-
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button type="button" form="loginForm" id="loginSubmitBtn" class="okBtn">Login</button>
-        </div>
-    </div>
-</div>
-
 </body>
-
 </html>

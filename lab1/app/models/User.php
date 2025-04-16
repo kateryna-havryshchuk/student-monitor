@@ -7,13 +7,14 @@ class User
     
     public function __construct()
     {
-        $this->db = new Database();
+        $database = new Database();
+        $this->db = $database->pdo;
     }
     
     public function findByEmail($email)
     {
         try {
-            $stmt = $this->db->pdo->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
+            $stmt = $this->db->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
             $stmt->bindParam(':email', $email, PDO::PARAM_STR);
             $stmt->execute();
             
@@ -27,7 +28,7 @@ class User
     public function create($userData)
     {
         try {
-            $stmt = $this->db->pdo->prepare(
+            $stmt = $this->db->prepare(
                 "INSERT INTO users (firstname, lastname, email, password) 
                  VALUES (:firstname, :lastname, :email, :password)"
             );
@@ -47,7 +48,7 @@ class User
     public function findById($id)
     {
         try {
-            $stmt = $this->db->pdo->prepare("SELECT * FROM users WHERE id = :id LIMIT 1");
+            $stmt = $this->db->prepare("SELECT * FROM users WHERE id = :id LIMIT 1");
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
             
@@ -57,4 +58,5 @@ class User
             return false;
         }
     }
+    
 }

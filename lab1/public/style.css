@@ -10,7 +10,6 @@ body {
     color: #333;
 }
 
-
 /* HEADER */
 header {
     background-color: #696969;
@@ -27,13 +26,7 @@ header {
     box-shadow: 0 2px 5px #0000001a;
 }
 
-
-/* header h4 {
-    font-size: 20px;
-    font-weight: normal;
-} */
-
-/*LOGOTYPE*/
+/* LOGOTYPE */
 .logo {
     margin-left: 1%;
     display: flex;
@@ -55,13 +48,11 @@ header {
 }
 
 .logo .cms-link:hover {
-    background-color: #ffffff33;
     background-color: #5f5c5c;
     border-color: #3d8140;
     transform: scale(1.2);
     animation: snakeBorderAnim 4s linear infinite;
 }
-
 
 /* NAVIGATION BAR */
 .navbar {
@@ -87,7 +78,6 @@ header {
 
 .navbar li {
     margin-bottom: 10px;
-   
 }
 
 .navbar a {
@@ -108,8 +98,7 @@ header {
     transform: scale(1.05);
 }
 
-
-/* MAIN CONTENT AND TABLE OPTIONS*/
+/* MAIN CONTENT AND TABLE OPTIONS */
 main {
     margin-left: 140px;
     margin-top: 76px;
@@ -167,7 +156,7 @@ main {
     font-size: 16px;
 }
 
-.fa-xmark{
+.fa-xmark {
     margin-top: 2%;
     color: #bd5467;
     font-size: 18px;
@@ -194,7 +183,6 @@ main {
     transform: scale(1.1);
 }
 
-
 /* TABLE */
 .table-container {
     overflow: auto;
@@ -219,9 +207,8 @@ table {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
-  }
+}
 
-  
 th,
 td {
     border: 1px solid #dedede;
@@ -244,7 +231,6 @@ thead {
     }
 }
 
-
 input[type="checkbox"] {
     appearance: none;
     width: 17px;
@@ -254,14 +240,14 @@ input[type="checkbox"] {
     border-radius: 4px;
     margin-left: 38%;
     cursor: pointer;
-  }
+}
 
-  input[type="checkbox"]:checked {
+input[type="checkbox"]:checked {
     background-color: #71c985;
     border-color: #4e8a60;
-  }
+}
 
-  input[type="checkbox"]::before {
+input[type="checkbox"]::before {
     content: '✔';
     color: #ffffff;
     font-size: 14px;
@@ -271,14 +257,13 @@ input[type="checkbox"] {
     width: 100%;
     height: 100%;
     visibility: hidden;
-  }
+}
 
-  input[type="checkbox"]:checked::before {
+input[type="checkbox"]:checked::before {
     visibility: visible;
-  }
+}
 
-
-/* DROPDOWN MENU AND NOTIFICATION*/
+/* DROPDOWN MENU AND NOTIFICATION */
 .username {
     margin: 0;
     color: #ffffff;
@@ -288,6 +273,7 @@ input[type="checkbox"] {
 
 .dropdown-container {
     display: flex;
+    align-items: center;
 }
 
 .dropdown-container button {
@@ -313,7 +299,7 @@ input[type="checkbox"] {
 .notify-content {
     display: none;
     border-radius: 15px;
-    background-color:#f2f2f2;
+    background-color: #f2f2f2;
     position: absolute;
     min-width: 130px;
     box-shadow: 2px 2px 5px #0003;
@@ -331,14 +317,14 @@ input[type="checkbox"] {
 
 .notify-dropdown:hover button,
 .user-dropdown:hover button {
-    background-color:#ffffff33;
+    background-color: #ffffff33;
     transform: scale(1.05);
 }
 
 .notify-dropdown a:hover,
 .user-dropdown a:hover {
     border-radius: 15px;
-    background-color:#e6e6e6;
+    background-color: #e6e6e6;
 }
 
 .notify-dropdown button {
@@ -360,13 +346,14 @@ input[type="checkbox"] {
     height: 10px;
     background: #ff0000;
     color: #ffffff;
-    display: none;
+    display: none; /* Приховано за замовчуванням */
     justify-content: center;
     align-items: center;
     border-radius: 50%;
 }
 
-.icon-button-badge.show {
+/* Показуємо бейдж при наведенні */
+.notify-dropdown:hover .icon-button-badge {
     display: flex;
     animation-name: fade;
     animation-iteration-count: infinite;
@@ -384,38 +371,29 @@ input[type="checkbox"] {
     border-radius: 20px;
 }
 
-
-/* ANIMATION BELL*/
-.icon-button-badge {
-    animation-name: fade;
-    animation-iteration-count: infinite;
-    animation-duration: 1.5s;
-}
-
+/* ANIMATION BELL */
 .bell-ringing {
     animation: bellRing 0.5s ease-in-out;
 }
 
+/* Запускаємо анітацію дзвіночка при наведенні */
+.notify-dropdown:hover .bell-ringing {
+    animation: bellRing 0.5s ease-in-out;
+}
 
 @keyframes bellRing {
-
-    0%,
-    100% {
+    0%, 100% {
         transform: rotate(0);
     }
-
     20% {
         transform: rotate(15deg);
     }
-
     40% {
         transform: rotate(-15deg);
     }
-
     60% {
         transform: rotate(7deg);
     }
-
     80% {
         transform: rotate(-7deg);
     }
@@ -425,16 +403,13 @@ input[type="checkbox"] {
     0% {
         opacity: 1;
     }
-
     50% {
         opacity: 0.5;
     }
-
     100% {
         opacity: 1;
     }
 }
-
 
 /* STATUS DOTS */
 .active-dot {
@@ -448,11 +423,10 @@ input[type="checkbox"] {
 .inactive-dot {
     height: 12px;
     width: 12px;
-    background-color: 	#9c9c9c;
+    background-color: #9c9c9c;
     border-radius: 50%;
     display: inline-block;
 }
-
 
 /* PAGINATION */
 .paging-nav {
@@ -482,22 +456,7 @@ input[type="checkbox"] {
     background-color: #d1d1d1;
 }
 
-
-/* ANIMATION */
-@keyframes fade {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0;
-    }
-}
-
-/* MODAL STYLES*/
-/*backgruond*/
+/* MODAL STYLES */
 .modal {
     display: none;
     position: fixed;
@@ -548,7 +507,6 @@ input[type="checkbox"] {
     transform: scale(1.2);
 }
 
-
 .modal-body {
     margin-bottom: 20px;
 }
@@ -596,16 +554,15 @@ input[type="checkbox"] {
     cursor: pointer;
 }
 
-
 .okBtn {
-    background-color: #e0e0e0;
+    background-color: #4CAF50;
     border-radius: 10px;
-    color: rgb(109, 110, 108);
+    color: #ffffff;
     border: none;
 }
 
 .okBtn:hover {
-    background-color: #95a39e;
+    background-color: #3d8140;
     transform: scale(1.07);
 }
 
@@ -645,9 +602,7 @@ input[type="checkbox"] {
     transform: scale(1.07);
 }
 
-
 /* RESPONSIVE DESIGN */
-
 .toggle,
 .toggle-label {
     display: none;
@@ -664,7 +619,7 @@ input[type="checkbox"] {
         width: 180px;
         transform: translateX(-180px);
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-        z-index: 1010; 
+        z-index: 1010;
         background-color: #f8f9fa;
         height: 100vh;
     }
@@ -756,13 +711,11 @@ input[type="checkbox"] {
         font-size: 14px;
     }
 
-
     .button-container {
         flex-direction: column;
         align-items: flex-end;
         gap: 10px;
     }
-
 
     .modal-content {
         margin: 15% auto;
@@ -779,7 +732,6 @@ input[type="checkbox"] {
         margin-bottom: 5px;
     }
 }
-
 
 @media screen and (max-width: 480px) {
     .dropdown-container {
@@ -815,5 +767,169 @@ input[type="checkbox"] {
 
     .fa-pencil, .fa-xmark {
         font-size: 14px;
+    }
+}
+
+/* Нові стилі для сторінки логіну */
+body.login {
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.modal.login-modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 30px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    position: relative;
+    transform: translateY(-20px);
+    animation: slideIn 0.3s ease-in-out forwards;
+}
+
+.modal-header h2 {
+    font-size: 24px;
+    color: #333;
+    margin: 0;
+}
+
+.form-group input {
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
+.form-group label {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.form-group p {
+    font-size: 14px;
+    color: #666;
+}
+
+.form-group p a {
+    color: #4CAF50;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.form-group p a:hover {
+    text-decoration: underline;
+}
+
+.error-message {
+    color: #bd5467;
+    font-size: 14px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.success-message {
+    color: #4CAF50;
+    font-size: 14px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.okBtn {
+    background-color: #4CAF50;
+    color: #ffffff;
+    font-size: 16px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    width: 100%;
+}
+
+.okBtn:hover {
+    background-color: #3d8140;
+    transform: scale(1.05);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); }
+    to { transform: translateY(0); }
+}
+
+/* Адаптивність для логіну */
+@media screen and (max-width: 480px) {
+    .modal-content {
+        width: 90%;
+        padding: 20px;
+    }
+
+    .modal-header h2 {
+        font-size: 20px;
+    }
+
+    .form-group input {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .okBtn {
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+}
+
+/* Стиль для кнопки логіну (схожий на CMS) */
+.login-btn {
+    color: #ffffff !important; /* Явно білий колір із пріоритетом */
+    font-size: 20px; /* Трохи менший розмір, ніж у CMS, щоб вписатися у хедер */
+    font-weight: bold; /* Грубший текст */
+    text-decoration: none;
+    letter-spacing: 1px;
+    padding: 8px 16px; /* Більші відступи для кнопки */
+    border-radius: 17px;
+    transition: all 0.3s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid transparent; /* Додаємо межу для ефекту при наведенні */
+}
+
+.login-btn:hover {
+    background-color: #5f5c5c;
+    border-color: #3d8140;
+    transform: scale(1.1); /* Трохи менше масштабування, ніж у CMS */
+}
+
+/* Адаптивність для кнопки логіну */
+@media screen and (max-width: 480px) {
+    .login-btn {
+        font-size: 16px;
+        padding: 6px 12px;
     }
 }
