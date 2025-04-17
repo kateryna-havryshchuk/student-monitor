@@ -37,11 +37,11 @@ class Router
                 return;
             case 'api':
                 error_log("Handling api");
-                if (!file_exists('api.php')) {
+                if (!file_exists('app/controllers/api.php')) {
                     error_log("api.php not found");
                     die("Error: api.php not found");
                 }
-                require_once 'api.php';
+                require_once 'app/controllers/api.php';
                 return;
         }
 

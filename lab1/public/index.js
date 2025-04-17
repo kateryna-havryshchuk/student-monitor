@@ -14,28 +14,24 @@ document.addEventListener("DOMContentLoaded", function() {
     const notificationBtn = document.querySelector('#notificationBtn');
     const notifyContent = document.querySelector('#notifyContent');
     const badge = document.querySelector('.icon-button-badge');
+    const notifyDropdown = document.querySelector('.notify-dropdown');
 
- // Перевірка, чи елементи існують (дзвіночок є лише для залогінених користувачів)
+    // Перевірка, чи елементи існують (дзвіночок є лише для залогінених користувачів)
     if (notificationBtn && notifyContent && notifyDropdown && badge) {
-    // Додаємо обробник події mouseover для першого наведення
-    notifyDropdown.addEventListener('mouseover', function() {
-        // Додаємо клас show до бейджа, щоб він залишався видимим
-        badge.classList.add('show');
-    }, { once: true }); // { once: true } забезпечує, що подія спрацює лише один раз
+        notifyDropdown.addEventListener('mouseover', function() {
+            badge.classList.add('show');
+        }, { once: true });
 
-    // Додаємо обробник кліку на кнопку дзвіночка
-    notificationBtn.addEventListener('click', function(e) {
-        e.preventDefault(); // Запобігаємо стандартній поведінці кнопки
-        // Перемикаємо видимість випадаючого меню
-        notifyContent.style.display = notifyContent.style.display === 'block' ? 'none' : 'block';
-    });
+        notificationBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            notifyContent.style.display = notifyContent.style.display === 'block' ? 'none' : 'block';
+        });
 
-    // Ховаємо випадаюче меню, якщо клік поза ним
-    document.addEventListener('click', function(e) {
-        if (!notificationBtn.contains(e.target) && !notifyContent.contains(e.target)) {
-            notifyContent.style.display = 'none';
-        }
-    });
+        document.addEventListener('click', function(e) {
+            if (!notificationBtn.contains(e.target) && !notifyContent.contains(e.target)) {
+                notifyContent.style.display = 'none';
+            }
+        });
     }
 
     // Show add modal when clicking the add button
@@ -89,8 +85,13 @@ document.addEventListener("DOMContentLoaded", function() {
         btn.addEventListener('click', function() {
             const studentId = this.getAttribute('data-id');
 
-            fetch(`${BASE_URL}index.php?url=api&action=getStudent&id=${studentId}`)
-                .then(response => response.json())
+            fetch(`/lab1/index.php?url=api&action=getStudent&id=${studentId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         const student = data.student;
@@ -104,12 +105,12 @@ document.addEventListener("DOMContentLoaded", function() {
                         modalTitle.textContent = "Edit student";
                         addModal.style.display = 'block';
                     } else {
-                        alert('Failed to fetch student data');
+                        alert('Failed to fetch student data: ' + (data.message || 'Unknown error'));
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error fetching student data');
+                    console.error('Error fetching student:', error);
+                    alert('Error fetching student data: ' + error.message);
                 });
         });
     });
@@ -133,30 +134,38 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Delete student function
     function deleteStudent(id) {
-        fetch(`${BASE_URL}index.php?url=api`, {
+        fetch('lab1/index.php?url=api', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'delete', id: id })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 location.reload();
             } else {
-                alert('Failed to delete student: ' + data.message);
+                alert('Failed to delete student: ' + (data.message || 'Unknown error'));
             }
             deleteModal.style.display = 'none';
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Error deleting student');
+            console.error('Error deleting student:', error);
+            alert('Error deleting student: ' + error.message);
             deleteModal.style.display = 'none';
         });
     }
 
     // Form submission (add/edit student)
     if (okBtn && studentForm) {
-        okBtn.addEventListener('click', function(e) {
+        okBtn.replaceWith(okBtn.cloneNode(true));
+        const freshOkBtn = document.getElementById('okBtn');
+
+        freshOkBtn.addEventListener('click', function(e) {
             e.preventDefault();
 
             if (!studentForm.checkValidity()) {
@@ -177,23 +186,33 @@ document.addEventListener("DOMContentLoaded", function() {
                 birthday: document.getElementById('birthday').value
             };
 
-            fetch(`${BASE_URL}index.php?url=api`, {
+            fetch('lab1/index.php?url=api', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Failed to save student: ' + data.message);
+            .then(response => {
+                console.log('Статус:', response.status);
+                console.log('Тип відповіді:', response.headers.get('content-type'));
+                return response.text();
+            })
+            .then(text => {
+                console.log('Сира відповідь:', text);
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        resetForm();
+                        location.reload();
+                    } else {
+                        alert('Не вдалося зберегти студента: ' + (data.message || 'Невідома помилка'));
+                    }
+                } catch (error) {
+                    alert('Помилка сервера: ' + text.substring(0, 200));
                 }
                 addModal.style.display = 'none';
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Error saving student');
+                alert('Помилка запиту: ' + error.message);
                 addModal.style.display = 'none';
             });
         });

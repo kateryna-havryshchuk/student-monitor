@@ -16,6 +16,7 @@ error_log("Loading login template: app/views/auth/login.php");
 </head>
 <body class="login">
     <div class="modal login-modal">
+        <a href="/lab1/index.php?url=student/index" class="home-btn">Home</a>
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Login</h2>

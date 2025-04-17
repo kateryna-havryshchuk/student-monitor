@@ -16,9 +16,10 @@ class Database
                 $this->password
             );
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            //echo "Підключення успішне!";
         } catch (PDOException $e) {
-            die("Помилка підключення до БД: " . $e->getMessage());
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Помилка підключення до БД: ' . $e->getMessage()]);
+            exit;
         }
     }
 }
