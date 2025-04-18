@@ -27,6 +27,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Students</title>
+    <link rel="icon" href="public/images/favicon-96x96.png" type="image/png">
     <link rel="stylesheet" href="/lab1/public/style.css">
     <script src="https://kit.fontawesome.com/d9209b8d96.js" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
@@ -48,14 +49,23 @@ try {
                             <i class="fa-regular fa-bell fa-xl bell-ringing" id="bellIcon"></i>
                             <span class="icon-button-badge show"></span>
                         </button>
-                        <div class="notify-content" id="notifyContent">
-                            <a href="#"><i class="fa-regular fa-user"></i> Victor: How are you?</a>
-                            <a href="#"><i class="fa-regular fa-user"></i> Jess: See you then!</a>
-                            <a href="#"><i class="fa-regular fa-user"></i> Max: What's up!</a>
+                        <div class="notify-content">
+                            <a href="/lab1/index.php?url=messages/index&show_messages=1">
+                                <i class="fa-regular fa-user"></i> 
+                                Victor: How are you?
+                            </a>
+                            <a href="/lab1/index.php?url=messages/index&show_messages=1">
+                                <i class="fa-regular fa-user"></i>
+                                Jess: See you then!
+                            </a>
+                            <a href="/lab1/index.php?url=messages/index&show_messages=1">
+                                <i class="fa-regular fa-user"></i>
+                                Max: What's up!
+                            </a>
                         </div>
                     </div>
 
-                    <div class="user-dropdown">
+                <div class="user-dropdown">
                     <button class="userBtn" id="userBtn">
                         <img id="profilePicture" class="profilePicture" src="/lab1/public/images/user-icon.jpg" alt="Profile picture">
                         <span class="username" id="username"><?= $username ?></span>
@@ -82,7 +92,11 @@ try {
                 <ul>
                     <li><a href="/lab1/index.php?url=dashboard/index">Dashboard</a></li>
                     <li><a href="/lab1/index.php?url=student/index" class="active">Students</a></li>
-                    <li><a href="/lab1/tasks.html">Tasks</a></li>
+                    <?php if ($loggedIn): ?>
+                            <li><a href="/lab1/index.php?url=tasks/index">Tasks</a></li>
+                    <?php else: ?>
+                            <li><a href="/lab1/index.php?url=auth/login">Tasks</a></li>
+                    <?php endif; ?>
                 </ul>
             </nav>
         </div>

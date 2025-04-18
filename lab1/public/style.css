@@ -380,7 +380,6 @@ input[type="checkbox"]:checked::before {
 .notify-dropdown:hover .bell-ringing {
     animation: bellRing 0.5s ease-in-out;
 }
-
 @keyframes bellRing {
     0%, 100% {
         transform: rotate(0);
