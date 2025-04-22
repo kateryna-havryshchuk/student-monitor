@@ -90,7 +90,11 @@ try {
             </label>
             <nav class="navbar">
                 <ul>
-                    <li><a href="/lab1/index.php?url=dashboard/index">Dashboard</a></li>
+                <?php if ($loggedIn): ?>
+                            <li><a href="/lab1/index.php?url=dashboard/index">Dashboard</a></li>
+                    <?php else: ?>
+                            <li><a href="/lab1/index.php?url=auth/login">Dashboard</a></li>
+                    <?php endif; ?>
                     <li><a href="/lab1/index.php?url=student/index" class="active">Students</a></li>
                     <?php if ($loggedIn): ?>
                             <li><a href="/lab1/index.php?url=tasks/index">Tasks</a></li>

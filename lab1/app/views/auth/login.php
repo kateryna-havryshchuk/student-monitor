@@ -29,7 +29,7 @@ error_log("Loading login template: app/views/auth/login.php");
                         <input type="email" id="email" name="email" required placeholder="Enter your email">
                     </div>
                     <div class="form-group">
-                        <label for="password">Password</label>
+                        <label for="password">Password</label> 
                         <input type="password" id="password" name="password" required placeholder="Enter your password">
                     </div>
                     <div class="form-group">

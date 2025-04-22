@@ -36,123 +36,15 @@ class StudentController
 
         switch ($action) {
             case 'getStudent':
-                $id = $_GET['id'] ?? '';
-                $student = $this->studentModel->getStudentById($id);
-                echo json_encode($student ? ['success' => true, 'student' => $student] : ['success' => false, 'message' => 'Student not found']);
+                $this->getStudent($_GET['id'] ?? '');
                 break;
 
             case 'add':
-                if (!isset($_SESSION['user'])) {
-                    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-                    break;
-                }
-
-                $group = htmlspecialchars(strip_tags(trim($data['group'] ?? '')));
-                $firstName = htmlspecialchars(strip_tags(trim($data['firstName'] ?? '')));
-                $lastName = htmlspecialchars(strip_tags(trim($data['lastName'] ?? '')));
-                $gender = htmlspecialchars(strip_tags(trim($data['gender'] ?? '')));
-                $birthday = htmlspecialchars(strip_tags(trim($data['birthday'] ?? '')));
-
-                $errors = [];
-
-                // Валідація
-                if (empty($group) || !in_array($group, ['PZ-21', 'PZ-22', 'PZ-23', 'PZ-24', 'PZ-25', 'PZ-26'])) {
-                    $errors[] = "Invalid group.";
-                }
-
-                if (empty($firstName) || strlen($firstName) < 2) {
-                    $errors[] = "First name must be at least 2 characters long.";
-                } elseif (!preg_match('/^[a-zA-Zа-яА-ЯёЁ]+$/u', $firstName)) {
-                    $errors[] = "First name can only contain letters.";
-                }
-
-                if (empty($lastName) || strlen($lastName) < 2) {
-                    $errors[] = "Last name must be at least 2 characters long.";
-                } elseif (!preg_match('/^[a-zA-Zа-яА-ЯёЁ]+$/u', $lastName)) {
-                    $errors[] = "Last name can only contain letters.";
-                }
-
-                if (empty($gender) || !in_array($gender, ['M', 'F'])) {
-                    $errors[] = "Invalid gender.";
-                }
-
-                if (empty($birthday)) {
-                    $errors[] = "Birthday is required.";
-                } else {
-                    $birthDate = new DateTime($birthday);
-                    $today = new DateTime();
-                    if ($birthDate > $today) {
-                        $errors[] = "Birthday cannot be in the future.";
-                    } elseif ($today->diff($birthDate)->y < 15) {
-                        $errors[] = "Student must be at least 15 years old.";
-                    }
-                }
-
-                if (empty($errors)) {
-                    $result = $this->studentModel->addStudent($group, $firstName, $lastName, $gender, $birthday);
-                    echo json_encode($result ? ['success' => true, 'message' => 'Student added successfully'] : ['success' => false, 'message' => 'Failed to add student']);
-                } else {
-                    echo json_encode(['success' => false, 'message' => implode("\n", $errors)]);
-                }
+                $this->addStudent($data);
                 break;
 
             case 'update':
-                if (!isset($_SESSION['user'])) {
-                    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-                    break;
-                }
-
-                $id = htmlspecialchars(strip_tags(trim($data['id'] ?? '')));
-                $group = htmlspecialchars(strip_tags(trim($data['group'] ?? '')));
-                $firstName = htmlspecialchars(strip_tags(trim($data['firstName'] ?? '')));
-                $lastName = htmlspecialchars(strip_tags(trim($data['lastName'] ?? '')));
-                $gender = htmlspecialchars(strip_tags(trim($data['gender'] ?? '')));
-                $birthday = htmlspecialchars(strip_tags(trim($data['birthday'] ?? '')));
-
-                $errors = [];
-
-                if (empty($id) || !is_numeric($id)) {
-                    $errors[] = "Invalid student ID.";
-                }
-
-                if (empty($group) || !in_array($group, ['PZ-21', 'PZ-22', 'PZ-23', 'PZ-24', 'PZ-25', 'PZ-26'])) {
-                    $errors[] = "Invalid group.";
-                }
-
-                if (empty($firstName) || strlen($firstName) < 2) {
-                    $errors[] = "First name must be at least 2 characters long.";
-                } elseif (!preg_match('/^[a-zA-Zа-яА-ЯёЁ]+$/u', $firstName)) {
-                    $errors[] = "First name can only contain letters.";
-                }
-
-                if (empty($lastName) || strlen($lastName) < 2) {
-                    $errors[] = "Last name must be at least 2 characters long.";
-                } elseif (!preg_match('/^[a-zA-Zа-яА-ЯёЁ]+$/u', $lastName)) {
-                    $errors[] = "Last name can only contain letters.";
-                }
-
-                if (empty($gender) || !in_array($gender, ['M', 'F'])) {
-                    $errors[] = "Invalid gender.";
-                }
-
-                if (empty($birthday)) {
-                    $errors[] = "Birthday is required.";
-                } else {
-                    $birthDate = new DateTime($birthday);
-                    $today = new DateTime();
-                    if ($birthDate > $today) {
-                        $errors[] = "Birthday cannot be in the future.";
-                    } elseif ($today->diff($birthDate)->y < 15) {
-                        $errors[] = "Student must be at least 15 years old.";
-                    }
-                }
-
-                if (empty($errors)) {
-                    $result = $this->studentModel->updateStudent($id, $group, $firstName, $lastName, $gender, $birthday);
-                    echo json_encode($result ? ['success' => true, 'message' => 'Student updated successfully'] : ['success' => false, 'message' => 'Failed to update student']);
-                } else {
-                    echo json_encode(['success' => false, 'message' => implode("\n", $errors)]);
-                }
+                $this->updateStudent($data);
                 break;
 
             case 'delete':
@@ -160,13 +52,7 @@ class StudentController
                     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
                     break;
                 }
-                $id = $data['id'] ?? '';
-                if (empty($id) || !is_numeric($id)) {
-                    echo json_encode(['success' => false, 'message' => 'Invalid student ID']);
-                    break;
-                }
-                $result = $this->studentModel->deleteStudent($id);
-                echo json_encode($result ? ['success' => true, 'message' => 'Student deleted successfully'] : ['success' => false, 'message' => 'Failed to delete student']);
+                $this->deleteStudent($data['id'] ?? '');
                 break;
 
             default:
@@ -175,7 +61,6 @@ class StudentController
         exit;
     }
 
-    // Методи для виклику з api.php
     public function getStudent($id)
     {
         $student = $this->studentModel->getStudentById($id);
@@ -184,116 +69,140 @@ class StudentController
 
     public function addStudent($data)
     {
-        $group = htmlspecialchars(strip_tags(trim($data['group'] ?? '')));
-        $firstName = htmlspecialchars(strip_tags(trim($data['firstName'] ?? '')));
-        $lastName = htmlspecialchars(strip_tags(trim($data['lastName'] ?? '')));
-        $gender = htmlspecialchars(strip_tags(trim($data['gender'] ?? '')));
-        $birthday = htmlspecialchars(strip_tags(trim($data['birthday'] ?? '')));
-
-        $errors = [];
-
-        if (empty($group) || !in_array($group, ['PZ-21', 'PZ-22', 'PZ-23', 'PZ-24', 'PZ-25', 'PZ-26'])) {
-            $errors[] = "Invalid group.";
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (!isset($_SESSION['user'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            return;
         }
 
-        if (empty($firstName) || strlen($firstName) < 2) {
-            $errors[] = "First name must be at least 2 characters long.";
-        } elseif (!preg_match('/^[a-zA-Zа-яА-ЯёЁ]+$/u', $firstName)) {
-            $errors[] = "First name can only contain letters.";
-        }
-
-        if (empty($lastName) || strlen($lastName) < 2) {
-            $errors[] = "Last name must be at least 2 characters long.";
-        } elseif (!preg_match('/^[a-zA-Zа-яА-ЯёЁ]+$/u', $lastName)) {
-            $errors[] = "Last name can only contain letters.";
-        }
-
-        if (empty($gender) || !in_array($gender, ['M', 'F'])) {
-            $errors[] = "Invalid gender.";
-        }
-
-        if (empty($birthday)) {
-            $errors[] = "Birthday is required.";
-        } else {
-            $birthDate = new DateTime($birthday);
-            $today = new DateTime();
-            if ($birthDate > $today) {
-                $errors[] = "Birthday cannot be in the future.";
-            } elseif ($today->diff($birthDate)->y < 15) {
-                $errors[] = "Student must be at least 15 years old.";
-            }
-        }
+        $validation = $this->validateStudentData($data);
+        $errors = $validation['errors'];
+        $cleanedData = $validation['cleanedData'];
 
         if (empty($errors)) {
-            $result = $this->studentModel->addStudent($group, $firstName, $lastName, $gender, $birthday);
+            $result = $this->studentModel->addStudent(
+                $cleanedData['group'],
+                $cleanedData['firstName'],
+                $cleanedData['lastName'],
+                $cleanedData['gender'],
+                $cleanedData['birthday']
+            );
             echo json_encode($result ? ['success' => true, 'message' => 'Student added successfully'] : ['success' => false, 'message' => 'Failed to add student']);
         } else {
-            echo json_encode(['success' => false, 'message' => implode("\n", $errors)]);
+            echo json_encode(['success' => false, 'errors' => $errors]);
         }
     }
 
     public function updateStudent($data)
     {
-        $id = htmlspecialchars(strip_tags(trim($data['id'] ?? '')));
-        $group = htmlspecialchars(strip_tags(trim($data['group'] ?? '')));
-        $firstName = htmlspecialchars(strip_tags(trim($data['firstName'] ?? '')));
-        $lastName = htmlspecialchars(strip_tags(trim($data['lastName'] ?? '')));
-        $gender = htmlspecialchars(strip_tags(trim($data['gender'] ?? '')));
-        $birthday = htmlspecialchars(strip_tags(trim($data['birthday'] ?? '')));
-
-        $errors = [];
-
-        if (empty($id) || !is_numeric($id)) {
-            $errors[] = "Invalid student ID.";
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (!isset($_SESSION['user'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            return;
         }
 
-        if (empty($group) || !in_array($group, ['PZ-21', 'PZ-22', 'PZ-23', 'PZ-24', 'PZ-25', 'PZ-26'])) {
-            $errors[] = "Invalid group.";
-        }
-
-        if (empty($firstName) || strlen($firstName) < 2) {
-            $errors[] = "First name must be at least 2 characters long.";
-        } elseif (!preg_match('/^[a-zA-Zа-яА-ЯёЁ]+$/u', $firstName)) {
-            $errors[] = "First name can only contain letters.";
-        }
-
-        if (empty($lastName) || strlen($lastName) < 2) {
-            $errors[] = "Last name must be at least 2 characters long.";
-        } elseif (!preg_match('/^[a-zA-Zа-яА-ЯёЁ]+$/u', $lastName)) {
-            $errors[] = "Last name can only contain letters.";
-        }
-
-        if (empty($gender) || !in_array($gender, ['M', 'F'])) {
-            $errors[] = "Invalid gender.";
-        }
-
-        if (empty($birthday)) {
-            $errors[] = "Birthday is required.";
-        } else {
-            $birthDate = new DateTime($birthday);
-            $today = new DateTime();
-            if ($birthDate > $today) {
-                $errors[] = "Birthday cannot be in the future.";
-            } elseif ($today->diff($birthDate)->y < 15) {
-                $errors[] = "Student must be at least 15 years old.";
-            }
-        }
+        $validation = $this->validateStudentData($data, true);
+        $errors = $validation['errors'];
+        $cleanedData = $validation['cleanedData'];
 
         if (empty($errors)) {
-            $result = $this->studentModel->updateStudent($id, $group, $firstName, $lastName, $gender, $birthday);
+            $result = $this->studentModel->updateStudent(
+                $cleanedData['id'],
+                $cleanedData['group'],
+                $cleanedData['firstName'],
+                $cleanedData['lastName'],
+                $cleanedData['gender'],
+                $cleanedData['birthday']
+            );
             echo json_encode($result ? ['success' => true, 'message' => 'Student updated successfully'] : ['success' => false, 'message' => 'Failed to update student']);
         } else {
-            echo json_encode(['success' => false, 'message' => implode("\n", $errors)]);
+            echo json_encode(['success' => false, 'errors' => $errors]);
         }
     }
 
     public function deleteStudent($id)
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (!isset($_SESSION['user'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            return;
+        }
+
         if (empty($id) || !is_numeric($id)) {
             echo json_encode(['success' => false, 'message' => 'Invalid student ID']);
             return;
         }
         $result = $this->studentModel->deleteStudent($id);
         echo json_encode($result ? ['success' => true, 'message' => 'Student deleted successfully'] : ['success' => false, 'message' => 'Failed to delete student']);
+    }
+
+    private function validateStudentData($data, $isUpdate = false)
+    {
+        $group = htmlspecialchars(strip_tags(trim($data['group'] ?? '')));
+        $firstName = htmlspecialchars(strip_tags(trim($data['firstName'] ?? '')));
+        $lastName = htmlspecialchars(strip_tags(trim($data['lastName'] ?? '')));
+        $gender = htmlspecialchars(strip_tags(trim($data['gender'] ?? '')));
+        $birthday = htmlspecialchars(strip_tags(trim($data['birthday'] ?? '')));
+        $id = isset($data['id']) ? htmlspecialchars(strip_tags(trim($data['id'] ?? ''))) : null;
+
+        $errors = [];
+
+        if ($isUpdate && (empty($id) || !is_numeric($id))) {
+            $errors['id'] = "Invalid student ID.";
+        }
+
+        if (empty($group) || !in_array($group, ['PZ-21', 'PZ-22', 'PZ-23', 'PZ-24', 'PZ-25', 'PZ-26'])) {
+            $errors['group'] = "Invalid group. Please select a valid group.";
+        }
+
+        if (empty($firstName) || strlen($firstName) < 2) {
+            $errors['firstName'] = "First name must be at least 2 characters long.";
+        } elseif (!preg_match('/^[a-zA-Zа-щА-ЩьЬюЮяЯіІїЇєЄґҐ]+(-[a-zA-Zа-щА-ЩьЬюЮяЯіІїЇєЄґҐ]+)?$/u', $firstName)) {
+            $errors['firstName'] = "First name can only contain letters.";
+        }
+
+        if (empty($lastName) || strlen($lastName) < 2) {
+            $errors['lastName'] = "Last name must be at least 2 characters long.";
+        } elseif (!preg_match('/^[a-zA-Zа-щА-ЩьЬюЮяЯіІїЇєЄґҐ]+(-[a-zA-Zа-щА-ЩьЬюЮяЯіІїЇєЄґҐ]+)?$/u', $lastName)) {
+            $errors['lastName'] = "Last name can only contain letters.";
+        }
+
+        if (empty($gender) || !in_array($gender, ['M', 'F'])) {
+            $errors['gender'] = "Please select a valid gender.";
+        }
+
+        if (empty($birthday)) {
+            $errors['birthday'] = "Birthday is required.";
+        } else {
+            try {
+                $birthDate = new DateTime($birthday);
+                $today = new DateTime();
+                if ($birthDate > $today) {
+                    $errors['birthday'] = "Birthday cannot be in the future.";
+                } elseif ($today->diff($birthDate)->y < 15) {
+                    $errors['birthday'] = "Student must be at least 15 years old.";
+                }
+            } catch (Exception $e) {
+                $errors['birthday'] = "Invalid birthday format.";
+            }
+        }
+
+        return [
+            'errors' => $errors,
+            'cleanedData' => [
+                'id' => $id,
+                'group' => $group,
+                'firstName' => $firstName,
+                'lastName' => $lastName,
+                'gender' => $gender,
+                'birthday' => $birthday
+            ]
+        ];
     }
 }

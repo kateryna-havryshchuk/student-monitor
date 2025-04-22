@@ -784,9 +784,7 @@ body.login {
     justify-content: center;
     align-items: center;
     background: linear-gradient(135deg, #e0e0e0, #f8f9fa);
-    padding-top: 0;
-    padding-bottom: 100px;
-    position: relative;
+    padding-top: 20px;
     overflow: hidden;
     animation: fadeIn 0.1s ease-in-out;
 }
@@ -818,7 +816,7 @@ body.login {
     transform-origin: center top;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     z-index: 2;
-    animation: moveEnvelope 1.0s cubic-bezier(1, 1, 1, 1) forwards;
+    animation: moveEnvelope 1.0s cubic-bezier(1, 1, 0.9, 0.9) forwards;
     will-change: clip-path, transform;
     backface-visibility: hidden;
 }
@@ -826,19 +824,24 @@ body.login {
 @keyframes moveEnvelope {
     /* Початок - повний прямокутник */
     0% {
-        clip-path: polygon(0 0, 100% 0, 100% 100%);
-        transform: translateX(0);
+        clip-path: polygon(0 0, 100% 0, 50% 100%);
+        transform: translateX(-3%);
     }
-    
+
+    10% {
+        clip-path: polygon(0 0, 100% 0, 50% 100%);
+        transform: translateX(-5%);
+    }
+
     /* Формування трикутника */
     20% {
         clip-path: polygon(0 0, 100% 0, 50% 100%);
-        transform: translateX(0);
+        transform: translateX(-10%);
     }
     
     30% {
         clip-path: polygon(0 0, 100% 0, 50% 100%);
-        transform: translateX(-10%);
+        transform: translateX(-15%);
     }
     
     /* Плавний рух трикутника вліво */
