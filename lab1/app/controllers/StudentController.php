@@ -157,7 +157,9 @@ class StudentController
             $errors['id'] = "Invalid student ID.";
         }
 
-        if (empty($group) || !in_array($group, ['PZ-21', 'PZ-22', 'PZ-23', 'PZ-24', 'PZ-25', 'PZ-26'])) {
+        if (empty($group) && array_filter($data) === []) {
+        }
+        else if (empty($group) || !in_array($group, ['PZ-21', 'PZ-22', 'PZ-23', 'PZ-24', 'PZ-25', 'PZ-26'])) {
             $errors['group'] = "Invalid group. Please select a valid group.";
         }
 

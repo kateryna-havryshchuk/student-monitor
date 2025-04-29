@@ -192,10 +192,92 @@ main {
     border-radius: 5px;
 }
 
+/* Fixed Table Layout CSS */
+/* Add this to your style.css file */
+
+/* Force fixed table layout */
 table {
     width: 100%;
+    table-layout: fixed; /* This is the key - forces fixed width columns */
     border-collapse: collapse;
-}
+  }
+  
+  /* Define specific widths for each column */
+  #studentsTable th:nth-child(1), 
+  #studentsTable td:nth-child(1) {
+    width: 5%; /* Checkbox column */
+  }
+  
+  #studentsTable th:nth-child(2), 
+  #studentsTable td:nth-child(2) {
+    width: 10%; /* Group column */
+  }
+  
+  #studentsTable th:nth-child(3), 
+  #studentsTable td:nth-child(3) {
+    width: 25%; /* Name column - wider to accommodate longer names */
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  #studentsTable th:nth-child(4), 
+  #studentsTable td:nth-child(4) {
+    width: 10%; /* Gender column */
+  }
+  
+  #studentsTable th:nth-child(5), 
+  #studentsTable td:nth-child(5) {
+    width: 15%; /* Birthday column */
+  }
+  
+  #studentsTable th:nth-child(6), 
+  #studentsTable td:nth-child(6) {
+    width: 10%; /* Status column */
+  }
+  
+  #studentsTable th:nth-child(7), 
+  #studentsTable td:nth-child(7) {
+    width: 15%; /* Options column */
+  }
+  
+  /* Ensure cell content is consistent */
+  #studentsTable td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Ensure all rows have the same height regardless of content */
+  .tableRow {
+    height: 60px; /* Match your existing row height */
+  }
+  
+  /* Fix dot alignment in status column for consistency */
+  .inactive-dot, .active-dot {
+    display: block;
+    margin: 5 auto; /* Center the dot */
+    height: 12px;
+    width: 12px;
+  }
+  
+  /* Ensure equal button spacing in options column */
+  td:last-child {
+    text-align: left;
+  }
+  
+  /* Make sure row hover highlights the entire row evenly */
+  .tableRow:hover {
+    background-color: #f5f5f5;
+  }
+  
+  /* If needed for extreme cases, truncate really long names with ellipsis */
+  .truncate-text {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+  }
 
 .visually-hidden {
     position: absolute;
@@ -215,6 +297,7 @@ td {
     text-align: left;
     padding: 12px;
     white-space: nowrap;
+    height: 60px; /* Increased row height for better spacing */
 }
 
 thead {
@@ -227,7 +310,7 @@ thead {
 
 @media screen and (min-height: 415px) {
     .table-container {
-        max-height: 415px;
+        max-height: 600px; /* Increased from 415px to 600px to make the table taller */
     }
 }
 
@@ -429,30 +512,57 @@ input[type="checkbox"]:checked::before {
 
 /* PAGINATION */
 .paging-nav {
-    overflow: hidden;
     display: flex;
     justify-content: center;
+    align-items: center;
+    gap: 5px;
     margin-top: 20px;
-    margin-bottom: 42px;
+    margin-bottom: 18px;
+    padding: 10px 10px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 5px 5px #0000001a;
     position: fixed;
-    bottom: 0;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
 }
 
-.paging-nav a {
-    margin: 0 5px;
-    padding: 5px 10px;
-    border: 1px solid #dedede;
-    border-radius: 5px;
+.page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 10px;
     text-decoration: none;
-    color: #333333;
+    color: #333;
+    font-weight: 500;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
-.paging-nav a:hover,
+.page-link:hover,
+.page-link:focus {
+    background-color: #e6e6e6;
+    transform: scale(1.05);
+    color: #4CAF50;
+}
+
 .selected-page {
-    background-color: #d1d1d1;
+    background-color: #4CAF50;
+    color: #ffffff !important;
+    border-color: #3d8140;
+    pointer-events: none;
+}
+
+.disabled {
+    color: #9c9c9c;
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
 /* MODAL STYLES */
@@ -473,7 +583,7 @@ input[type="checkbox"]:checked::before {
     padding: 20px;
     border-radius: 5px;
     margin-bottom: auto;
-    margin-top: 100px;
+    margin-top: 80px;
     width: 500px;
     max-width: 80%;
     box-shadow: 0 5px 15px #0000004d;
@@ -673,14 +783,16 @@ input[type="checkbox"]:checked::before {
     }
 
     .paging-nav {
-        width: 100%;
-        padding: 0 10px;
-        z-index: 990;
+        width: 90%;
+        padding: 5px;
+        flex-wrap: wrap;
+        bottom: 10px;
     }
 
-    .paging-nav a {
-        padding: 3px 8px;
-        margin: 0 2px;
+    .page-link {
+        min-width: 30px;
+        height: 30px;
+        font-size: 14px;
     }
 
     .user-dropdown h4 {
@@ -708,6 +820,7 @@ input[type="checkbox"]:checked::before {
     th, td {
         padding: 8px;
         font-size: 14px;
+        height: 50px; /* Adjusted for smaller screens */
     }
 
     .button-container {
@@ -751,7 +864,7 @@ input[type="checkbox"]:checked::before {
         font-size: 14px;
     }
 
-    input[type="checkbox"] {
+    .input[type="checkbox"] {
         margin-left: 0;
     }
 
@@ -766,6 +879,21 @@ input[type="checkbox"]:checked::before {
 
     .fa-pencil, .fa-xmark {
         font-size: 14px;
+    }
+
+    .paging-nav {
+        flex-direction: column;
+        gap: 5px;
+        padding: 5px;
+    }
+
+    .page-link {
+        width: 100%;
+        margin: 2px 0;
+    }
+
+    th, td {
+        height: 40px; /* Further adjusted for very small screens */
     }
 }
 
@@ -811,8 +939,6 @@ body.login {
     width: 100%;
     height: 100%;
     background: linear-gradient(135deg, #4CAF50, #3d8140); /* Градієнт для клапана */
-    /* Початково повний прямокутник */
-    /* clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);  */
     transform-origin: center top;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     z-index: 2;
@@ -822,83 +948,69 @@ body.login {
 }
 
 @keyframes moveEnvelope {
-    /* Початок - повний прямокутник */
     0% {
         clip-path: polygon(0 0, 100% 0, 50% 100%);
         transform: translateX(-3%);
     }
-
     10% {
         clip-path: polygon(0 0, 100% 0, 50% 100%);
         transform: translateX(-5%);
     }
-
-    /* Формування трикутника */
     20% {
         clip-path: polygon(0 0, 100% 0, 50% 100%);
         transform: translateX(-10%);
     }
-    
     30% {
         clip-path: polygon(0 0, 100% 0, 50% 100%);
         transform: translateX(-15%);
     }
-    
-    /* Плавний рух трикутника вліво */
     40% {
         clip-path: polygon(0 0, 100% 0, 50% 100%);
         transform: translateX(-20%);
     }
-    
     50% {
         clip-path: polygon(0 0, 100% 0, 50% 100%);
         transform: translateX(-30%);
     }
-
     60% {
         clip-path: polygon(0 0, 100% 0, 50% 100%);
         transform: translateX(-40%);
     }
-    
     70% {
         clip-path: polygon(0 0, 100% 0, 50% 100%);
         transform: translateX(-50%);
     }
-
     80% {
         clip-path: polygon(0 0, 100% 0, 50% 100%);
         transform: translateX(-60%);
     }
-    
     90% {
         clip-path: polygon(0 0, 100% 0, 50% 100%);
         transform: translateX(-70%);
     }
-
-    /* Фінальна позиція - зліва від форми, але в межах екрана */
     100% {
         clip-path: polygon(0 0, 100% 0, 50% 100%);
         transform: translateX(-75%);
     }
 }
+
 .modal-content {
     background-color: #ffffff;
     border-radius: 15px;
     padding: 30px;
     width: 400px;
     max-width: 90%;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.05); /* Сучасна тінь */
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.05);
     position: relative;
     transform: translateY(20px);
-    animation: slideIn 0.25s linear forwards; /* Лінійна анімація для плавності */
-    /* animation-delay: 0.5s; Затримка для синхронізації з анімацією конверта */
-    opacity: 0; /* Початково невидимий */
-    z-index: 3; /* Поверх конверта */
-    backdrop-filter: blur(5px); /* Легкий ефект розмиття */
-    background: rgba(255, 255, 255, 0.95); /* Напівпрозорий білий */
-    will-change: transform, opacity; /* Оптимізація для плавності анімації */
-    backface-visibility: hidden; /* Додаткова оптимізація рендерингу */
-    perspective: 1000px; /* Покращення рендерингу 3D-трансформацій */
+    animation: slideIn 0.25s linear forwards;
+    opacity: 0;
+    z-index: 3;
+    backdrop-filter: blur(5px);
+    background: rgba(255, 255, 255, 0.95);
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    perspective: 1000px;
 }
 
 .modal-header h2 {
@@ -947,9 +1059,10 @@ body.login {
 
 .error-message {
     color: #bd5467;
-    font-size: 14px;
-    margin-top: 10px;
-    text-align: center;
+    font-size: 13px;
+    margin-top: 2px;
+    margin-bottom: -8px;
+    text-align: left;
 }
 
 .success-message {
@@ -957,6 +1070,12 @@ body.login {
     font-size: 14px;
     margin-top: 10px;
     text-align: center;
+}
+
+.error-input {
+    border: 1px solid #bd5467 !important;
+    background-color: #fff0f0;
+    transition: all 0.3s ease;
 }
 
 .okBtn {
@@ -1023,7 +1142,7 @@ body.login {
     justify-content: center;
     cursor: pointer;
     border: 1px solid transparent;
-    z-index: 4; /* Щоб кнопка була поверх анімації */
+    z-index: 4;
 }
 
 .home-btn:hover {

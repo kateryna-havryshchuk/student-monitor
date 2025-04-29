@@ -9,13 +9,31 @@ try {
     $database = new Database();
     $conn = $database->pdo;
 
-    $query = "SELECT id, student_group, firstname, lastname, gender, birthday FROM students";
+    // Pagination settings
+    $recordsPerPage = 6;
+    $currentPage = isset($_GET['page']) && is_numeric($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+    $offset = ($currentPage - 1) * $recordsPerPage;
+
+    // Total records count
+    $countQuery = "SELECT COUNT(*) FROM students";
+    $countStmt = $conn->prepare($countQuery);
+    $countStmt->execute();
+    $totalRecords = $countStmt->fetchColumn();
+    $totalPages = ceil($totalRecords / $recordsPerPage);
+
+    // Fetch paginated records
+    $query = "SELECT id, student_group, firstname, lastname, gender, birthday FROM students LIMIT :limit OFFSET :offset";
     $stmt = $conn->prepare($query);
+    $stmt->bindValue(':limit', $recordsPerPage, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
     $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $loggedIn = isset($_SESSION['user']);
     $username = $loggedIn ? htmlspecialchars($_SESSION['user']['firstname'] . ' ' . $_SESSION['user']['lastname']) : null;
+
+    // Explicitly check if on the last page
+    $isLastPage = ($currentPage >= $totalPages);
 } catch (PDOException $e) {
     $error = "Database error: " . $e->getMessage();
 }
@@ -43,27 +61,24 @@ try {
             </div>
         </div>
         <div class="dropdown-container">
-                <?php if ($loggedIn): ?>
-                    <div class="notify-dropdown">
-                        <button class="notificationBtn" id="notificationBtn" aria-label="notificationBtn">
-                            <i class="fa-regular fa-bell fa-xl bell-ringing" id="bellIcon"></i>
-                            <span class="icon-button-badge show"></span>
-                        </button>
-                        <div class="notify-content">
-                            <a href="/lab1/index.php?url=messages/index&show_messages=1">
-                                <i class="fa-regular fa-user"></i> 
-                                Victor: How are you?
-                            </a>
-                            <a href="/lab1/index.php?url=messages/index&show_messages=1">
-                                <i class="fa-regular fa-user"></i>
-                                Jess: See you then!
-                            </a>
-                            <a href="/lab1/index.php?url=messages/index&show_messages=1">
-                                <i class="fa-regular fa-user"></i>
-                                Max: What's up!
-                            </a>
-                        </div>
+            <?php if ($loggedIn): ?>
+                <div class="notify-dropdown">
+                    <button class="notificationBtn" id="notificationBtn" aria-label="notificationBtn">
+                        <i class="fa-regular fa-bell fa-xl bell-ringing" id="bellIcon"></i>
+                        <span class="icon-button-badge show"></span>
+                    </button>
+                    <div class="notify-content">
+                        <a href="/lab1/index.php?url=messages/index&show_messages=1">
+                            <i class="fa-regular fa-user"></i> Victor: How are you?
+                        </a>
+                        <a href="/lab1/index.php?url=messages/index&show_messages=1">
+                            <i class="fa-regular fa-user"></i> Jess: See you then!
+                        </a>
+                        <a href="/lab1/index.php?url=messages/index&show_messages=1">
+                            <i class="fa-regular fa-user"></i> Max: What's up!
+                        </a>
                     </div>
+                </div>
 
                 <div class="user-dropdown">
                     <button class="userBtn" id="userBtn">
@@ -172,6 +187,20 @@ try {
                 </tbody>
             </table>
         </div>
+
+        <?php if ($totalPages > 1): ?>
+            <div class="paging-nav">
+                <a href="?page=<?= max(1, $currentPage - 1) ?>" class="page-link <?= $currentPage <= 1 ? 'disabled' : '' ?>">
+                    <i class="fa-solid fa-angle-left"></i>
+                </a>
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <a href="?page=<?= $i ?>" class="page-link <?= $i === $currentPage ? 'selected-page' : '' ?>"><?= $i ?></a>
+                <?php endfor; ?>
+                <a href="?page=<?= min($totalPages, $currentPage + 1) ?>" class="page-link <?= $isLastPage ? 'disabled' : '' ?>">
+                    <i class="fa-solid fa-angle-right"></i>
+                </a>
+            </div>
+        <?php endif; ?>
     </main>
 </div>
 
@@ -187,8 +216,8 @@ try {
                 <input type="hidden" id="studentId" name="id">
                 <div class="form-group">
                     <label for="group">Group</label>
-                    <select id="group" name="group" required>
-                        <option value="">Select Group</option>
+                    <select id="group" name="group" style="border-radius: 8px;">
+                        <option style="color: grey;" value="">Select Group</option>
                         <option value="PZ-21">PZ-21</option>
                         <option value="PZ-22">PZ-22</option>
                         <option value="PZ-23">PZ-23</option>
@@ -196,26 +225,31 @@ try {
                         <option value="PZ-25">PZ-25</option>
                         <option value="PZ-26">PZ-26</option>
                     </select>
+                    <span id="group-error" class="error-message" style="display: none;"></span>
                 </div>
                 <div class="form-group">
                     <label for="firstName">First name</label>
-                    <input type="text" id="firstName" name="firstName" required>
+                    <input type="text" id="firstName" name="firstName" required placeholder="Enter student's first name" style="height: 37px;">
+                    <span id="firstName-error" class="error-message" style="display: none;"></span>
                 </div>
                 <div class="form-group">
                     <label for="lastName">Last name</label>
-                    <input type="text" id="lastName" name="lastName" required>
+                    <input type="text" id="lastName" name="lastName" required placeholder="Enter student's last name" style="height: 37px;">
+                    <span id="lastName-error" class="error-message" style="display: none;"></span>
                 </div>
                 <div class="form-group">
                     <label for="gender">Gender</label>
-                    <select id="gender" name="gender" required>
+                    <select id="gender" name="gender" style="border-radius: 8px;">
                         <option value="">Select Gender</option>
                         <option value="M">M</option>
                         <option value="F">F</option>
                     </select>
+                    <span id="gender-error" class="error-message" style="display: none;"></span>
                 </div>
                 <div class="form-group">
                     <label for="birthday">Birthday</label>
-                    <input type="date" id="birthday" name="birthday" required>
+                    <input type="date" id="birthday" name="birthday" style="height: 37px;">
+                    <span id="birthday-error" class="error-message" style="display: none;"></span>
                 </div>
             </form>
         </div>
