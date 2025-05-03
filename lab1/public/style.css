@@ -303,6 +303,11 @@ table {
     display: block;
   }
 
+  /* CSS to visually capitalize first letters in name input fields */
+#firstName, #lastName, #firstname, #lastname {
+    text-transform: capitalize;
+}
+
 .visually-hidden {
     position: absolute;
     width: 1px;

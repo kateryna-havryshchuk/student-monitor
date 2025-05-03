@@ -4,8 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $loggedIn = isset($_SESSION['user']);
-$username = $loggedIn ? htmlspecialchars($_SESSION['user']['firstname'] . ' ' . $_SESSION['user']['lastname']) : null;
-
+$username = $loggedIn ? ucfirst(strtolower($_SESSION['user']['firstname'])) . ' ' . ucfirst(strtolower($_SESSION['user']['lastname'])) : null;
 ?>
 
 <!DOCTYPE html>
@@ -89,7 +88,7 @@ $username = $loggedIn ? htmlspecialchars($_SESSION['user']['firstname'] . ' ' . 
 
             <h1 class="main-heading1">
                 Welcome to the Dashboard,
-                <?php echo isset($_SESSION['user']['firstname']) ? htmlspecialchars($_SESSION['user']['firstname']) : 'Guest'; ?>!
+                <?php echo isset($_SESSION['user']['firstname']) ? ucfirst(strtolower(htmlspecialchars($_SESSION['user']['firstname']))) : 'Guest'; ?>!
             </h1>
 
         </main>

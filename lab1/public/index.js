@@ -23,6 +23,80 @@ document.addEventListener("DOMContentLoaded", function () {
     const studentsTable = document.getElementById('studentsTable');
     const pagingNav = document.querySelector('.paging-nav');
 
+    const cmsLogo = document.getElementById('cms-logo');
+    if (cmsLogo) {
+        cmsLogo.addEventListener('click', function () {
+            window.location.href = '/lab1/index.php?url=home/index';
+        });
+    }
+    
+    // Auto-capitalize first letter in name fields
+    document.addEventListener("DOMContentLoaded", function () {
+        // Function to capitalize the first letter
+        function capitalizeFirstLetter(input) {
+            // Skip if input is empty
+            if (!input.value) return;
+
+            // Capitalize the first letter of each word
+            input.value = input.value
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+
+        // Function to handle input events
+        function handleInputEvent(e) {
+            const input = e.target;
+
+            // Handle when a user enters a space (for multi-word names)
+            if (e == null || e.data === ' ') {
+                capitalizeFirstLetter(input);
+            }
+            // Handle initial character
+            else if (input.value.length === 1) {
+                input.value = input.value.toUpperCase();
+            }
+        }
+
+        // Apply to student form first name and last name fields
+        const studentFirstName = document.getElementById('firstName');
+        const studentLastName = document.getElementById('lastName');
+
+        // Apply to signup form fields
+        const signupFirstName = document.getElementById('firstname');
+        const signupLastName = document.getElementById('lastname');
+
+        // Attach event listeners to student form fields if they exist
+        if (studentFirstName) {
+            studentFirstName.addEventListener('input', handleInputEvent);
+            studentFirstName.addEventListener('blur', function () {
+                capitalizeFirstLetter(this);
+            });
+        }
+
+        if (studentLastName) {
+            studentLastName.addEventListener('input', handleInputEvent);
+            studentLastName.addEventListener('blur', function () {
+                capitalizeFirstLetter(this);
+            });
+        }
+
+        // Attach event listeners to signup form fields if they exist
+        if (signupFirstName) {
+            signupFirstName.addEventListener('input', handleInputEvent);
+            signupFirstName.addEventListener('blur', function () {
+                capitalizeFirstLetter(this);
+            });
+        }
+
+        if (signupLastName) {
+            signupLastName.addEventListener('input', handleInputEvent);
+            signupLastName.addEventListener('blur', function () {
+                capitalizeFirstLetter(this);
+            });
+        }
+    });
+
     // Current page tracker
     let currentPage = 1;
 
@@ -176,6 +250,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Update student table with new data
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    }
+
     function updateStudentTable(students) {
         if (!tableBody) return;
 
@@ -186,10 +264,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let html = '';
         students.forEach(student => {
-            const fullName = `${student.firstname} ${student.lastname}`;
+            const fullName = `${capitalizeFirstLetter(student.firstname)} ${capitalizeFirstLetter(student.lastname)}`;
             const formattedDate = formatDateForDisplay(student.birthday);
             const isLoggedIn = !!document.querySelector('.userBtn'); // Check if user is logged in
-            const statusDot = student.isActive ? '<span class="active-dot"></span> Active' : '<span class="inactive-dot"></span> Inactive';
+            const statusDot = student.isActive ? '<span class="active-dot"></span>' : '<span class="inactive-dot"></span>';
 
             html += `
                 <tr class="tableRow">
@@ -222,7 +300,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Update pagination controls
     function updatePagination(currentPage, totalPages) {
         if (!pagingNav) return;
-        
+
         if (totalPages <= 1) {
             pagingNav.style.display = 'none';
             return;
@@ -230,27 +308,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
         pagingNav.style.display = 'flex';
         let html = '';
-        
+
         // Previous page button
         html += `<a href="#" class="page-link ${currentPage <= 1 ? 'disabled' : ''}" data-page="${Math.max(1, currentPage - 1)}">
                     <i class="fa-solid fa-angle-left"></i>
                 </a>`;
-        
+
         // Page numbers
         for (let i = 1; i <= totalPages; i++) {
             html += `<a href="#" class="page-link ${i === currentPage ? 'selected-page' : ''}" data-page="${i}">${i}</a>`;
         }
-        
+
         // Next page button
         html += `<a href="#" class="page-link ${currentPage >= totalPages ? 'disabled' : ''}" data-page="${Math.min(totalPages, currentPage + 1)}">
                     <i class="fa-solid fa-angle-right"></i>
                 </a>`;
-        
+
         pagingNav.innerHTML = html;
-        
+
         // Add event listeners to pagination links
         pagingNav.querySelectorAll('.page-link').forEach(link => {
-            link.addEventListener('click', function(e) {
+            link.addEventListener('click', function (e) {
                 e.preventDefault();
                 const page = this.getAttribute('data-page');
                 if (page && !this.classList.contains('disabled')) {
@@ -331,7 +409,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     const selectedStudents = JSON.parse(localStorage.getItem('selectedStudents') || '[]');
                     const updatedSelection = selectedStudents.filter(sid => sid !== id);
                     localStorage.setItem('selectedStudents', JSON.stringify(updatedSelection));
-                    
+
                     // Reload current page
                     loadStudents(currentPage);
                 } else {
@@ -361,7 +439,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (data.success) {
                     // Clear selected students in LocalStorage
                     localStorage.setItem('selectedStudents', JSON.stringify([]));
-                    
+
                     // Reload current page or go to first page if no results left
                     loadStudents(currentPage);
                 } else {
@@ -452,7 +530,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateDeleteSelectedButtonVisibility() {
         const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
         if (!deleteSelectedBtn) return;
-        
+
         const selectedStudents = JSON.parse(localStorage.getItem('selectedStudents') || '[]');
         if (selectedStudents.length > 0) {
             deleteSelectedBtn.style.display = 'inline-block';
@@ -481,7 +559,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Save updated selections to LocalStorage
         localStorage.setItem('selectedStudents', JSON.stringify(updatedSelections));
-        
+
         // Update delete button visibility
         updateDeleteSelectedButtonVisibility();
     }
@@ -489,11 +567,11 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateSelectAllState() {
         const selectAllCheckbox = document.getElementById('selectAll');
         if (!selectAllCheckbox) return;
-        
+
         const checkboxes = document.querySelectorAll('input[type="checkbox"][data-id]');
         const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
         const someChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
-        
+
         selectAllCheckbox.checked = allChecked;
         selectAllCheckbox.indeterminate = someChecked && !allChecked;
     }
@@ -504,9 +582,9 @@ document.addEventListener("DOMContentLoaded", function () {
         // Remove existing listeners to avoid duplicates
         const newSelectAllCheckbox = selectAllCheckbox.cloneNode(true);
         selectAllCheckbox.parentNode.replaceChild(newSelectAllCheckbox, selectAllCheckbox);
-        
+
         // Add new listener
-        newSelectAllCheckbox.addEventListener('change', function() {
+        newSelectAllCheckbox.addEventListener('change', function () {
             const checkboxes = document.querySelectorAll('input[type="checkbox"][data-id]');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = this.checked;
@@ -522,9 +600,9 @@ document.addEventListener("DOMContentLoaded", function () {
             // Remove existing listeners to avoid duplicates
             const newCheckbox = checkbox.cloneNode(true);
             checkbox.parentNode.replaceChild(newCheckbox, checkbox);
-            
+
             // Add new listener
-            newCheckbox.addEventListener('change', function() {
+            newCheckbox.addEventListener('change', function () {
                 saveSelectedStudents();
                 updateSelectAllState();
             });

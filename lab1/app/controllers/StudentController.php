@@ -276,6 +276,8 @@ class StudentController
                     $errors['birthday'] = "Birthday cannot be in the future.";
                 } elseif ($today->diff($birthDate)->y < 15) {
                     $errors['birthday'] = "Student must be at least 15 years old.";
+                }elseif ($today->diff($birthDate)->y > 100) {
+                    $errors['birthday'] = "Student cannot be older than 100 years.";
                 }
             } catch (Exception $e) {
                 $errors['birthday'] = "Invalid birthday format.";

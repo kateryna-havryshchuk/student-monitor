@@ -25,7 +25,11 @@ class Student
                       ORDER BY id DESC";
             $stmt = $this->db->prepare($query);
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return array_map(function ($student) {
+                $student['firstname'] = ucfirst(strtolower($student['firstname']));
+                $student['lastname'] = ucfirst(strtolower($student['lastname']));
+                return $student;
+            }, $stmt->fetchAll(PDO::FETCH_ASSOC));
         } catch (PDOException $e) {
             error_log("Error in getAllStudents: " . $e->getMessage());
             throw $e;
@@ -98,6 +102,10 @@ class Student
     public function addStudent($group, $firstName, $lastName, $gender, $birthday)
     {
         try {
+            // // Normalize first and last names
+            $firstName = ucfirst(strtolower($firstName));
+            $lastName = ucfirst(strtolower($lastName));
+
             // Check for duplicate student
             if ($this->checkDuplicateStudent($firstName, $lastName, $birthday)) {
                 return false; // Duplicate found

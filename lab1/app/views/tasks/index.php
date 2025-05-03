@@ -4,8 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $loggedIn = isset($_SESSION['user']);
-$username = $loggedIn ? htmlspecialchars($_SESSION['user']['firstname'] . ' ' . $_SESSION['user']['lastname']) : null;
-
+$username = $loggedIn ? ucfirst(strtolower($_SESSION['user']['firstname'])) . ' ' . ucfirst(strtolower($_SESSION['user']['lastname'])) : null;
 ?>
 
 <!DOCTYPE html>
@@ -24,14 +23,14 @@ $username = $loggedIn ? htmlspecialchars($_SESSION['user']['firstname'] . ' ' . 
 <body>
     <div id="wrapper">
 
-    <header>
-        <div class="logo">
-            <div class="cms-link" id="cms-logo">
-                <h4 id="cms">CMS</h4>
+        <header>
+            <div class="logo">
+                <div class="cms-link" id="cms-logo">
+                    <h4 id="cms">CMS</h4>
+                </div>
             </div>
-        </div>
-        
-        <div class="dropdown-container">
+
+            <div class="dropdown-container">
                 <?php if ($loggedIn): ?>
                     <div class="notify-dropdown">
                         <button class="notificationBtn" id="notificationBtn" aria-label="notificationBtn">
@@ -69,30 +68,29 @@ $username = $loggedIn ? htmlspecialchars($_SESSION['user']['firstname'] . ' ' . 
                     <?php endif; ?>
                 </div>
             </div>
-    </header>
+        </header>
 
-    <main>
-        <div class="navigation">
-            <input type="checkbox" class="toggle" id="toggle-checkbox">
-            <label for="toggle-checkbox" class="toggle-label"><i class="fa-solid fa-bars"></i></label>
-    
-            <nav class="navbar">
-                <ul>
-                    <li><a href="/lab1/index.php?url=dashboard/index">Dashboard</a></li>
-                    <li><a href="/lab1/index.php?url=student/index">Students</a></li>
-                    <li><a href="/lab1/index.php?url=tasks/index" class="active">Tasks</a></li>
-                </ul>
-            </nav>
-        </div>
+        <main>
+            <div class="navigation">
+                <input type="checkbox" class="toggle" id="toggle-checkbox">
+                <label for="toggle-checkbox" class="toggle-label"><i class="fa-solid fa-bars"></i></label>
 
-        <h1 class="main-heading1">
+                <nav class="navbar">
+                    <ul>
+                        <li><a href="/lab1/index.php?url=dashboard/index">Dashboard</a></li>
+                        <li><a href="/lab1/index.php?url=student/index">Students</a></li>
+                        <li><a href="/lab1/index.php?url=tasks/index" class="active">Tasks</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <h1 class="main-heading1">
                 Welcome to the Tasks,
-                <?php echo isset($_SESSION['user']['firstname']) ? htmlspecialchars($_SESSION['user']['firstname']) . '!' : ''; ?>
+                <?php echo isset($_SESSION['user']['firstname']) ? ucfirst(strtolower(htmlspecialchars($_SESSION['user']['firstname']))) : 'Guest'; ?>!
             </h1>
-    </main>
+        </main>
 
-</div>
+    </div>
 </body>
+
 </html>
-
-
