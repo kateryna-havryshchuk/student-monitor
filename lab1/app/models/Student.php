@@ -56,6 +56,35 @@ class Student
     }
 
     /**
+     * Check if a student with the same first name, last name, and birthday exists
+     * 
+     * @param string $firstName Student's first name
+     * @param string $lastName Student's last name
+     * @param string $birthday Student's birthday
+     * @return bool True if duplicate exists, false otherwise
+     * @throws PDOException If database query fails
+     */
+    public function checkDuplicateStudent($firstName, $lastName, $birthday)
+    {
+        try {
+            $query = "SELECT COUNT(*) 
+                      FROM students 
+                      WHERE firstname = :firstname 
+                      AND lastname = :lastname 
+                      AND birthday = :birthday";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':firstname', $firstName, PDO::PARAM_STR);
+            $stmt->bindParam(':lastname', $lastName, PDO::PARAM_STR);
+            $stmt->bindParam(':birthday', $birthday, PDO::PARAM_STR);
+            $stmt->execute();
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            error_log("Error in checkDuplicateStudent: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
      * Add a new student
      * 
      * @param string $group Student's group
@@ -69,6 +98,11 @@ class Student
     public function addStudent($group, $firstName, $lastName, $gender, $birthday)
     {
         try {
+            // Check for duplicate student
+            if ($this->checkDuplicateStudent($firstName, $lastName, $birthday)) {
+                return false; // Duplicate found
+            }
+
             $query = "INSERT INTO students (student_group, firstname, lastname, gender, birthday) 
                       VALUES (:group, :firstname, :lastname, :gender, :birthday)";
             $stmt = $this->db->prepare($query);
@@ -219,7 +253,6 @@ class Student
             throw $e;
         }
     }
-
 
     /**
      * Get the ID of the last inserted student

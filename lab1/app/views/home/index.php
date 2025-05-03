@@ -180,6 +180,7 @@ $username = $loggedIn ? htmlspecialchars($_SESSION['user']['firstname'] . ' ' . 
                 </div>
             </form>
         </div>
+        <div id="duplicate-error" class="error-message" style="display: none; margin-bottom: 10px;"></div>
         <div class="modal-footer">
             <button type="submit" class="okBtn" id="okBtn">OK</button>
         </div>

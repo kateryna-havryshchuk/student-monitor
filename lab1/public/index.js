@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const newOkBtn = document.getElementById('newOkBtn');
     const studentForm = document.getElementById('studentForm');
     const modalTitle = document.getElementById('modalTitle');
+    const duplicateError = document.getElementById('duplicate-error');
 
     // Notification elements
     const bellIcon = document.querySelector('#bellIcon');
@@ -34,7 +35,6 @@ document.addEventListener("DOMContentLoaded", function () {
         deleteSelectedBtn.innerHTML = '<i class="bi bi-trash"></i> Delete Selected';
         deleteSelectedBtn.style.display = 'none'; // Initially hidden
         tableActionArea.appendChild(deleteSelectedBtn);
-        
 
         // Delete selected button event listener
         deleteSelectedBtn.addEventListener('click', function () {
@@ -84,6 +84,8 @@ document.addEventListener("DOMContentLoaded", function () {
             modalTitle.textContent = "Add student";
             addModal.style.display = 'block';
             clearErrors();
+            duplicateError.style.display = 'none';
+            duplicateError.textContent = '';
         });
     }
 
@@ -92,6 +94,8 @@ document.addEventListener("DOMContentLoaded", function () {
         closeModalBtn.addEventListener('click', function () {
             addModal.style.display = 'none';
             clearErrors();
+            duplicateError.style.display = 'none';
+            duplicateError.textContent = '';
         });
     }
 
@@ -125,6 +129,8 @@ document.addEventListener("DOMContentLoaded", function () {
         studentForm.reset();
         document.getElementById('studentId').value = '';
         clearErrors();
+        duplicateError.style.display = 'none';
+        duplicateError.textContent = '';
     }
 
     // Clear errors
@@ -183,6 +189,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const fullName = `${student.firstname} ${student.lastname}`;
             const formattedDate = formatDateForDisplay(student.birthday);
             const isLoggedIn = !!document.querySelector('.userBtn'); // Check if user is logged in
+            const statusDot = student.isActive ? '<span class="active-dot"></span> Active' : '<span class="inactive-dot"></span> Inactive';
 
             html += `
                 <tr class="tableRow">
@@ -194,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <td>${fullName}</td>
                     <td>${student.gender}</td>
                     <td>${formattedDate}</td>
-                    <td><span class="inactive-dot"></span></td>
+                    <td>${statusDot}</td>
                     <td>
                         ${isLoggedIn ? `
                             <button class="editRowBtn" data-id="${student.id}">
@@ -277,6 +284,8 @@ document.addEventListener("DOMContentLoaded", function () {
                             modalTitle.textContent = "Edit student";
                             addModal.style.display = 'block';
                             clearErrors();
+                            duplicateError.style.display = 'none';
+                            duplicateError.textContent = '';
                         } else {
                             console.error('Failed to fetch student data:', data.message || 'Unknown error');
                         }
@@ -401,8 +410,13 @@ document.addEventListener("DOMContentLoaded", function () {
                         addModal.style.display = 'none';
                         // Reload current page to show updated data
                         loadStudents(currentPage);
+                    } else if (data.duplicate) {
+                        duplicateError.textContent = data.message;
+                        duplicateError.style.display = 'block';
                     } else if (data.errors) {
                         clearErrors();
+                        duplicateError.style.display = 'none';
+                        duplicateError.textContent = '';
                         Object.entries(data.errors).forEach(([field, error]) => {
                             console.log(`Setting error for ${field}: ${error}`);
                             const errorElement = document.getElementById(`${field}-error`);

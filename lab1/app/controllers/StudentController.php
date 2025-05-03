@@ -86,6 +86,13 @@ class StudentController
             $totalRecords = $this->studentModel->getTotalStudentsCount();
             $totalPages = ceil($totalRecords / $recordsPerPage);
 
+            // Add isActive flag for students matching the logged-in user's name
+            $username = isset($_SESSION['user']) ? htmlspecialchars($_SESSION['user']['firstname'] . ' ' . $_SESSION['user']['lastname']) : null;
+            $students = array_map(function ($student) use ($username) {
+                $student['isActive'] = $username && ($student['firstname'] . ' ' . $student['lastname']) === $username;
+                return $student;
+            }, $students);
+
             echo json_encode([
                 'success' => true,
                 'students' => $students,
@@ -122,6 +129,16 @@ class StudentController
         $cleanedData = $validation['cleanedData'];
 
         if (empty($errors)) {
+            // Check for duplicate student
+            if ($this->studentModel->checkDuplicateStudent(
+                $cleanedData['firstName'],
+                $cleanedData['lastName'],
+                $cleanedData['birthday']
+            )) {
+                echo json_encode(['success' => false, 'duplicate' => true, 'message' => 'A student with the same name and birthday already exists']);
+                return;
+            }
+
             $result = $this->studentModel->addStudent(
                 $cleanedData['group'],
                 $cleanedData['firstName'],
