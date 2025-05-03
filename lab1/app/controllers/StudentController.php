@@ -55,8 +55,48 @@ class StudentController
                 $this->deleteStudent($data['id'] ?? '');
                 break;
 
+            case 'deleteMultiple':
+                if (!isset($_SESSION['user'])) {
+                    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+                    break;
+                }
+                $this->deleteMultipleStudents($data['ids'] ?? []);
+                break;
             default:
                 echo json_encode(['success' => false, 'message' => 'Invalid action']);
+        }
+        exit;
+    }
+
+    public function getStudentsAjax()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        header('Content-Type: application/json');
+
+        // Pagination settings
+        $recordsPerPage = 6;
+        $currentPage = isset($_GET['page']) && is_numeric($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
+
+        try {
+            // Get paginated data
+            $students = $this->studentModel->getPaginatedStudents($currentPage, $recordsPerPage);
+            $totalRecords = $this->studentModel->getTotalStudentsCount();
+            $totalPages = ceil($totalRecords / $recordsPerPage);
+
+            echo json_encode([
+                'success' => true,
+                'students' => $students,
+                'currentPage' => $currentPage,
+                'totalPages' => $totalPages
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error fetching students: ' . $e->getMessage()
+            ]);
         }
         exit;
     }
@@ -142,6 +182,37 @@ class StudentController
         echo json_encode($result ? ['success' => true, 'message' => 'Student deleted successfully'] : ['success' => false, 'message' => 'Failed to delete student']);
     }
 
+    public function deleteMultipleStudents($ids)
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (!isset($_SESSION['user'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            return;
+        }
+
+        if (empty($ids) || !is_array($ids)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid student IDs']);
+            return;
+        }
+
+        // Filter to ensure only numeric IDs
+        $ids = array_filter($ids, function ($id) {
+            return is_numeric($id);
+        });
+
+        if (empty($ids)) {
+            echo json_encode(['success' => false, 'message' => 'No valid student IDs provided']);
+            return;
+        }
+
+        $result = $this->studentModel->deleteMultipleStudents($ids);
+        echo json_encode($result ?
+            ['success' => true, 'message' => count($ids) . ' students deleted successfully'] :
+            ['success' => false, 'message' => 'Failed to delete students']);
+    }
+
     private function validateStudentData($data, $isUpdate = false)
     {
         $group = htmlspecialchars(strip_tags(trim($data['group'] ?? '')));
@@ -158,8 +229,7 @@ class StudentController
         }
 
         if (empty($group) && array_filter($data) === []) {
-        }
-        else if (empty($group) || !in_array($group, ['PZ-21', 'PZ-22', 'PZ-23', 'PZ-24', 'PZ-25', 'PZ-26'])) {
+        } else if (empty($group) || !in_array($group, ['PZ-21', 'PZ-22', 'PZ-23', 'PZ-24', 'PZ-25', 'PZ-26'])) {
             $errors['group'] = "Invalid group. Please select a valid group.";
         }
 

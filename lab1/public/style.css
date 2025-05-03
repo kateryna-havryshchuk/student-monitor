@@ -141,6 +141,30 @@ main {
     color: #ffffff;
 }
 
+.deleteSelectedBtn{
+    padding: 8px 16px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #ec8f8f;
+    color: #ffffff;
+}
+
+.btn-danger{
+    padding: 10px 16px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #ec8f8f;
+    color: #ffffff;
+}
+
+.btn-danger:hover{
+    background-color: #d25a5a;
+    transform: scale(1.1);
+}
+
 .deleteAllBtn:hover {
     background-color: #3d8140;
     transform: scale(1.1);

@@ -1,5 +1,5 @@
-document.addEventListener("DOMContentLoaded", function() {
-    // Modal elements (unchanged)
+document.addEventListener("DOMContentLoaded", function () {
+    // Modal elements
     const addModal = document.getElementById('addEditModal');
     const deleteModal = document.getElementById('deleteModal');
     const addBtn = document.getElementById('addBtn');
@@ -10,34 +10,76 @@ document.addEventListener("DOMContentLoaded", function() {
     const studentForm = document.getElementById('studentForm');
     const modalTitle = document.getElementById('modalTitle');
 
-    // Notification elements (unchanged)
+    // Notification elements
     const bellIcon = document.querySelector('#bellIcon');
     const notificationBtn = document.querySelector('#notificationBtn');
-    const notifyContent = document.querySelector('#notifyContent');
+    const notifyContent = document.querySelector('.notify-content');
     const badge = document.querySelector('.icon-button-badge');
     const notifyDropdown = document.querySelector('.notify-dropdown');
 
-    // Notification logic (unchanged)
+    // Table elements
+    const tableBody = document.getElementById('tableBody');
+    const studentsTable = document.getElementById('studentsTable');
+    const pagingNav = document.querySelector('.paging-nav');
+
+    // Current page tracker
+    let currentPage = 1;
+
+    // Delete selected button setup
+    const tableActionArea = document.querySelector('#addBtn')?.parentNode;
+    if (tableActionArea) {
+        const deleteSelectedBtn = document.createElement('button');
+        deleteSelectedBtn.id = 'deleteSelectedBtn';
+        deleteSelectedBtn.className = 'btn btn-danger ms-2';
+        deleteSelectedBtn.innerHTML = '<i class="bi bi-trash"></i> Delete Selected';
+        deleteSelectedBtn.style.display = 'none'; // Initially hidden
+        tableActionArea.appendChild(deleteSelectedBtn);
+        
+
+        // Delete selected button event listener
+        deleteSelectedBtn.addEventListener('click', function () {
+            const selectedStudents = JSON.parse(localStorage.getItem('selectedStudents') || '[]');
+            if (selectedStudents.length === 0) {
+                alert('No students selected');
+                return;
+            }
+
+            // Create a message showing how many students will be deleted
+            document.getElementById('studentName').textContent = `${selectedStudents.length} selected students`;
+            deleteModal.style.display = 'block';
+
+            // Replace the deleteConfirmBtn to avoid multiple event listeners
+            newOkBtn.replaceWith(newOkBtn.cloneNode(true));
+            const freshNewOkBtn = document.getElementById('newOkBtn');
+
+            // Add event listener for the new button
+            freshNewOkBtn.addEventListener('click', function () {
+                deleteMultipleStudents(selectedStudents);
+            });
+        });
+    }
+
+    // Notification logic
     if (notificationBtn && notifyContent && notifyDropdown && badge) {
-        notifyDropdown.addEventListener('mouseover', function() {
+        notifyDropdown.addEventListener('mouseover', function () {
             badge.classList.add('show');
         }, { once: true });
 
-        notificationBtn.addEventListener('click', function(e) {
+        notificationBtn.addEventListener('click', function (e) {
             e.preventDefault();
             notifyContent.style.display = notifyContent.style.display === 'block' ? 'none' : 'block';
         });
 
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!notificationBtn.contains(e.target) && !notifyContent.contains(e.target)) {
                 notifyContent.style.display = 'none';
             }
         });
     }
 
-    // Show add modal (unchanged)
+    // Show add modal
     if (addBtn) {
-        addBtn.addEventListener('click', function() {
+        addBtn.addEventListener('click', function () {
             resetForm();
             modalTitle.textContent = "Add student";
             addModal.style.display = 'block';
@@ -45,36 +87,47 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Close modal (unchanged)
+    // Close modal
     if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', function() {
+        closeModalBtn.addEventListener('click', function () {
             addModal.style.display = 'none';
             clearErrors();
         });
     }
 
-    // Close delete modal (unchanged)
+    // Close delete modal
     if (cancelDeleteBtn) {
-        cancelDeleteBtn.addEventListener('click', function() {
+        cancelDeleteBtn.addEventListener('click', function () {
             deleteModal.style.display = 'none';
         });
     }
 
-    // Format date (unchanged)
+    // Format date
     function formatDateForInput(dateString) {
         if (!dateString) return '';
         const date = new Date(dateString);
         return date.toISOString().split('T')[0];
     }
 
-    // Reset form (unchanged)
+    // Format date for display
+    function formatDateForDisplay(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        }).split('/').join('.');
+    }
+
+    // Reset form
     function resetForm() {
         studentForm.reset();
         document.getElementById('studentId').value = '';
         clearErrors();
     }
 
-    // Clear errors (unchanged)
+    // Clear errors
     function clearErrors() {
         studentForm.querySelectorAll('input, select').forEach(field => field.classList.remove('error-input'));
         studentForm.querySelectorAll('.error-message').forEach(error => {
@@ -83,86 +136,241 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Edit buttons (unchanged)
-    document.querySelectorAll('.editRowBtn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const studentId = this.getAttribute('data-id');
-            fetch(`/lab1/index.php?url=student/handleApi&action=getStudent&id=${studentId}`)
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Get Student Response:', data);
-                    if (data.success) {
-                        const student = data.student;
-                        document.getElementById('studentId').value = student.id;
-                        document.getElementById('group').value = student.student_group;
-                        document.getElementById('firstName').value = student.firstname;
-                        document.getElementById('lastName').value = student.lastname;
-                        document.getElementById('gender').value = student.gender;
-                        document.getElementById('birthday').value = formatDateForInput(student.birthday);
-                        modalTitle.textContent = "Edit student";
-                        addModal.style.display = 'block';
-                        clearErrors();
-                    } else {
-                        console.error('Failed to fetch student data:', data.message || 'Unknown error');
-                    }
-                })
-                .catch(error => console.error('Error fetching student:', error));
-        });
-    });
+    // Load students for a specific page
+    function loadStudents(page = 1) {
+        // Show loading indicator
+        if (tableBody) {
+            tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Loading...</td></tr>';
+        }
 
-    // Delete buttons (unchanged)
-    document.querySelectorAll('.deleteRowBtn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const studentId = this.getAttribute('data-id');
-            const studentName = this.getAttribute('data-name');
-            document.getElementById('studentName').textContent = studentName;
-            deleteModal.style.display = 'block';
-            newOkBtn.replaceWith(newOkBtn.cloneNode(true));
-            const freshNewOkBtn = document.getElementById('newOkBtn');
-            freshNewOkBtn.addEventListener('click', function() {
-                deleteStudent(studentId);
+        // Fetch students for the specified page
+        fetch(`/lab1/index.php?url=student/getStudentsAjax&page=${page}`)
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    updateStudentTable(data.students);
+                    updatePagination(data.currentPage, data.totalPages);
+                    currentPage = data.currentPage;
+                    setupRowEventListeners();
+                    loadSelectedStudents();
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Error loading students</td></tr>';
+                    console.error('Failed to load students:', data.message || 'Unknown error');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading students:', error);
+                if (tableBody) {
+                    tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Error loading students</td></tr>';
+                }
+            });
+    }
+
+    // Update student table with new data
+    function updateStudentTable(students) {
+        if (!tableBody) return;
+
+        if (students.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="7" class="no-data">No students found</td></tr>';
+            return;
+        }
+
+        let html = '';
+        students.forEach(student => {
+            const fullName = `${student.firstname} ${student.lastname}`;
+            const formattedDate = formatDateForDisplay(student.birthday);
+            const isLoggedIn = !!document.querySelector('.userBtn'); // Check if user is logged in
+
+            html += `
+                <tr class="tableRow">
+                    <th>
+                        <input type="checkbox" id="select${student.id}" data-id="${student.id}">
+                        <label for="select${student.id}" class="visually-hidden">Select one</label>
+                    </th>
+                    <td>${student.student_group}</td>
+                    <td>${fullName}</td>
+                    <td>${student.gender}</td>
+                    <td>${formattedDate}</td>
+                    <td><span class="inactive-dot"></span></td>
+                    <td>
+                        ${isLoggedIn ? `
+                            <button class="editRowBtn" data-id="${student.id}">
+                                <i class="fa-solid fa-pencil"></i>
+                            </button>
+                            <button class="deleteRowBtn" data-id="${student.id}" data-name="${fullName}">
+                                <i class="fa-solid fa-xmark fa-lg"></i>
+                            </button>
+                        ` : '<span class="no-access">N/A</span>'}
+                    </td>
+                </tr>
+            `;
+        });
+
+        tableBody.innerHTML = html;
+    }
+
+    // Update pagination controls
+    function updatePagination(currentPage, totalPages) {
+        if (!pagingNav) return;
+        
+        if (totalPages <= 1) {
+            pagingNav.style.display = 'none';
+            return;
+        }
+
+        pagingNav.style.display = 'flex';
+        let html = '';
+        
+        // Previous page button
+        html += `<a href="#" class="page-link ${currentPage <= 1 ? 'disabled' : ''}" data-page="${Math.max(1, currentPage - 1)}">
+                    <i class="fa-solid fa-angle-left"></i>
+                </a>`;
+        
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<a href="#" class="page-link ${i === currentPage ? 'selected-page' : ''}" data-page="${i}">${i}</a>`;
+        }
+        
+        // Next page button
+        html += `<a href="#" class="page-link ${currentPage >= totalPages ? 'disabled' : ''}" data-page="${Math.min(totalPages, currentPage + 1)}">
+                    <i class="fa-solid fa-angle-right"></i>
+                </a>`;
+        
+        pagingNav.innerHTML = html;
+        
+        // Add event listeners to pagination links
+        pagingNav.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = this.getAttribute('data-page');
+                if (page && !this.classList.contains('disabled')) {
+                    loadStudents(parseInt(page));
+                }
             });
         });
-    });
+    }
 
-    // Delete student (unchanged)
+    // Setup event listeners for edit and delete buttons in rows
+    function setupRowEventListeners() {
+        // Edit buttons
+        document.querySelectorAll('.editRowBtn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const studentId = this.getAttribute('data-id');
+                fetch(`/lab1/index.php?url=student/handleApi&action=getStudent&id=${studentId}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Get Student Response:', data);
+                        if (data.success) {
+                            const student = data.student;
+                            document.getElementById('studentId').value = student.id;
+                            document.getElementById('group').value = student.student_group;
+                            document.getElementById('firstName').value = student.firstname;
+                            document.getElementById('lastName').value = student.lastname;
+                            document.getElementById('gender').value = student.gender;
+                            document.getElementById('birthday').value = formatDateForInput(student.birthday);
+                            modalTitle.textContent = "Edit student";
+                            addModal.style.display = 'block';
+                            clearErrors();
+                        } else {
+                            console.error('Failed to fetch student data:', data.message || 'Unknown error');
+                        }
+                    })
+                    .catch(error => console.error('Error fetching student:', error));
+            });
+        });
+
+        // Delete buttons
+        document.querySelectorAll('.deleteRowBtn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const studentId = this.getAttribute('data-id');
+                const studentName = this.getAttribute('data-name');
+                document.getElementById('studentName').textContent = studentName;
+                deleteModal.style.display = 'block';
+                newOkBtn.replaceWith(newOkBtn.cloneNode(true));
+                const freshNewOkBtn = document.getElementById('newOkBtn');
+                freshNewOkBtn.addEventListener('click', function () {
+                    deleteStudent(studentId);
+                });
+            });
+        });
+
+        // Update checkbox listeners
+        updateCheckboxListeners();
+    }
+
+    // Delete student
     function deleteStudent(id) {
         fetch('/lab1/index.php?url=student/handleApi', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'delete', id: id })
         })
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            console.log('Delete Student Response:', data);
-            if (data.success) {
-                // Remove from selected students in LocalStorage
-                const selectedStudents = JSON.parse(localStorage.getItem('selectedStudents') || '[]');
-                const updatedSelection = selectedStudents.filter(sid => sid !== id);
-                localStorage.setItem('selectedStudents', JSON.stringify(updatedSelection));
-                location.reload();
-            } else {
-                console.error('Failed to delete student:', data.message || 'Unknown error');
-            }
-            deleteModal.style.display = 'none';
-        })
-        .catch(error => {
-            console.error('Error deleting student:', error);
-            deleteModal.style.display = 'none';
-        });
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Delete Student Response:', data);
+                if (data.success) {
+                    // Remove from selected students in LocalStorage
+                    const selectedStudents = JSON.parse(localStorage.getItem('selectedStudents') || '[]');
+                    const updatedSelection = selectedStudents.filter(sid => sid !== id);
+                    localStorage.setItem('selectedStudents', JSON.stringify(updatedSelection));
+                    
+                    // Reload current page
+                    loadStudents(currentPage);
+                } else {
+                    console.error('Failed to delete student:', data.message || 'Unknown error');
+                }
+                deleteModal.style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error deleting student:', error);
+                deleteModal.style.display = 'none';
+            });
     }
 
-    // Form submission (unchanged)
+    // Delete multiple students
+    function deleteMultipleStudents(ids) {
+        fetch('/lab1/index.php?url=student/handleApi', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'deleteMultiple', ids: ids })
+        })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Delete Multiple Students Response:', data);
+                if (data.success) {
+                    // Clear selected students in LocalStorage
+                    localStorage.setItem('selectedStudents', JSON.stringify([]));
+                    
+                    // Reload current page or go to first page if no results left
+                    loadStudents(currentPage);
+                } else {
+                    console.error('Failed to delete students:', data.message || 'Unknown error');
+                }
+                deleteModal.style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error deleting students:', error);
+                deleteModal.style.display = 'none';
+            });
+    }
+
+    // Form submission
     if (okBtn && studentForm) {
         okBtn.replaceWith(okBtn.cloneNode(true));
         const freshOkBtn = document.getElementById('okBtn');
-        freshOkBtn.addEventListener('click', function(e) {
+        freshOkBtn.addEventListener('click', function (e) {
             e.preventDefault();
             const studentId = document.getElementById('studentId').value;
             const action = studentId ? 'update' : 'add';
@@ -181,35 +389,37 @@ document.addEventListener("DOMContentLoaded", function() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             })
-            .then(response => {
-                console.log('Response Status:', response.status);
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                return response.json();
-            })
-            .then(data => {
-                console.log('Server Response:', data);
-                if (data.success) {
-                    resetForm();
-                    location.reload();
-                } else if (data.errors) {
-                    clearErrors();
-                    Object.entries(data.errors).forEach(([field, error]) => {
-                        console.log(`Setting error for ${field}: ${error}`);
-                        const errorElement = document.getElementById(`${field}-error`);
-                        const inputElement = document.getElementById(field);
-                        if (errorElement && inputElement) {
-                            errorElement.textContent = error;
-                            errorElement.style.display = 'block';
-                            inputElement.classList.add('error-input');
-                        } else {
-                            console.error(`Could not find elements for field ${field}`);
-                        }
-                    });
-                } else {
-                    console.error('Unexpected response format:', data);
-                }
-            })
-            .catch(error => console.error('Error submitting form:', error));
+                .then(response => {
+                    console.log('Response Status:', response.status);
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Server Response:', data);
+                    if (data.success) {
+                        resetForm();
+                        addModal.style.display = 'none';
+                        // Reload current page to show updated data
+                        loadStudents(currentPage);
+                    } else if (data.errors) {
+                        clearErrors();
+                        Object.entries(data.errors).forEach(([field, error]) => {
+                            console.log(`Setting error for ${field}: ${error}`);
+                            const errorElement = document.getElementById(`${field}-error`);
+                            const inputElement = document.getElementById(field);
+                            if (errorElement && inputElement) {
+                                errorElement.textContent = error;
+                                errorElement.style.display = 'block';
+                                inputElement.classList.add('error-input');
+                            } else {
+                                console.error(`Could not find elements for field ${field}`);
+                            }
+                        });
+                    } else {
+                        console.error('Unexpected response format:', data);
+                    }
+                })
+                .catch(error => console.error('Error submitting form:', error));
         });
     }
 
@@ -222,6 +432,19 @@ document.addEventListener("DOMContentLoaded", function() {
             checkbox.checked = selectedStudents.includes(studentId);
         });
         updateSelectAllState();
+        updateDeleteSelectedButtonVisibility();
+    }
+
+    function updateDeleteSelectedButtonVisibility() {
+        const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+        if (!deleteSelectedBtn) return;
+        
+        const selectedStudents = JSON.parse(localStorage.getItem('selectedStudents') || '[]');
+        if (selectedStudents.length > 0) {
+            deleteSelectedBtn.style.display = 'inline-block';
+        } else {
+            deleteSelectedBtn.style.display = 'none';
+        }
     }
 
     function saveSelectedStudents() {
@@ -244,13 +467,19 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // Save updated selections to LocalStorage
         localStorage.setItem('selectedStudents', JSON.stringify(updatedSelections));
+        
+        // Update delete button visibility
+        updateDeleteSelectedButtonVisibility();
     }
 
     function updateSelectAllState() {
         const selectAllCheckbox = document.getElementById('selectAll');
+        if (!selectAllCheckbox) return;
+        
         const checkboxes = document.querySelectorAll('input[type="checkbox"][data-id]');
         const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
         const someChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+        
         selectAllCheckbox.checked = allChecked;
         selectAllCheckbox.indeterminate = someChecked && !allChecked;
     }
@@ -258,7 +487,12 @@ document.addEventListener("DOMContentLoaded", function() {
     // Select all functionality
     const selectAllCheckbox = document.getElementById('selectAll');
     if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener('change', function() {
+        // Remove existing listeners to avoid duplicates
+        const newSelectAllCheckbox = selectAllCheckbox.cloneNode(true);
+        selectAllCheckbox.parentNode.replaceChild(newSelectAllCheckbox, selectAllCheckbox);
+        
+        // Add new listener
+        newSelectAllCheckbox.addEventListener('change', function() {
             const checkboxes = document.querySelectorAll('input[type="checkbox"][data-id]');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = this.checked;
@@ -267,25 +501,14 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Individual checkbox functionality
-    const checkboxes = document.querySelectorAll('input[type="checkbox"][data-id]');
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            saveSelectedStudents();
-            updateSelectAllState();
-        });
-    });
-
-    // Load selected students on page load
-    loadSelectedStudents();
-
-    // Update checkbox event listeners after pagination
+    // Update checkbox event listeners
     function updateCheckboxListeners() {
         const checkboxes = document.querySelectorAll('input[type="checkbox"][data-id]');
         checkboxes.forEach(checkbox => {
             // Remove existing listeners to avoid duplicates
             const newCheckbox = checkbox.cloneNode(true);
             checkbox.parentNode.replaceChild(newCheckbox, checkbox);
+            
             // Add new listener
             newCheckbox.addEventListener('change', function() {
                 saveSelectedStudents();
@@ -294,14 +517,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Re-attach checkbox listeners after page content updates
-    document.querySelectorAll('.page-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            // Delay to allow table to update
-            setTimeout(updateCheckboxListeners, 100);
-        });
-    });
-
-    // Initial call to ensure listeners are attached
-    updateCheckboxListeners();
+    // Initial load of students
+    loadStudents();
 });

@@ -4,13 +4,13 @@ require_once __DIR__ . "/../core/Database.php";
 class Student
 {
     private $db;
-    
+
     public function __construct()
     {
         $database = new Database();
         $this->db = $database->pdo;
     }
-    
+
     /**
      * Get all students
      * 
@@ -31,7 +31,7 @@ class Student
             throw $e;
         }
     }
-    
+
     /**
      * Get a specific student by ID
      * 
@@ -54,7 +54,7 @@ class Student
             throw $e;
         }
     }
-    
+
     /**
      * Add a new student
      * 
@@ -72,7 +72,7 @@ class Student
             $query = "INSERT INTO students (student_group, firstname, lastname, gender, birthday) 
                       VALUES (:group, :firstname, :lastname, :gender, :birthday)";
             $stmt = $this->db->prepare($query);
-            
+
             return $stmt->execute([
                 ':group' => $group,
                 ':firstname' => $firstName,
@@ -85,7 +85,7 @@ class Student
             throw $e;
         }
     }
-    
+
     /**
      * Update an existing student
      * 
@@ -109,7 +109,7 @@ class Student
                           birthday = :birthday 
                       WHERE id = :id";
             $stmt = $this->db->prepare($query);
-            
+
             return $stmt->execute([
                 ':id' => $id,
                 ':group' => $group,
@@ -123,7 +123,7 @@ class Student
             throw $e;
         }
     }
-    
+
     /**
      * Delete a student
      * 
@@ -143,6 +143,83 @@ class Student
             throw $e;
         }
     }
+
+    /**
+     * Delete multiple students
+     * 
+     * @param array $ids Array of student IDs
+     * @return bool Success status
+     * @throws PDOException If database query fails
+     */
+    public function deleteMultipleStudents($ids)
+    {
+        if (empty($ids)) {
+            return false;
+        }
+
+        try {
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $query = "DELETE FROM students WHERE id IN ($placeholders)";
+            $stmt = $this->db->prepare($query);
+
+            // Bind each ID as parameter
+            foreach ($ids as $index => $id) {
+                $stmt->bindValue($index + 1, $id, PDO::PARAM_INT);
+            }
+
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error in deleteMultipleStudents: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Get paginated students
+     * 
+     * @param int $page Current page number
+     * @param int $perPage Number of records per page
+     * @return array List of students for current page
+     * @throws PDOException If database query fails
+     */
+    public function getPaginatedStudents($page = 1, $perPage = 6)
+    {
+        try {
+            $offset = ($page - 1) * $perPage;
+            $query = "SELECT id, student_group, firstname, lastname, gender, birthday 
+                  FROM students 
+                  ORDER BY id DESC
+                  LIMIT :limit OFFSET :offset";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':limit', $perPage, PDO::PARAM_INT);
+            $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error in getPaginatedStudents: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Get total count of students
+     * 
+     * @return int Total number of students
+     * @throws PDOException If database query fails
+     */
+    public function getTotalStudentsCount()
+    {
+        try {
+            $query = "SELECT COUNT(*) FROM students";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            return (int) $stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log("Error in getTotalStudentsCount: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
 
     /**
      * Get the ID of the last inserted student
