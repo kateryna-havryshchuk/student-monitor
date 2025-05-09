@@ -5,17 +5,15 @@ class Student
 {
     private $db;
 
+    //Ініціалізує підключення до бази даних, створюючи об'єкт класу Database
     public function __construct()
     {
         $database = new Database();
-        $this->db = $database->pdo;
+        $this->db = $database->pdo; //зберігає PDO-об'єкт у приватну властивість $db
     }
 
     /**
      * Get all students
-     * 
-     * @return array List of students
-     * @throws PDOException If database query fails
      */
     public function getAllStudents()
     {
@@ -38,10 +36,6 @@ class Student
 
     /**
      * Get a specific student by ID
-     * 
-     * @param int $id Student ID
-     * @return array|false Student data or false if not found
-     * @throws PDOException If database query fails
      */
     public function getStudentById($id)
     {
@@ -61,12 +55,6 @@ class Student
 
     /**
      * Check if a student with the same first name, last name, and birthday exists
-     * 
-     * @param string $firstName Student's first name
-     * @param string $lastName Student's last name
-     * @param string $birthday Student's birthday
-     * @return bool True if duplicate exists, false otherwise
-     * @throws PDOException If database query fails
      */
     public function checkDuplicateStudent($firstName, $lastName, $birthday)
     {
@@ -90,14 +78,6 @@ class Student
 
     /**
      * Add a new student
-     * 
-     * @param string $group Student's group
-     * @param string $firstName Student's first name
-     * @param string $lastName Student's last name
-     * @param string $gender Student's gender
-     * @param string $birthday Student's birthday
-     * @return bool Success status
-     * @throws PDOException If database query fails
      */
     public function addStudent($group, $firstName, $lastName, $gender, $birthday)
     {
@@ -130,15 +110,6 @@ class Student
 
     /**
      * Update an existing student
-     * 
-     * @param int $id Student ID
-     * @param string $group Student's group
-     * @param string $firstName Student's first name
-     * @param string $lastName Student's last name
-     * @param string $gender Student's gender
-     * @param string $birthday Student's birthday
-     * @return bool Success status
-     * @throws PDOException If database query fails
      */
     public function updateStudent($id, $group, $firstName, $lastName, $gender, $birthday)
     {
@@ -168,10 +139,6 @@ class Student
 
     /**
      * Delete a student
-     * 
-     * @param int $id Student ID
-     * @return bool Success status
-     * @throws PDOException If database query fails
      */
     public function deleteStudent($id)
     {
@@ -188,10 +155,6 @@ class Student
 
     /**
      * Delete multiple students
-     * 
-     * @param array $ids Array of student IDs
-     * @return bool Success status
-     * @throws PDOException If database query fails
      */
     public function deleteMultipleStudents($ids)
     {
@@ -218,11 +181,6 @@ class Student
 
     /**
      * Get paginated students
-     * 
-     * @param int $page Current page number
-     * @param int $perPage Number of records per page
-     * @return array List of students for current page
-     * @throws PDOException If database query fails
      */
     public function getPaginatedStudents($page = 1, $perPage = 6)
     {
@@ -245,9 +203,6 @@ class Student
 
     /**
      * Get total count of students
-     * 
-     * @return int Total number of students
-     * @throws PDOException If database query fails
      */
     public function getTotalStudentsCount()
     {
@@ -263,9 +218,6 @@ class Student
     }
 
     /**
-     * Get the ID of the last inserted student
-     * 
-     * @return int Last inserted ID
      */
     public function getLastInsertId()
     {

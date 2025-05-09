@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Виправлений шлях до StudentController.php
+// шлях до StudentController.php
 $controllerPath = __DIR__ . '/StudentController.php';
 if (!file_exists($controllerPath)) {
     ob_end_clean();
