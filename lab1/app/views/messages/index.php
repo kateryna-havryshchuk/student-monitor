@@ -5,6 +5,15 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $loggedIn = isset($_SESSION['user']);
 $username = $loggedIn ? ucfirst(strtolower($_SESSION['user']['firstname'])) . ' ' . ucfirst(strtolower($_SESSION['user']['lastname'])) : null;
+$currentUserId = $loggedIn ? $_SESSION['user']['id'] : null; // This is mysqlUserId
+$currentUserEmail = $loggedIn ? $_SESSION['user']['email'] : null;
+$currentUserFirstname = $loggedIn ? $_SESSION['user']['firstname'] : null;
+$currentUserLastname = $loggedIn ? $_SESSION['user']['lastname'] : null;
+
+if (!$loggedIn) {
+    header('Location: /lab1/index.php?url=auth/login');
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
@@ -13,9 +22,9 @@ $username = $loggedIn ? ucfirst(strtolower($_SESSION['user']['firstname'])) . ' 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messages</title>
-    <link rel="icon" href="public/images/favicon-96x96.png" type="image/png">
+    <link rel="icon" href="/lab1/public/images/favicon-96x96.png" type="image/png">
     <link rel="stylesheet" href="/lab1/public/messageStyle.css">
-    <script type="module" src="/lab1/public/messagesFunctional.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="https://kit.fontawesome.com/d9209b8d96.js" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -23,171 +32,103 @@ $username = $loggedIn ? ucfirst(strtolower($_SESSION['user']['firstname'])) . ' 
     <header>
         <div class="logo">
             <div class="cms-link" id="cms-logo">
-                <h4 id="cms">CMS</h4>
+                <h4 class="cms" id="cms">CMS</h4>
             </div>
         </div>
-        
         <div class="dropdown-container">
-            <?php if ($loggedIn): ?>
-                <div class="notify-dropdown">
-                    <button id="notificationBtn">
-                        <i class="fa-regular fa-bell fa-xl" id="bellIcon"></i>
-                    </button>
-                    <div class="notify-content">
-                        <a href="#">No new notifications</a>
+            <div class="notify-dropdown">
+                <button class="notificationBtn" id="notificationBtn" aria-label="notificationBtn">
+                    <i class="fa-regular fa-bell fa-xl" id="bellIcon"></i>
+                    <span class="icon-button-badge"></span>
+                </button>
+                <div class="notify-content">
                     </div>
+            </div>
+
+            <div class="user-dropdown">
+                <button class="userBtn" id="userBtn">
+                    <img id="profilePicture" class="profilePicture" src="/lab1/public/images/user-icon.jpg" alt="Profile picture">
+                    <span class="username" id="username"><?= htmlspecialchars($username) ?></span>
+                </button>
+                <div class="user-content">
+                    <a href="#">Profile</a>
+                    <a href="/lab1/index.php?url=auth/logout">Log out</a>
                 </div>
-        
-                <div class="user-dropdown">
-                    <button id="userBtn">
-                        <img id="profilePicture" src="/lab1/public/images/user-icon.jpg" alt="Profile picture">
-                        <span class="username" id="username"><?= htmlspecialchars($username) ?></span>
-                    </button>
-                    <div class="user-content">
-                        <a href="#">Profile</a>
-                        <a href="/lab1/index.php?url=auth/logout">Log out</a>
-                    </div>
-                </div>
-            <?php else: ?>
-                <a href="/lab1/index.php?url=auth/login" class="login-btn">Login</a>
-            <?php endif; ?>
+            </div>
         </div>
     </header>
-    
+
     <main>
         <div class="navigation">
-            <input type="checkbox" class="toggle" id="toggle-checkbox">
-            <label for="toggle-checkbox" class="toggle-label"><i class="fa-solid fa-bars"></i></label>
-    
+            <input type="checkbox" class="toggle" id="toggle-checkbox" title="Check to toggle menu">
+            <label id="toggle-label" for="toggle-checkbox" class="toggle-label">
+                <span>Toggle menu</span>
+                <i class="fa-solid fa-bars"></i>
+            </label>
             <nav class="navbar">
                 <ul>
-                    <?php if ($loggedIn): ?>
-                        <li><a href="/lab1/index.php?url=dashboard/index">Dashboard</a></li>
-                    <?php else: ?>
-                        <li><a href="/lab1/index.php?url=auth/login">Dashboard</a></li>
-                    <?php endif; ?>
+                    <li><a href="/lab1/index.php?url=dashboard/index">Dashboard</a></li>
                     <li><a href="/lab1/index.php?url=student/index">Students</a></li>
-                    <?php if ($loggedIn): ?>
-                        <li><a href="/lab1/index.php?url=tasks/index">Tasks</a></li>
-                    <?php else: ?>
-                        <li><a href="/lab1/index.php?url=auth/login">Tasks</a></li>
-                    <?php endif; ?>
+                    <li><a href="/lab1/index.php?url=tasks/index">Tasks</a></li>
                     <li><a href="/lab1/index.php?url=messages/index" class="active">Messages</a></li>
                 </ul>
             </nav>
         </div>
-        
-        <div class="table-container chat-container">
+
+        <div class="chat-container">
             <div class="chat-sidebar">
                 <div class="chat-header">
-                    <h3>Chat room</h3>
-                    <?php if ($loggedIn): ?>
+                    <h3>Chat Room</h3>
+                    <div class="chat-actions">
                         <button class="new-chat-btn" id="addBtn">
-                            <i class="fa-solid fa-plus">New chat</i>
+                            <i class="fa-solid fa-plus"></i>
+                            New chat
                         </button>
-                    <?php endif; ?>
+                    </div>
                 </div>
-                
-                <ul class="chat-list">
-                    <li class="chat-item active">
-                        <div class="chat-item-avatar">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
-                        <div class="chat-item-info">
-                            <div class="chat-item-name">Admin</div>
-                        </div>
-                    </li>
-                    <li class="chat-item">
-                        <div class="chat-item-avatar">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
-                        <div class="chat-item-info">
-                            <div class="chat-item-name">Victor</div>
-                            <span>How are you?</span>
-                        </div>
-                    </li>
-                    <li class="chat-item">
-                        <div class="chat-item-avatar">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
-                        <div class="chat-item-info">
-                            <div class="chat-item-name">Jess</div>
-                            <span>See you then!</span>
-                        </div>
-                    </li>
-                    <li class="chat-item">
-                        <div class="chat-item-avatar">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
-                        <div class="chat-item-info">
-                            <div class="chat-item-name">Max</div>
-                            <span id="leftUnderMessage">What's up!</span>
-                        </div>
-                    </li>
-                </ul>
+                <ul class="chat-list" id="chatList">
+                    </ul>
             </div>
-            
-            <!-- Chat main area -->
-            <div class="chat-main">
-                <div class="chat-header">
-                    <h3 class="chat-title">Chat room Admin</h3>
-                </div>
-                
-                <div class="chat-members">
-                    <div class="members-title">Members</div>
-                    <div class="members-list">
-                        <div class="member-avatar">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
-                        <div class="member-avatar">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
-                        <div class="member-avatar">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
-                        <?php if ($loggedIn): ?>
-                            <div class="add-member">
-                                <i class="fa-solid fa-plus"></i>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                
-                <div class="chat-messages">
-                    <div class="message message-received">
-                        <div class="message-avatar">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
-                        <div class="message-bubble">
-                            <div class="message-sender">Admin</div>
-                            <div class="message-content">Hello everyone! Welcome to our new chat room.</div>
-                            <div class="message-time">10:30 AM</div>
-                        </div>
-                    </div>
-                    
-                    <div class="message message-sent">
-                        <div class="message-bubble">
-                            <div class="message-sender">Me</div>
-                            <div class="message-content">Thank you for the invitation!</div>
-                            <div class="message-time">10:32 AM</div>
-                        </div>
-                        <div class="message-avatar">
-                            <img src="/lab1/public/images/user-icon.jpg" alt="Me">
-                        </div>
-                    </div>
-                </div>
 
-                <?php if ($loggedIn): ?>
-                    <div class="chat-input">
-                        <input type="text" placeholder="Type your message...">
-                        <button>
-                            <i class="fa-solid fa-paper-plane"></i>
-                        </button>
+            <div class="chat-main">
+                <div class="chat-header" id="chatMainHeader">
+                     <h3 class="chat-title" id="chatTitle">Select a chat</h3>
+                     </div>
+                <div class="chat-messages" id="chatMessages">
                     </div>
-                <?php endif; ?>
+                <div class="chat-input" id="chatInputContainer" style="display: none;">
+                    <input type="text" id="messageInput" placeholder="Type your message...">
+                    <button id="sendMessageBtn">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </main>
 </div>
+
+<div id="studentSelectModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Select a Student</h2> <span class="close-btn" id="closeStudentModal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <input type="text" id="studentSearchInputModal" class="student-search" placeholder="Search students...">
+            <ul id="studentsListForModal" class="students-list">
+                </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.chatAppData = {
+        currentUserId: <?= json_encode($currentUserId, JSON_NUMERIC_CHECK) ?>,
+        currentUserEmail: <?= json_encode($currentUserEmail) ?>,
+        currentUserFirstname: <?= json_encode($currentUserFirstname) ?>,
+        currentUserLastname: <?= json_encode($currentUserLastname) ?>
+    };
+</script>
+<script src="/lab1/public/chatClient.js"></script>
+<script src="/lab1/public/messagesFunctional.js"></script>
 </body>
 </html>

@@ -68,30 +68,53 @@ class StudentController
         exit;
     }
 
-    public function getStudentsAjax()
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+  
+public function getStudentsAjax()
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    header('Content-Type: application/json');
+
+    $fetchAll = isset($_GET['all']) && $_GET['all'] === 'true';
+
+    if ($fetchAll) {
+        try {
+            $students = $this->studentModel->getAllStudents(); // Використовуємо існуючий метод
+            // Ви можете додати сюди isActive логіку, якщо потрібно, але для вибору чату вона, ймовірно, не потрібна
+             $currentUserId = isset($_SESSION['user']) ? (int)$_SESSION['user']['id'] : null;
+             $filteredStudents = array_filter($students, function($student) use ($currentUserId) {
+                return (int)$student['id'] !== $currentUserId; // Виключаємо поточного користувача
+            });
+
+
+            echo json_encode([
+                'success' => true,
+                'students' => array_values($filteredStudents) // Переіндексувати масив
+            ]);
+        }  catch (Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error fetching all students: ' . $e->getMessage()
+            ]);
         }
-
-        header('Content-Type: application/json');
-
-        // Pagination settings
+    } else {
+        // Існуюча логіка пагінації
         $recordsPerPage = 6;
         $currentPage = isset($_GET['page']) && is_numeric($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
 
         try {
-            // Get paginated data
             $students = $this->studentModel->getPaginatedStudents($currentPage, $recordsPerPage);
             $totalRecords = $this->studentModel->getTotalStudentsCount();
             $totalPages = ceil($totalRecords / $recordsPerPage);
 
-            // Add isActive flag for students matching the logged-in user's name
+            // Існуюча логіка isActive - залиште, якщо використовується десь ще
             $username = isset($_SESSION['user']) ? htmlspecialchars($_SESSION['user']['firstname'] . ' ' . $_SESSION['user']['lastname']) : null;
-            $students = array_map(function ($student) use ($username) {
-                $student['isActive'] = $username && ($student['firstname'] . ' ' . $student['lastname']) === $username;
-                return $student;
-            }, $students);
+             $students = array_map(function ($student) use ($username) {
+                 $student['isActive'] = $username && ($student['firstname'] . ' ' . $student['lastname']) === $username;
+                 return $student;
+             }, $students);
 
             echo json_encode([
                 'success' => true,
@@ -102,11 +125,12 @@ class StudentController
         } catch (Exception $e) {
             echo json_encode([
                 'success' => false,
-                'message' => 'Error fetching students: ' . $e->getMessage()
+                'message' => 'Error fetching paginated students: ' . $e->getMessage()
             ]);
         }
-        exit;
     }
+    exit;
+}
 
     public function getStudent($id)
     {
