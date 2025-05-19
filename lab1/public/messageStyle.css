@@ -456,19 +456,20 @@ main h1 {
 
 .chat-container {
     display: flex;
-    height: calc(100vh - 130px);
+    height: calc(100vh - 130px); /* Або інша висота, яка вам потрібна */
     border-radius: 5px;
     overflow: hidden;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .chat-sidebar {
-    width: 250px;
+    width: 280px; /* Ви можете змінити це значення на бажану ширину */
     background-color: #f8f9fa;
     border-right: 1px solid #eee;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    flex-shrink: 0; /* Важливо: запобігає стисканню бічної панелі */
 }
 
 /* Оновлені стилі для чат-хедера та кнопки нового чату */
@@ -508,10 +509,11 @@ main h1 {
 .chat-item {
     padding: 15px;
     display: flex;
-    align-items: center;
+    align-items: center; /* Вертикально вирівнює аватар та блок інформації */
     cursor: pointer;
     transition: background-color 0.2s ease;
     border-bottom: 1px solid #eee;
+    overflow: hidden; /* Запобігає виходу вмісту за межі елемента списку */
 }
 
 .chat-item:hover {
@@ -532,18 +534,41 @@ main h1 {
     align-items: center;
     justify-content: center;
     color: #777;
+    position: relative; /* Для позиціонування індикатора статусу */
+    flex-shrink: 0; /* Запобігає стисканню аватара */
+}
+
+/* Стилі для контейнера інформації про чат (ім'я та останнє повідомлення) */
+.chat-item-info {
+    flex-grow: 1; /* Дозволяє цьому блоку зайняти весь доступний простір */
+    min-width: 0; /* Важливо для flex-елементів, щоб дозволити обрізання тексту всередині */
+    overflow: hidden; /* Обрізає вміст, який не вміщується */
 }
 
 .chat-item-name {
     font-weight: bold;
     margin-bottom: 3px;
+    white-space: nowrap; /* Запобігає переносу імені на новий рядок */
+    overflow: hidden; /* Приховує частину імені, яка не вміщується */
+    text-overflow: ellipsis; /* Додає "..." в кінці, якщо ім'я задовге */
+    display: block; /* Для коректної роботи text-overflow */
+}
+
+.chat-item-info span { /* Попередній перегляд останнього повідомлення */
+    font-size: 0.9em;
+    color: #666;
+    white-space: nowrap; /* Запобігає переносу повідомлення */
+    overflow: hidden; /* Приховує частину повідомлення, яка не вміщується */
+    text-overflow: ellipsis; /* Додає "..." в кінці, якщо повідомлення задовге */
+    display: block; /* Для коректної роботи text-overflow */
 }
 
 .chat-main {
-    flex-grow: 1;
+    flex-grow: 1; /* Дозволяє цій частині займати весь доступний простір */
     display: flex;
     flex-direction: column;
     background-color: #fff;
+    overflow: hidden; /* Додано, щоб запобігти проблемам з макетом, якщо вміст завеликий */
 }
 
 .chat-messages {
@@ -568,8 +593,18 @@ main h1 {
     padding: 10px 15px;
     border-radius: 18px;
     background-color: #f0f0f0;
-    word-wrap: break-word;
+    word-wrap: break-word; /* Already present, good for breaking long words */
+    max-width: 70%; /* Бульбашка може займати всю доступну ширину в межах батьківського .message */
 }
+
+/* ADD THESE STYLES FOR THE SENDER'S NAME */
+.message-sender {
+    font-weight: bold;
+    font-size: 0.9em;
+    color: #333; /* Або інший колір, який вам подобається */
+    margin-bottom: 4px;
+}
+/* END OF ADDED STYLES */
 
 .message-avatar {
     width: 36px;
@@ -580,17 +615,22 @@ main h1 {
     align-items: center;
     justify-content: center;
     color: #777;
-    overflow: hidden;
+    overflow: hidden; /* Важливо, щоб зображення не виходило за межі */
+    flex-shrink: 0; /* Запобігає стисканню аватара, якщо текст занадто довгий */
+    position: relative; /* Для позиціонування індикатора статусу */
 }
 
 .message-avatar img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; /* Запобігає спотворенню зображення аватара */
 }
 
 .message-content {
-    word-wrap: break-word;
+    white-space: pre-wrap;  /* Зберігає пробіли та переноси рядків, введені користувачем, та забезпечує автоматичне перенесення тексту */
+    overflow-wrap: break-word; /* Примусово переносить дуже довгі слова без пробілів */
+    word-break: break-word; /* Альтернатива або доповнення до overflow-wrap для кращої сумісності */
+    line-height: 1.4; /* Для кращої читабельності */
 }
 
 .message-time {
@@ -612,17 +652,25 @@ main h1 {
 
 .chat-input {
     border-top: 1px solid #eee;
-    padding: 15px;
+    padding: 10px 15px; /* Зменшив падінг для кращого вигляду textarea */
     display: flex;
-    align-items: center;
+    align-items: center; /* Вирівнює кнопку та textarea по центру */
 }
 
-.chat-input input {
+.chat-input textarea { /* Змінено з input на textarea */
     flex-grow: 1;
     padding: 10px 15px;
     border: 1px solid #ddd;
-    border-radius: 20px;
+    border-radius: 18px; /* Зробив радіус як у бульбашок */
     outline: none;
+    resize: none; /* Забороняє користувачу змінювати розмір textarea */
+    font-family: inherit; /* Наслідує шрифт сторінки */
+    font-size: inherit; /* Наслідує розмір шрифту */
+    line-height: 1.4; /* Для консистентності з повідомленнями */
+    min-height: 22px; /* Висота приблизно одного рядка тексту + padding */
+    max-height: 100px; /* Обмеження висоти, щоб не розтягувалось безкінечно */
+    overflow-y: auto; /* Додає скрол, якщо тексту більше ніж max-height */
+    box-sizing: border-box; /* Включає padding і border в загальну висоту/ширину */
 }
 
 .chat-input button {
@@ -700,7 +748,6 @@ main h1 {
     display: none;
     z-index: 1000;
     overflow: hidden;
-    border: 1px solid #eaeaea;
 }
 
 .student-select-dropdown.active {
@@ -1118,127 +1165,77 @@ main h1 {
 
 /* Модальне вікно */
 .modal {
-    display: none; /* Initially hidden, JS will change to 'block' or 'flex' */
-    position: fixed; /* Stay in place even if scrolling */
-    z-index: 1000; /* Sit on top of other content */
+    display: none; /* Hidden by default */
+    position: fixed; /* Full screen overlay */
+    z-index: 1000;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity - overlay */
-    /* Added for centering modal-content */
-    display: flex; /* Use flexbox to center content */
-    align-items: center; /* Vertically center */
-    justify-content: center; /* Horizontally center */
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4); /* Semi-transparent background */
 }
 
+/* Styles for #studentSelectModal when used as a dropdown */
+#studentSelectModal.dropdown-mode {
+    position: absolute; /* Override fixed */
+    left: auto; /* Reset */
+    top: auto; /* Reset */
+    width: 300px; /* Or desired width for dropdown */
+    height: auto; /* Fit content */
+    overflow: visible; /* Allow content to define size */
+    background-color: #fff; /* Dropdown background */
+    border: 1px solid #ccc;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    border-radius: 4px;
+    /* z-index still 1000 or higher */
+}
 
 .modal-content {
-    background-color: #fff;
-    /* margin: 10% auto; */ /* Remove this if using flexbox on .modal for centering */
+    background-color: #fefefe;
+    margin: 10% auto; /* Centered by default for standard modal */
     padding: 20px;
-    border-radius: 10px;
-    width: 50%; /* Or a fixed width like 500px */
-    max-width: 600px; /* Maximum width */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    position: relative; /* For positioning close button or other elements inside */
-    /* Ensure it doesn't get hidden if overflow:auto was on .modal */
-    max-height: 90vh; /* Max height to prevent overflow on small screens */
-    overflow-y: auto; /* Allow content to scroll if it's too tall */
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 400px; 
+    border-radius: 8px;
+    position: relative;
 }
 
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 10px;
-    margin-bottom: 15px; /* Add some space before modal-body */
+#studentSelectModal.dropdown-mode .modal-content {
+    margin: 0; /* Remove auto margin for dropdown mode */
+    padding: 0; /* Remove padding, let inner elements control */
+    border: none; /* Remove border, parent has one */
+    width: 100%; /* Fill the .dropdown-mode container */
+    max-width: none; /* Override max-width */
+    box-shadow: none; /* Remove inner shadow if any */
+    border-radius: 0; /* Optional: remove inner radius if parent has one */
 }
 
-.modal-header h2 {
-    margin: 0;
-    font-size: 20px;
-}
-.close-btn {
-    font-size: 24px;
-    font-weight: bold; /* Make it more visible */
-    cursor: pointer;
-    color: #aaa;
-    transition: color 0.3s;
-    padding: 0 5px; /* Easier to click */
-}
-
-
-.close-btn:hover {
-    color: #000;
-}
-
-/* .modal-body {
-    margin-top: 15px;
-} */
-
-.student-search {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-.students-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-}
-
-.student-item {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+#studentSelectModal.dropdown-mode .modal-header {
+    padding: 10px 15px; /* Adjust padding for dropdown */
     border-bottom: 1px solid #eee;
 }
-
-.student-item:last-child {
-    border-bottom: none;
+#studentSelectModal.dropdown-mode .modal-body {
+    padding: 0; /* Search and list will have their own */
+}
+#studentSelectModal.dropdown-mode #studentsListForModal {
+    max-height: 250px; /* Adjust max height for dropdown */
 }
 
-.student-item:hover {
-    background-color: #f5f5f5;
+
+/* Ensure parent containers of trigger buttons can be positioning contexts */
+.chat-sidebar .chat-actions {
+    position: relative;
 }
 
-.student-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background-color: #4CAF50;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 10px;
-    font-weight: bold;
+#chatMainHeader .chat-members-display, 
+#chatMainHeader .add-member-btn-header { /* The button itself or its direct container */
+    position: relative; /* If the button is directly appended to chatMainHeader, then chatMainHeader needs it */
 }
-
-.student-info {
-    flex-grow: 1;
-}
-
-.student-name {
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.student-details {
-    font-size: 12px;
-    color: #666;
+/* If add-member-btn-header is wrapped, the wrapper needs position: relative */
+/* Making chatMainHeader relative is safer if button is direct child */
+#chatMainHeader {
+    /* ... existing flex styles ... */
+    position: relative; /* For positioning dropdowns from header buttons */
 }

@@ -226,40 +226,38 @@ io.on('connection', (socket) => {
                     // CORRECTED CONDITION: Only need id, firstname, lastname from PHP
                     if (studentData && studentData.success && studentData.student && 
                         studentData.student.id && studentData.student.firstname && studentData.student.lastname) {
-                        
-                        const fetchedStudent = studentData.student;
-                        console.log(`Successfully fetched student details for ${numericTargetMysqlUserId} from PHP:`, fetchedStudent);
 
-                        const placeholderEmailDomain = process.env.PLACEHOLDER_EMAIL_DOMAIN || 'chat.system';
-                        // Ensure mysqlUserId used for placeholder is the numeric one from the student record
-                        const placeholderEmail = `student_${fetchedStudent.id}@${placeholderEmailDomain}`;
+                    const placeholderEmailDomain = process.env.PLACEHOLDER_EMAIL_DOMAIN || 'chat.system';
+                    // Ensure mysqlUserId used for placeholder is the numeric one from the student record
+                    const placeholderEmail = `student_${studentData.student.id}@${placeholderEmailDomain}`; // Changed from fetchedStudent.id
 
-                        // Defensive check: ensure this placeholder email isn't somehow already taken
-                        let existingByPlaceholderEmail = await User.findOne({ email: placeholderEmail });
-                        if (existingByPlaceholderEmail && existingByPlaceholderEmail.mysqlUserId !== numericTargetMysqlUserId) {
-                             console.error(`Placeholder email ${placeholderEmail} conflict for student ID ${numericTargetMysqlUserId}. Existing user: ${existingByPlaceholderEmail.mysqlUserId}`);
-                             return socket.emit('error', { message: `Could not create chat profile for student ID ${numericTargetMysqlUserId} due to an internal email conflict.` });
-                        }
-                        
-                        targetUser = new User({
-                            mysqlUserId: numericTargetMysqlUserId, // This is students.id
-                            firstname: capitalizeFirstLetter(fetchedStudent.firstname),
-                            lastname: capitalizeFirstLetter(fetchedStudent.lastname),
-                            email: placeholderEmail, // Unique placeholder email
-                            status: 'offline',
-                            lastSeen: new Date(0) // Indicates never truly 'seen' online
-                        });
-                        await targetUser.save();
-                        console.log(`Created new 'offline' stub user in MongoDB for ${targetUser.firstname} ${targetUser.lastname} (Student ID: ${numericTargetMysqlUserId}) with email ${placeholderEmail}`);
-                    } else {
-                        // Error message if essential details (id, firstname, lastname) are missing from PHP response
-                        let errorMsg = `Could not create chat: Essential details (ID, firstname, lastname) for student (ID: ${numericTargetMysqlUserId}) not found or incomplete via backend.`;
-                        if (studentData && !studentData.success) {
-                            errorMsg = `Could not create chat: Failed to retrieve details for student ID ${numericTargetMysqlUserId} from backend: ${studentData.message || 'Unknown error'}`;
-                        }
-                        console.error(errorMsg, studentData);
-                        return socket.emit('error', { message: errorMsg });
+                    // Defensive check: ensure this placeholder email isn't somehow already taken
+                    let existingByPlaceholderEmail = await User.findOne({ email: placeholderEmail });
+                    if (existingByPlaceholderEmail && existingByPlaceholderEmail.mysqlUserId !== numericTargetMysqlUserId) {
+                        // Handle this conflict - perhaps generate a different placeholder or log an error
+                        console.error(`Placeholder email ${placeholderEmail} conflict for mysqlUserId ${numericTargetMysqlUserId}. Existing user:`, existingByPlaceholderEmail.mysqlUserId);
+                        return socket.emit('error', { message: `Could not create chat: Internal email conflict for student ID ${numericTargetMysqlUserId}.` });
                     }
+                    
+                    targetUser = new User({
+                        mysqlUserId: numericTargetMysqlUserId,                            
+                        firstname: capitalizeFirstLetter(studentData.student.firstname), // Changed from fetchedStudent.firstname
+                        lastname: capitalizeFirstLetter(studentData.student.lastname),   // Changed from fetchedStudent.lastname
+                        email: placeholderEmail,                            
+                        status: 'offline',
+                        lastSeen: new Date(0)                        
+                    });
+                    await targetUser.save();
+                    console.log(`Created new 'offline' stub user in MongoDB for ${targetUser.firstname} ${targetUser.lastname} (Student ID: ${numericTargetMysqlUserId}) with email ${placeholderEmail}`);
+                } else {
+                    // Error message if essential details (id, firstname, lastname) are missing from PHP response
+                    let errorMsg = `Could not create chat: Essential details (ID, firstname, lastname) for student (ID: ${numericTargetMysqlUserId}) not found or incomplete via backend.`;
+                    if (studentData && !studentData.success) {
+                        errorMsg = `Could not create chat: Failed to retrieve details for student ID ${numericTargetMysqlUserId} from backend: ${studentData.message || 'Unknown error'}`;
+                    }
+                    console.error(errorMsg, studentData);
+                    return socket.emit('error', { message: errorMsg });
+                }
                 } catch (fetchError) {
                     let errMsg = `Server error: Could not retrieve details for student ID ${numericTargetMysqlUserId} from the main system.`;
                     if (fetchError.response && fetchError.response.status === 404 && fetchError.config.url.includes('getStudentDetailsAjax')) {

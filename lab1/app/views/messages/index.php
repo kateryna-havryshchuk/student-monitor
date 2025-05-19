@@ -5,7 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $loggedIn = isset($_SESSION['user']);
 $username = $loggedIn ? ucfirst(strtolower($_SESSION['user']['firstname'])) . ' ' . ucfirst(strtolower($_SESSION['user']['lastname'])) : null;
-$currentUserId = $loggedIn ? $_SESSION['user']['id'] : null; // This is mysqlUserId
+// Use the chat_user_id if available, otherwise fallback to the user's primary ID
+$currentUserIdForChat = $loggedIn ? ($_SESSION['user']['chat_user_id'] ?? $_SESSION['user']['id']) : null; 
 $currentUserEmail = $loggedIn ? $_SESSION['user']['email'] : null;
 $currentUserFirstname = $loggedIn ? $_SESSION['user']['firstname'] : null;
 $currentUserLastname = $loggedIn ? $_SESSION['user']['lastname'] : null;
@@ -97,7 +98,7 @@ if (!$loggedIn) {
                 <div class="chat-messages" id="chatMessages">
                     </div>
                 <div class="chat-input" id="chatInputContainer" style="display: none;">
-                    <input type="text" id="messageInput" placeholder="Type your message...">
+                    <textarea id="messageInput" placeholder="Type your message..."></textarea>
                     <button id="sendMessageBtn">
                         <i class="fa-solid fa-paper-plane"></i>
                     </button>
@@ -122,7 +123,7 @@ if (!$loggedIn) {
 
 <script>
     window.chatAppData = {
-        currentUserId: <?= json_encode($currentUserId, JSON_NUMERIC_CHECK) ?>,
+        currentUserId: <?= json_encode($currentUserIdForChat, JSON_NUMERIC_CHECK) ?>,
         currentUserEmail: <?= json_encode($currentUserEmail) ?>,
         currentUserFirstname: <?= json_encode($currentUserFirstname) ?>,
         currentUserLastname: <?= json_encode($currentUserLastname) ?>

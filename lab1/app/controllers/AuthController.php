@@ -6,6 +6,7 @@ if (!file_exists('app/models/User.php')) {
     die("Error: User.php not found");
 }
 require_once 'app/models/User.php';
+require_once __DIR__ . '/../models/Student.php'; // Add this line to include the Student model
 
 class AuthController
 {
@@ -51,9 +52,38 @@ class AuthController
 
             if (password_verify($password, $user['password'])) {
                 unset($user['password']);
-                $_SESSION['user'] = $user;
+                $_SESSION['user'] = $user; // $user is from the 'users' table
+
+                // Attempt to find the corresponding student_id for chat
+                $studentModel = new Student();
+                $studentLinkedToUser = null;
+                
+                // Try to find a student by matching firstname and lastname (case-insensitive)
+                // This is a basic approach. A more robust system might involve a direct link
+                // (e.g., a student_id foreign key in the users table) established during registration.
+                $allStudents = $studentModel->getAllStudents(); // Your Student model already normalizes names here
+                foreach ($allStudents as $student) {
+                    if (strtolower($student['firstname']) === strtolower($user['firstname']) &&
+                        strtolower($student['lastname']) === strtolower($user['lastname'])) {
+                        $studentLinkedToUser = $student;
+                        break;
+                    }
+                }
+
+                if ($studentLinkedToUser && isset($studentLinkedToUser['id'])) {
+                    // Found a corresponding student. Use their ID for the chat.
+                    $_SESSION['user']['chat_user_id'] = (int)$studentLinkedToUser['id'];
+                    error_log("Login: User {$user['email']} (users.id {$user['id']}) linked to student.id {$studentLinkedToUser['id']} for chat.");
+                } else {
+                    // No corresponding student record found by name, or linking failed.
+                    // Fallback to using the users.id. This could be the source of the issue
+                    // if this user *is* a student but the name match failed or isn't unique.
+                    $_SESSION['user']['chat_user_id'] = (int)$user['id'];
+                    error_log("Login: User {$user['email']} (users.id {$user['id']}). No specific student link found by name for chat; using users.id {$user['id']}. This might be an issue if the user is a student with a different students.id.");
+                }
+
                 $_SESSION['login_success'] = 'Login successful';
-                error_log("Login successful for email=$email, redirecting to student/index");
+                error_log("Login successful for email=$email, chat_user_id set to {$_SESSION['user']['chat_user_id']}, redirecting to student/index");
                 header('Location: /lab1/index.php?url=student/index');
                 exit;
             } else {

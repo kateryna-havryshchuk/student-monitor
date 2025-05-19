@@ -138,6 +138,41 @@ public function getStudentsAjax()
         echo json_encode($student ? ['success' => true, 'student' => $student] : ['success' => false, 'message' => 'Student not found']);
     }
 
+    public function getStudentDetailsAjax()
+    {
+        header('Content-Type: application/json');
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // You might want to add authentication here if this endpoint should be protected
+        // if (!isset($_SESSION['user'])) {
+        //     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+        //     http_response_code(401); // Unauthorized
+        //     exit;
+        // }
+
+        $id = $_GET['id'] ?? null;
+
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid or missing student ID.']);
+            http_response_code(400); // Bad Request
+            exit;
+        }
+
+        $student = $this->studentModel->getStudentById((int)$id);
+
+        if ($student) {
+            echo json_encode(['success' => true, 'student' => $student]);
+        } else {
+            // It's important that the Node.js server can distinguish this "student not found"
+            // from a "method not found" error. So, a success:false with a message is good.
+            echo json_encode(['success' => false, 'message' => "Student not found with ID: $id."]);
+            // http_response_code(404); // Not Found - Or you can keep it 200 OK with success:false
+        }
+        exit; // Crucial for AJAX handlers to prevent further output
+    }
+
     public function addStudent($data)
     {
         if (session_status() === PHP_SESSION_NONE) {
