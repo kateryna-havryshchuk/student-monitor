@@ -1,9 +1,122 @@
-// public/js/chatClient.js
+// public/chatClient.js
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.chatAppData === 'undefined' || !window.chatAppData.currentUserId) {
         console.log("User not logged in. Chat functionality disabled.");
-        // ... (rest of the initial check)
         return;
+    }
+
+    const initialUrlParams = new URLSearchParams(window.location.search);
+    const isOnMessagesView = initialUrlParams.get('url') === 'messages/index';
+
+    const bellIcon = document.getElementById('bellIcon');
+    const badge = document.querySelector('.icon-button-badge');
+    const notifyContentElement = document.querySelector('.notify-content');
+
+    const NOTIFICATIONS_LS_KEY = 'chatNotifications';
+
+    function createNotificationElement(message) {
+        if (!message || !message.senderId || !message.content || !message.chatId) return null;
+
+        const item = document.createElement('a');
+        item.href = `/lab1/index.php?url=messages/index&chat=${message.chatId}`;
+        item.classList.add('notification-item');
+        item.dataset.messageId = message._id;
+        item.dataset.chatId = message.chatId;
+
+        const senderName = (message.senderId && message.senderId.firstname) ? `${message.senderId.firstname} ${message.senderId.lastname || ''}`.trim() : 'Someone';
+        const shortContent = message.content.length > 50 ? message.content.substring(0, 47) + '...' : message.content;
+
+        item.innerHTML = `
+            
+            <div>
+                <strong><i class="fa-solid fa-comment-dots"></i>  ${senderName}</strong>
+                <p>${shortContent}</p>
+            </div>
+        `;
+        item.addEventListener('click', (e) => {
+            removeNotificationFromStorage(message._id);
+        });
+        return item;
+    }
+
+    function addNotificationToStorage(newMessage) {
+        if (!newMessage || !newMessage._id) return;
+
+        const storedNotifications = localStorage.getItem(NOTIFICATIONS_LS_KEY);
+        let notifications = [];
+        if (storedNotifications) {
+            try {
+                notifications = JSON.parse(storedNotifications);
+            } catch (e) {
+                console.error("Error parsing stored notifications for adding:", e);
+                notifications = [];
+            }
+        }
+        if (!notifications.find(n => n._id === newMessage._id)) {
+            notifications.unshift(newMessage);
+        }
+        localStorage.setItem(NOTIFICATIONS_LS_KEY, JSON.stringify(notifications));
+    }
+
+    function removeNotificationFromStorage(messageId) {
+        const storedNotifications = localStorage.getItem(NOTIFICATIONS_LS_KEY);
+        let notifications = [];
+        if (storedNotifications) {
+            try {
+                notifications = JSON.parse(storedNotifications);
+            } catch (e) { return; }
+        }
+        notifications = notifications.filter(n => n._id !== messageId);
+        localStorage.setItem(NOTIFICATIONS_LS_KEY, JSON.stringify(notifications));
+    }
+    function clearAllNotificationsFromStorage() {
+        localStorage.removeItem(NOTIFICATIONS_LS_KEY);
+        if (notifyContentElement) {
+            notifyContentElement.innerHTML = '<p class="no-notifications-placeholder">No new notifications.</p>';
+        }
+        updateNotificationBadgeCount();
+        if (bellIcon) {
+            bellIcon.classList.remove('bell-ringing');
+        }
+    }
+    function loadAndRenderNotifications() {
+        if (!notifyContentElement) return;
+        const storedNotifications = localStorage.getItem(NOTIFICATIONS_LS_KEY);
+        let notifications = [];
+        if (storedNotifications) {
+            try {
+                notifications = JSON.parse(storedNotifications);
+            } catch (e) {
+                console.error("Error parsing stored notifications:", e);
+                localStorage.removeItem(NOTIFICATIONS_LS_KEY);
+            }
+        }
+
+        notifyContentElement.innerHTML = '';
+        if (notifications.length === 0) {
+            notifyContentElement.innerHTML = '<p class="no-notifications-placeholder">No new notifications.</p>';
+        } else {
+            notifications.forEach(msg => {
+                const notificationItem = createNotificationElement(msg);
+                if (notificationItem) {
+                    notifyContentElement.appendChild(notificationItem);
+                }
+            });
+        }
+        updateNotificationBadgeCount();
+        
+        if (notifications.length > 0 && bellIcon) {
+            bellIcon.classList.remove('bell-ringing'); 
+            void bellIcon.offsetWidth; 
+            bellIcon.classList.add('bell-ringing');
+        } else if (bellIcon) {
+            bellIcon.classList.remove('bell-ringing');
+        }
+    }
+    loadAndRenderNotifications();
+    if (isOnMessagesView) {
+        console.log("Navigated to messages view. Clearing all notifications from storage and UI.");
+        clearAllNotificationsFromStorage();
     }
 
     const socket = io('http://localhost:4000');
@@ -12,34 +125,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatMessagesDiv = document.getElementById('chatMessages');
     const messageInput = document.getElementById('messageInput');
     const sendMessageBtn = document.getElementById('sendMessageBtn');
-    const newChatBtn = document.getElementById('addBtn');
+    const newChatBtn = document.getElementById('initiateNewChatBtn');
 
-    // Modal elements - define them carefully
     const studentSelectModal = document.getElementById('studentSelectModal');
-    let studentsListForModalUl, studentSearchModalInput, closeStudentSelectModalBtn; // Use these consistently
+    let studentsListForModalUl, studentSearchModalInput, closeStudentSelectModalBtn;
 
     if (studentSelectModal) {
-        studentsListForModalUl = studentSelectModal.querySelector('#studentsListForModal'); // Correct ID from PHP
-        studentSearchModalInput = studentSelectModal.querySelector('#studentSearchInputModal'); // Correct ID from PHP
+        studentsListForModalUl = studentSelectModal.querySelector('#studentsListForModal');
+        studentSearchModalInput = studentSelectModal.querySelector('#studentSearchInputModal');
         closeStudentSelectModalBtn = studentSelectModal.querySelector('#closeStudentModal');
     } else {
         console.error("FATAL: studentSelectModal not found in the DOM!");
-        // If the modal isn't found, much of the new chat/add member functionality will fail.
-        // Ensure the modal HTML is present in messages/index.php with id="studentSelectModal"
     }
 
     const chatInputContainer = document.getElementById('chatInputContainer');
     const chatMainHeader = document.getElementById('chatMainHeader');
     const chatTitleH3 = document.getElementById('chatTitle');
-    // const currentChatMembersDiv = document.getElementById('currentChatMembers'); // This ID was a placeholder, header is built dynamically
+
+    const groupNameInputModal = document.getElementById('groupNameInputModal');
+    const confirmStudentSelectionBtnModal = document.getElementById('confirmStudentSelectionBtnModal');
 
     let currentOpenChatId = null;
     let currentChatParticipants = [];
     let allStudents = [];
     let localUserMongoId = null;
+    let selectedStudentsForModal = new Set();
 
-    // --- Socket event handlers ('connect', 'disconnect', 'userIdentified', etc.) ---
-    // (Keep your existing socket event handlers as they were, I'm omitting them here for brevity if unchanged from my previous correct version)
     socket.on('connect', () => {
         console.log('Connected to chat server:', socket.id);
         socket.emit('identifyUser', {
@@ -58,31 +169,49 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('User identified on server:', data);
         localUserMongoId = data.mongoUserId;
         socket.emit('loadMyChats');
-
         const urlParams = new URLSearchParams(window.location.search);
         const targetChatIdFromUrl = urlParams.get('chat');
-        if (targetChatIdFromUrl) {
-            const tryOpenChatFromUrl = (chatIdToOpen) => {
-                const chatListItem = chatListUl.querySelector(`li[data-chat-id="${chatIdToOpen}"]`);
-                if (chatListItem) {
-                    const chatName = chatListItem.querySelector('.chat-item-name').textContent || 'Chat';
-                    const participants = chatListItem.dataset.participants ? JSON.parse(chatListItem.dataset.participants) : [];
-                    openChat(chatIdToOpen, chatName, participants);
-                } else {
-                    console.warn(`Chat ${chatIdToOpen} from URL not found in list. Will try after chats load if not already.`);
-                    // If chats haven't loaded yet, this might be called too early.
-                    // The 'myChatsLoaded' event might also try to open it.
-                }
-            };
-            // Attempt to open immediately if chat list might already be populated (e.g. from cache or quick load)
-            if (chatListUl && chatListUl.children.length > 0 && chatListUl.children[0].tagName === 'LI') {
-                tryOpenChatFromUrl(targetChatIdFromUrl);
+        
+        if (targetChatIdFromUrl && isOnMessagesView) {
+            console.log(`Requesting to open chat from URL parameter: ${targetChatIdFromUrl} on messages view.`);
+            socket.emit('requestOpenChat', { chatId: targetChatIdFromUrl });
+        } else {
+            if (targetChatIdFromUrl && !isOnMessagesView) {
             }
-            // Always set up a listener for when chats are loaded, as the list might be empty initially.
-            socket.once('myChatsLoaded', (chats) => { // Use once to avoid multiple bindings if re-identified
-                // Small delay to ensure DOM updates from myChatsLoaded are processed
-                setTimeout(() => tryOpenChatFromUrl(targetChatIdFromUrl), 100);
-            });
+            loadAndRenderNotifications();
+        }
+    });
+
+    socket.on('openThisChat', (chatData) => {
+        if (chatData && chatData._id) {
+            console.log("Server instructed to open chat:", chatData);
+            
+            const existingLi = chatListUl ? chatListUl.querySelector(`li[data-chat-id="${chatData._id}"]`) : null;
+            if (!existingLi && chatListUl) {
+                 console.log(`Chat item for ${chatData._id} not found in list, adding it.`);
+                 addChatToList(chatData, false); 
+            }
+            let chatName;
+            if (chatData.type === 'private') {
+                const otherParticipant = chatData.participants.find(p => p._id.toString() !== localUserMongoId && p.mysqlUserId !== window.chatAppData.currentUserId);
+                chatName = otherParticipant ? `${otherParticipant.firstname || ''} ${otherParticipant.lastname || ''}`.trim() : "Chat";
+                if (!chatName && otherParticipant) chatName = otherParticipant.email || "Private Chat";
+                if (!otherParticipant) { 
+                     const self = chatData.participants.find(p => p._id.toString() === localUserMongoId);
+                     chatName = self ? `${self.firstname || ''} ${self.lastname || ''}`.trim() : "My Notes";
+                }
+            } else {
+                chatName = chatData.name || "Group Chat";
+            }
+            openChat(chatData._id, chatName, chatData.participants);
+
+            if (window.history.replaceState) {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.delete('chat');
+                window.history.replaceState({ path: currentUrl.href }, '', currentUrl.href);
+            }
+        } else {
+            console.warn("Received 'openThisChat' but chatData is invalid or missing ID.", chatData);
         }
     });
 
@@ -90,12 +219,16 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Server error:', errorData.message);
         alert(`Chat Error: ${errorData.message}`);
     });
+
     socket.on('info', (infoData) => {
         console.log('Server info:', infoData.message);
     });
-
     socket.on('myChatsLoaded', (chats) => {
-        chatListUl.innerHTML = '';
+        if (chatListUl) {
+            chatListUl.innerHTML = '';
+        } else {
+            console.warn("chatListUl not found. Skipping chat list update.");
+        }
         if (chats && chats.length > 0) {
             chats.forEach(chat => addChatToList(chat));
         } else {
@@ -103,22 +236,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // +++ ADD THIS EVENT HANDLER +++
     socket.on('chatInitiated', (chatData) => {
         console.log('Chat initiated (or existing one focused):', chatData);
-        addChatToList(chatData, true); // Додає або оновлює чат у списку та переміщує вгору
-
+        addChatToList(chatData, true);
+        studentSelectModal.style.display = 'none';
         let chatName;
         if (chatData.type === 'private') {
             const otherParticipant = chatData.participants.find(p => p.mysqlUserId !== window.chatAppData.currentUserId);
             chatName = (otherParticipant ? (`${otherParticipant.firstname || ''} ${otherParticipant.lastname || ''}`.trim() || 'Private Chat') : 'Private Chat');
-            if (!chatName && otherParticipant) chatName = otherParticipant.email || 'Private Chat'; // Fallback if names are empty
+            if (!chatName && otherParticipant) chatName = otherParticipant.email || 'Private Chat';
         } else {
             chatName = chatData.name || 'Group Chat';
         }
-        openChat(chatData._id, chatName, chatData.participants); // Відкриває чат
+        openChat(chatData._id, chatName, chatData.participants);
     });
-    // +++ END OF ADDED EVENT HANDLER +++
 
     socket.on('newChatStarted', (chatData) => {
         console.log('New chat started by another user:', chatData);
@@ -140,7 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     socket.on('userStatusChanged', ({ userId, mysqlUserId, status, lastSeen }) => {
         console.log(`Status changed: User ${mysqlUserId} (mongoId: ${userId}) is now ${status}`);
-        // Update status in chat list
         document.querySelectorAll(`.chat-item[data-chat-type="private"]`).forEach(chatItem => {
             const participantsAttr = chatItem.dataset.participants;
             if (participantsAttr) {
@@ -160,14 +290,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Update status in currently open chat header
         if (currentOpenChatId && currentChatParticipants) {
             const participantInCurrentChat = currentChatParticipants.find(p => p.mysqlUserId === mysqlUserId);
             if (participantInCurrentChat) {
-                participantInCurrentChat.status = status; // Update local cache
+                participantInCurrentChat.status = status;
                 const headerAvatars = chatMainHeader.querySelectorAll('.member-avatar-header');
                 headerAvatars.forEach(avatar => {
-                    // Assuming title is like "Firstname Lastname (status)"
                     if (avatar.title && avatar.title.toLowerCase().includes(`${participantInCurrentChat.firstname.toLowerCase()} ${participantInCurrentChat.lastname.toLowerCase()}`)) {
                         const dot = avatar.querySelector('.status-dot-small');
                         if (dot) dot.className = `status-dot-small ${getStatusIndicatorClass(status)}`;
@@ -176,30 +304,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         }
-        // Update status in message avatars
         document.querySelectorAll(`.message-avatar[data-user-id="${userId}"] .status-dot-message`).forEach(dot => {
             dot.className = `status-dot-message ${getStatusIndicatorClass(status)}`;
             dot.title = status;
         });
     });
 
-
-    // +++ ADD THESE HANDLERS +++
     socket.on('messagesLoaded', ({ chatId, messages }) => {
         if (chatId !== currentOpenChatId) {
             console.log(`Messages loaded for chat ${chatId}, but current open chat is ${currentOpenChatId}. Ignoring.`);
             return;
         }
-
         if (chatMessagesDiv) {
-            chatMessagesDiv.innerHTML = ''; // Clear previous messages
+            chatMessagesDiv.innerHTML = '';
             if (messages && messages.length > 0) {
                 console.log(`Loading ${messages.length} messages for chat ${chatId}`);
                 messages.forEach(msg => {
                     if (!msg.senderId) {
                         console.warn("Message received without senderId, cannot determine if sender:", msg);
-                        // Decide how to handle this - skip, or display with a generic "Unknown"
-                        return; 
+                        return;
                     }
                     const isSender = msg.senderId.mysqlUserId === window.chatAppData.currentUserId;
                     displayMessage(msg, isSender);
@@ -213,129 +336,133 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("chatMessagesDiv is null, cannot display loaded messages.");
         }
     });
-
     socket.on('newMessage', (msgData) => {
         console.log("New message received from server:", msgData);
-        if (msgData.chatId === currentOpenChatId) {
-            if (!msgData.senderId) {
-                console.warn("New message received without senderId:", msgData);
-                return; // Or handle as an error message
+
+        if (!msgData.senderId) {
+            console.warn("New message received without senderId:", msgData);
+            return;
+        }
+        if (chatListUl) {
+            const chatListItem = chatListUl.querySelector(`li[data-chat-id="${msgData.chatId}"]`);
+            if (chatListItem) {
+                const lastMsgSpan = chatListItem.querySelector('.chat-item-info span');
+                if (lastMsgSpan) {
+                    lastMsgSpan.textContent = msgData.content.length > 25 ? msgData.content.substring(0, 25) + '...' : msgData.content;
+                }
+                chatListUl.prepend(chatListItem);
             }
+        }
+
+        if (msgData.chatId === currentOpenChatId && isOnMessagesView) {
             const isSender = msgData.senderId.mysqlUserId === window.chatAppData.currentUserId;
-            
             const noMessagesPlaceholder = chatMessagesDiv ? chatMessagesDiv.querySelector('.no-messages') : null;
             if (noMessagesPlaceholder) {
                 noMessagesPlaceholder.remove();
             }
-
             displayMessage(msgData, isSender);
             scrollToBottom(chatMessagesDiv);
         } else {
-            console.log(`New message for chat ${msgData.chatId}, but current open chat is ${currentOpenChatId}. Not displaying immediately.`);
-            // Update chat list item with last message preview (if addChatToList handles this)
-            // And trigger notification
+            console.log(`New message for chat ${msgData.chatId}, but current open chat is ${currentOpenChatId} or not on messages view.`);
         }
-        // Potentially update the last message in the chat list for the specific chat
-        const chatListItem = chatListUl.querySelector(`li[data-chat-id="${msgData.chatId}"]`);
-        if (chatListItem) {
-            const lastMsgSpan = chatListItem.querySelector('.chat-item-info span');
-            if (lastMsgSpan) {
-                lastMsgSpan.textContent = msgData.content.length > 25 ? msgData.content.substring(0, 25) + '...' : msgData.content;
-            }
-            // Move chat to top
-            chatListUl.prepend(chatListItem);
-        }
-
-        handleNotification(msgData); // Assuming you have this function defined elsewhere
     });
-    // +++ END OF ADDED HANDLERS +++
 
+    socket.on('notification', (data) => {
+        console.log("Client: Received 'notification' event:", JSON.stringify(data));
+        const { chatId, message } = data;
+        if (localUserMongoId && message.senderId && message.senderId._id && message.senderId._id.toString() === localUserMongoId) {
+            console.log("Notification for self message. Suppressing.");
+            return;
+        }
+        if (isOnMessagesView && currentOpenChatId === chatId) {
+            console.log(`Notification for chat ${chatId} suppressed as it's the active chat on the messages view.`);
+            return;
+        }
 
-    // (Keep addChatToList, openChat, updateChatMainHeader, openAddMembersModal, getStatusIndicatorClass - ensure they use corrected modal element vars if needed)
-    // For example, in openAddMembersModal:
-    // studentSearchModalInput.value = ''; studentSearchModalInput.focus();
+        addNotificationToStorage(message);
+        loadAndRenderNotifications(); 
 
-    // --- MODIFIED New Chat Modal Logic ---
-    if (newChatBtn && studentSelectModal && closeStudentSelectModalBtn && studentsListForModalUl && studentSearchModalInput) {
-        newChatBtn.addEventListener('click', () => {
-            console.log("New Chat button clicked. Modal should open."); 
-            
-            if (!studentSelectModal) {
-                console.error("CRITICAL: studentSelectModal is null right before trying to use it in newChatBtn listener!");
-                return;
+        if (chatListUl) {
+            const chatListItem = chatListUl.querySelector(`li[data-chat-id="${chatId}"]`);
+            if (chatListItem) {
+                if (!chatListItem.classList.contains('new-message-indicator')) {
+                    chatListItem.classList.add('new-message-indicator');
+                }
+                // Update last message preview in chat list
+                const lastMsgSpan = chatListItem.querySelector('.chat-item-info span');
+                if (lastMsgSpan) {
+                    lastMsgSpan.textContent = message.content.length > 25 ? message.content.substring(0, 25) + '...' : message.content;
+                }
+                 chatListUl.prepend(chatListItem); // Move to top
+            } else {
+                console.warn(`Notification for chat ${chatId}, but chat item not in list.`);
             }
-            console.log("Debug: studentSelectModal is:", studentSelectModal);
+        }
+    });
 
+    if (newChatBtn && studentSelectModal && closeStudentSelectModalBtn && studentsListForModalUl && studentSearchModalInput && groupNameInputModal && confirmStudentSelectionBtnModal) {
+        newChatBtn.addEventListener('click', () => {
+            console.log("New Chat button clicked.");
             studentSelectModal.dataset.mode = 'newChat';
-            console.log("Debug: Modal mode set to 'newChat'.");
+            selectedStudentsForModal.clear(); // Clear previous selections
+            if (groupNameInputModal) groupNameInputModal.value = '';
+            if (groupNameInputModal) groupNameInputModal.style.display = 'none';
+            if (studentSearchModalInput) studentSearchModalInput.value = '';
 
             const modalTitle = studentSelectModal.querySelector('.modal-header h2');
-            if (modalTitle) {
-                modalTitle.textContent = 'Start a New Chat';
-                console.log("Debug: Modal title set to 'Start a New Chat'.");
-            } else {
-                console.warn("Debug: Modal title element (.modal-header h2) not found.");
-            }
-
-            try {
-                studentSelectModal.style.display = 'flex';
-                console.log("Debug: Modal display style set to 'flex'. It should be visible now.");
-
-                // Check computed style shortly after to confirm
-                setTimeout(() => {
-                    if (studentSelectModal) {
-                        const styles = window.getComputedStyle(studentSelectModal);
-                        console.log("Debug: Computed modal display style after 0ms timeout:", styles.display);
-                        if (styles.display !== 'flex') {
-                            console.warn("Debug: Modal display is NOT 'flex'. Current display is:", styles.display, ". Something might have overridden it or it failed to apply.");
-                        }
-                    } else {
-                        console.error("Debug: studentSelectModal became null in setTimeout check.");
-                    }
-                }, 0);
-
-            } catch (e) {
-                console.error("Debug: Error setting modal display style:", e);
-                return; // Stop if we can't even show the modal
-            }
+            if (modalTitle) modalTitle.textContent = 'Start a New Chat / Create Group';
+            
+            studentSelectModal.style.display = 'flex';
+            setTimeout(() => studentSearchModalInput.focus(), 50);
 
             if (allStudents.length === 0) {
-                console.log("Debug: No cached students (allStudents is empty). Fetching new list...");
                 fetchStudentsForNewChat((students) => {
-                    console.log("Debug: Callback from fetchStudentsForNewChat received. Students count:", students ? students.length : 'null/undefined');
-                    if (students && Array.isArray(students)) {
-                        allStudents = students;
-                        renderStudentListInModal(allStudents, 'newChat');
-                    } else {
-                        console.error("Debug: Students data from fetch is not an array or is null/undefined. Received:", students);
-                        allStudents = []; // Reset to empty array
-                        renderStudentListInModal(allStudents, 'newChat'); // Will show "No students available"
-                    }
+                    allStudents = students.filter(s => s.id !== window.chatAppData.currentUserId); // Exclude self
+                    renderStudentListInModal(allStudents, 'newChat');
                 });
             } else {
-                console.log("Debug: Using cached students. Count:", allStudents.length);
-                renderStudentListInModal(allStudents, 'newChat');
-            }
-
-            if (studentSearchModalInput) {
-                studentSearchModalInput.value = '';
-                // Defer focus slightly to ensure modal is rendered
-                setTimeout(() => {
-                    if (studentSelectModal.style.display === 'flex') { // Only focus if modal is intended to be visible
-                         studentSearchModalInput.focus();
-                         console.log("Debug: Search input cleared and focused.");
-                    } else {
-                        console.log("Debug: Search input cleared, but not focusing as modal is not displayed as flex.");
-                    }
-                }, 50);
-            } else {
-                console.warn("Debug: studentSearchModalInput not found, cannot clear or focus.");
+                renderStudentListInModal(allStudents.filter(s => s.id !== window.chatAppData.currentUserId), 'newChat');
             }
         });
 
         closeStudentSelectModalBtn.addEventListener('click', () => {
             studentSelectModal.style.display = 'none';
-            console.log("Debug: Student select modal closed by close button.");
+        });
+
+        confirmStudentSelectionBtnModal.addEventListener('click', () => {
+            const mode = studentSelectModal.dataset.mode;
+            const currentChatId = studentSelectModal.dataset.chatId;
+
+            if (mode === 'newChat') {
+                if (selectedStudentsForModal.size === 0) {
+                    alert('Please select at least one student.');
+                    return;
+                }
+                if (selectedStudentsForModal.size === 1) {
+                    const targetMysqlUserId = selectedStudentsForModal.values().next().value;
+                    socket.emit('initiateChat', { targetMysqlUserId });
+                } else {
+                    const groupName = groupNameInputModal.value.trim();
+                    if (!groupName) {
+                        alert('Please enter a name for the group.');
+                        groupNameInputModal.focus();
+                        return;
+                    }
+                    socket.emit('createGroupChat', { 
+                        memberMysqlUserIds: Array.from(selectedStudentsForModal), 
+                        groupName 
+                    });
+                }
+            } else if (mode === 'addMembers' && currentChatId) {
+                if (selectedStudentsForModal.size === 0) {
+                    alert('Please select students to add.');
+                    return;
+                }
+                socket.emit('addMembersToChat', {
+                    chatId: currentChatId,
+                    newMemberMysqlUserIds: Array.from(selectedStudentsForModal)
+                });
+            }
         });
 
         window.addEventListener('click', (e) => {
@@ -345,16 +472,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     } else {
-        console.error("Crucial elements for new chat modal are missing. Check IDs: newChatBtn (addBtn), studentSelectModal, closeStudentModal, studentsListForModal, or studentSearchInputModal.");
-        // Log which specific element is missing if some are found
-        if (!newChatBtn) console.error("Debug: newChatBtn (addBtn) is missing.");
-        if (!studentSelectModal) console.error("Debug: studentSelectModal is missing.");
-        if (studentSelectModal && !closeStudentSelectModalBtn) console.error("Debug: closeStudentSelectModalBtn (closeStudentModal) is missing within studentSelectModal.");
-        if (studentSelectModal && !studentsListForModalUl) console.error("Debug: studentsListForModalUl (studentsListForModal) is missing within studentSelectModal.");
-        if (studentSelectModal && !studentSearchModalInput) console.error("Debug: studentSearchModalInput (studentSearchInputModal) is missing within studentSelectModal.");
+        console.error("Crucial elements for new chat modal are missing. Check IDs: newChatBtn (initiateNewChatBtn), studentSelectModal, closeStudentModal, studentsListForModal, or studentSearchInputModal.");
+        if (!newChatBtn) console.warn("Debug: newChatBtn (expected ID 'initiateNewChatBtn') is missing.");
+        if (!studentSelectModal) console.warn("Debug: studentSelectModal is missing.");
+        if (studentSelectModal && !closeStudentSelectModalBtn) console.warn("Debug: closeStudentSelectModalBtn (expected ID 'closeStudentModal') is missing within studentSelectModal.");
+        if (studentSelectModal && !studentsListForModalUl) console.warn("Debug: studentsListForModalUl (expected ID 'studentsListForModal') is missing within studentSelectModal.");
+        if (studentSelectModal && !studentSearchModalInput) console.warn("Debug: studentSearchModalInput (expected ID 'studentSearchInputModal') is missing within studentSelectModal.");
     }
 
-    // +++ ADD SEND MESSAGE LISTENER +++
     if (sendMessageBtn && messageInput) {
         sendMessageBtn.addEventListener('click', () => {
             const messageText = messageInput.value.trim();
@@ -364,7 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     chatId: currentOpenChatId,
                     content: messageText
                 });
-                messageInput.value = ''; // Clear input after sending
+                messageInput.value = '';
                 messageInput.focus();
             } else {
                 if (!currentOpenChatId) console.warn("Cannot send message: No chat is currently open (currentOpenChatId is null).");
@@ -373,17 +498,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) { // Send on Enter, allow Shift+Enter for newline
-                e.preventDefault(); 
-                sendMessageBtn.click(); 
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessageBtn.click();
             }
         });
     } else {
         if (!sendMessageBtn) console.error("sendMessageBtn element not found. Message sending disabled.");
         if (!messageInput) console.error("messageInput element not found. Message sending disabled.");
     }
-    // +++ END OF SEND MESSAGE LISTENER +++
-
 
     async function fetchStudentsForNewChat(callback) {
         console.log("Debug: fetchStudentsForNewChat called.");
@@ -420,19 +543,20 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Debug: studentsListForModalUl (UL element in modal) is not defined. Cannot render student list.");
             return;
         }
-        studentsListForModalUl.innerHTML = ''; // Clear previous list
+        studentsListForModalUl.innerHTML = '';
 
         if (!Array.isArray(studentsToRender) || studentsToRender.length === 0) {
-            console.log("Debug: No students to render or not an array. Displaying 'No students available'.");
-            studentsListForModalUl.innerHTML = '<li class="student-item-none">No students available.</li>';
+            studentsListForModalUl.innerHTML = `<li class="student-item-none">No students available${mode === 'addMembers' ? ' to add' : ''}.</li>`;
             return;
         }
 
-        console.log("Debug: Rendering student list items...");
-        studentsToRender.forEach((student, index) => {
+        studentsToRender.forEach((student) => {
             const li = document.createElement('li');
             li.className = 'student-item';
             li.dataset.studentMysqlId = student.id;
+            if (selectedStudentsForModal.has(student.id.toString())) {
+                li.classList.add('selected');
+            }
 
             const avatarInitial = `${student.firstname ? student.firstname.charAt(0) : ''}${student.lastname ? student.lastname.charAt(0) : ''}`.toUpperCase();
             li.innerHTML = `
@@ -444,22 +568,34 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
 
             li.addEventListener('click', () => {
-                const selectedStudentMysqlId = li.dataset.studentMysqlId;
-                console.log(`Debug: Student item clicked. MySQL ID: ${selectedStudentMysqlId}, Modal mode: ${studentSelectModal.dataset.mode}`);
-                if (studentSelectModal.dataset.mode === 'newChat') {
-                    socket.emit('initiateChat', { targetMysqlUserId: selectedStudentMysqlId });
-                } else if (studentSelectModal.dataset.mode === 'addMembers') {
-                    const chatId = studentSelectModal.dataset.chatId;
-                    socket.emit('addMembersToChat', { chatId: chatId, newMemberMysqlUserIds: [selectedStudentMysqlId] });
+                const studentIdStr = student.id.toString();
+                if (mode === 'newChat') {
+                    if (selectedStudentsForModal.has(studentIdStr)) {
+                        selectedStudentsForModal.delete(studentIdStr);
+                        li.classList.remove('selected');
+                    } else {
+                        selectedStudentsForModal.add(studentIdStr);
+                        li.classList.add('selected');
+                    }
+                    // Show/hide group name input based on selection count
+                    if (groupNameInputModal) {
+                        groupNameInputModal.style.display = selectedStudentsForModal.size > 1 ? 'block' : 'none';
+                        if (selectedStudentsForModal.size <= 1) groupNameInputModal.value = '';
+                    }
+                } else if (mode === 'addMembers') {
+                    if (selectedStudentsForModal.has(studentIdStr)) {
+                        selectedStudentsForModal.delete(studentIdStr);
+                        li.classList.remove('selected');
+                    } else {
+                        selectedStudentsForModal.add(studentIdStr);
+                        li.classList.add('selected');
+                    }
                 }
-                studentSelectModal.style.display = 'none';
             });
             studentsListForModalUl.appendChild(li);
         });
-        console.log("Debug: Finished rendering student list items.");
     }
 
-    // MODIFIED: Event listener for modal search input
     if (studentSearchModalInput) {
         let searchTimeoutModal;
         studentSearchModalInput.addEventListener('input', (e) => {
@@ -470,12 +606,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 let currentParticipantsMysqlIds = [];
 
                 if (currentMode === 'addMembers' && currentOpenChatId) {
-                    // Re-fetch current participants if necessary, or use stored 'currentChatParticipants'
                     currentParticipantsMysqlIds = currentChatParticipants.map(p => p.mysqlUserId);
                 }
 
                 const filteredStudents = allStudents.filter(student => {
-                    const studentMysqlId = parseInt(student.id); // Ensure comparison with numbers
+                    const studentMysqlId = parseInt(student.id);
                     const isCurrentUser = studentMysqlId === window.chatAppData.currentUserId;
                     const isAlreadyMember = currentMode === 'addMembers' && currentParticipantsMysqlIds.includes(studentMysqlId);
                     const matchesSearch = `${student.firstname} ${student.lastname} ${student.student_group || ''}`.toLowerCase().includes(searchTerm);
@@ -485,29 +620,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 150);
         });
     } else {
-        // This will also be caught by the console.error in the newChatBtn logic if studentSelectModal itself is the issue
         console.warn("studentSearchModalInput (for modal search) not found.");
     }
 
-    // --- Other functions (displayMessage, handleNotification, etc.) ---
-    // (Keep your existing functions like displayMessage, handleNotification, addChatToList, openChat, updateChatMainHeader, openAddMembersModal, getStatusIndicatorClass)
-    // Ensure they are defined correctly and use the updated variable names for modal elements if they interact with them.
-    // For example, openAddMembersModal should use 'studentsListForModalUl' and 'studentSearchModalInput'
-
     function addChatToList(chat, replace = false) {
-        const existingLi = chatListUl.querySelector(`li[data-chat-id="${chat._id}"]`);
-        if (replace && existingLi) {
-            existingLi.remove();
-        } else if (existingLi && !replace) {
-            // If it exists and we are not replacing, maybe just update last message and move to top
-            const lastMsgSpan = existingLi.querySelector('.chat-item-info span');
-            if (lastMsgSpan && chat.lastMessage) {
-                 lastMsgSpan.textContent = chat.lastMessage.content.length > 25 ? chat.lastMessage.content.substring(0, 25) + '...' : chat.lastMessage.content;
-            }
-            chatListUl.prepend(existingLi); // Move to top
-            return; // Don't re-add
+        if (!chatListUl) {
+            console.warn('addChatToList: chatListUl element not found. Skipping DOM update for chat:', chat ? chat._id : 'unknown chat');
+            return;
         }
-
+        
+        const existingLi = chatListUl.querySelector(`li[data-chat-id="${chat._id}"]`);
+        
+        if (existingLi) { // If exists, remove to re-add at top, effectively updating it
+            existingLi.remove();
+        }
 
         const noChatsMsg = chatListUl.querySelector('.no-chats-message');
         if (noChatsMsg) {
@@ -515,21 +641,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let chatName = 'Group Chat';
-        let avatarIconClass = "fa-users"; // Default for group
-        let firstParticipantForStatus = null; // For private chat status dot
+        let avatarIconClass = "fa-users";
+        let firstParticipantForStatus = null;
 
         if (chat.type === 'private') {
             const otherParticipant = chat.participants.find(p => p.mysqlUserId !== window.chatAppData.currentUserId);
             if (otherParticipant) {
                 chatName = `${otherParticipant.firstname || ''} ${otherParticipant.lastname || ''}`.trim() || 'Private Chat';
-                avatarIconClass = "fa-user"; // Icon for private chat
+                if (!chatName && otherParticipant.email) chatName = otherParticipant.email;
+                avatarIconClass = "fa-user";
                 firstParticipantForStatus = otherParticipant;
             } else {
-                // This case might happen if the chat participants don't include the other user somehow, or it's a chat with self (if allowed)
-                chatName = "Private Chat"; // Fallback
-                avatarIconClass = "fa-user-secret"; 
+                const selfParticipant = chat.participants.find(p => p.mysqlUserId === window.chatAppData.currentUserId);
+                if (selfParticipant && chat.participants.length === 1) {
+                    chatName = "My Notes (Self)"; // Or similar
+                } else {
+                    chatName = "Private Chat";
+                }
+                avatarIconClass = "fa-user-secret";
             }
-        } else { // Group chat
+        } else {
             chatName = chat.name || 'Group Chat';
         }
 
@@ -537,24 +668,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const listItem = document.createElement('li');
         listItem.classList.add('chat-item');
+        if (chat._id === currentOpenChatId) { // ADDED: Check if this chat is the currently open one
+            listItem.classList.add('active');
+        }
         listItem.dataset.chatId = chat._id;
         listItem.dataset.chatType = chat.type;
-        // Store essential participant info for status updates and opening chat
-        listItem.dataset.participants = JSON.stringify(chat.participants.map(p => ({ 
-            _id: p._id, // Mongo ID
-            mysqlUserId: p.mysqlUserId, 
-            firstname: p.firstname, 
-            lastname: p.lastname, 
-            status: p.status 
+        listItem.dataset.participants = JSON.stringify(chat.participants.map(p => ({
+            _id: p._id,
+            mysqlUserId: p.mysqlUserId,
+            firstname: p.firstname,
+            lastname: p.lastname,
+            status: p.status
         })));
-
 
         let statusDotHtml = '';
         if (chat.type === 'private' && firstParticipantForStatus) {
             const statusClass = getStatusIndicatorClass(firstParticipantForStatus.status);
             statusDotHtml = `<span class="status-dot ${statusClass}" title="${firstParticipantForStatus.status || 'offline'}"></span>`;
         }
-
 
         listItem.innerHTML = `
             <div class="chat-item-avatar">
@@ -567,57 +698,77 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         listItem.addEventListener('click', () => {
-            // Reparse participants from dataset when opening to ensure fresh data if list item wasn't fully re-rendered
             const participantsFromData = JSON.parse(listItem.dataset.participants || "[]");
-            openChat(chat._id, chatName, participantsFromData);
+            let nameForOpenChat = chatName;
+            if (chat.type === 'private') {
+                const otherP = chat.participants.find(p => p.mysqlUserId !== window.chatAppData.currentUserId);
+                if (otherP) {
+                    nameForOpenChat = `${otherP.firstname || ''} ${otherP.lastname || ''}`.trim() || otherP.email || 'Private Chat';
+                } else if (chat.participants.length === 1 && chat.participants[0].mysqlUserId === window.chatAppData.currentUserId) {
+                    nameForOpenChat = "My Notes (Self)";
+                }
+            } else {
+                nameForOpenChat = chat.name || 'Group Chat';
+            }
+            openChat(chat._id, nameForOpenChat, participantsFromData);
         });
-        chatListUl.prepend(listItem); // Add new/updated chats to the top
+        chatListUl.prepend(listItem);
     }
 
     function openChat(chatId, chatName, participants) {
         console.log(`Opening chat: ID=${chatId}, Name=${chatName}, Participants:`, participants);
         currentOpenChatId = chatId;
-        currentChatParticipants = participants || []; // Ensure it's an array
+        currentChatParticipants = participants || [];
 
         if (chatMessagesDiv) {
-            chatMessagesDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Loading messages...</div>'; // Placeholder
+            chatMessagesDiv.innerHTML = '<p class="no-messages">Loading messages...</p>';
         } else {
-            console.error("chatMessagesDiv is null. Cannot clear for new chat.");
+            console.error("chatMessagesDiv is null. Cannot display messages.");
         }
-        if (chatTitleH3) {
-            chatTitleH3.textContent = chatName;
-        }
+        
         if (chatInputContainer) {
-            chatInputContainer.style.display = 'flex'; // Show input field
+            chatInputContainer.style.display = 'flex';
         } else {
-            console.error("chatInputContainer is null. Cannot show.");
+            console.error("chatInputContainer is null. Cannot enable message input.");
         }
 
+        updateChatMainHeader(chatName, participants, chatId);
 
-        updateChatMainHeader(chatName, participants, chatId); // Pass chatId here
+        socket.emit('joinChatRoom', chatId); // Client joins the socket.io room
+        socket.emit('loadMessagesForChat', chatId);
 
-        socket.emit('joinChatRoom', chatId); // Tell server we are focusing on this chat
-        socket.emit('loadMessagesForChat', chatId); // Request messages for this chat
-
-        document.querySelectorAll('#chatList .chat-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        const currentChatListItem = chatListUl.querySelector(`li[data-chat-id="${chatId}"]`);
-        if (currentChatListItem) {
-            currentChatListItem.classList.add('active');
+        if (chatListUl) {
+            document.querySelectorAll('.chat-item.active').forEach(item => item.classList.remove('active'));
+            const currentChatItem = chatListUl.querySelector(`li[data-chat-id="${chatId}"]`);
+            if (currentChatItem) {
+                currentChatItem.classList.add('active');
+                currentChatItem.classList.remove('new-message-indicator');
+            }
+        }
+        if (isOnMessagesView) {
+            const storedNotifications = localStorage.getItem(NOTIFICATIONS_LS_KEY);
+            let notifications = [];
+            if (storedNotifications) {
+                try {
+                    notifications = JSON.parse(storedNotifications);
+                } catch (e) { /* ignore */ }
+            }
+            const remainingNotifications = notifications.filter(n => n.chatId !== chatId);
+            localStorage.setItem(NOTIFICATIONS_LS_KEY, JSON.stringify(remainingNotifications));
+            loadAndRenderNotifications();
         }
     }
 
-    function updateChatMainHeader(chatName, participants, chatId) { // Added chatId
+    function updateChatMainHeader(chatName, participants, chatId) {
         if (!chatMainHeader) {
             console.error("chatMainHeader is null. Cannot update.");
             return;
         }
-        chatMainHeader.innerHTML = ''; // Clear previous header content
+        chatMainHeader.innerHTML = '';
 
         const titleElement = document.createElement('h3');
         titleElement.className = 'chat-title';
-        titleElement.id = 'chatTitle'; // Keep ID if CSS targets it
+        titleElement.id = 'chatTitle';
         titleElement.textContent = chatName;
         chatMainHeader.appendChild(titleElement);
 
@@ -625,13 +776,13 @@ document.addEventListener('DOMContentLoaded', () => {
         membersContainer.className = 'chat-members-display';
 
         (participants || []).forEach(p => {
-            if (p.mysqlUserId !== window.chatAppData.currentUserId) { // Don't show self in members list here
+            if (p.mysqlUserId !== window.chatAppData.currentUserId) {
                 const avatar = document.createElement('div');
                 avatar.className = 'member-avatar-header';
                 const initials = `${(p.firstname || '?').charAt(0)}${(p.lastname || '?').charAt(0)}`.toUpperCase();
                 avatar.textContent = initials;
                 avatar.title = `${p.firstname || ''} ${p.lastname || ''} (${p.status || 'offline'})`;
-                
+
                 const statusDot = document.createElement('span');
                 statusDot.className = `status-dot-small ${getStatusIndicatorClass(p.status)}`;
                 avatar.appendChild(statusDot);
@@ -644,7 +795,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const chatData = chatListUl.querySelector(`.chat-item[data-chat-id="${chatId}"]`);
         const chatType = chatData ? chatData.dataset.chatType : ((participants && participants.length > 2) ? 'group' : 'private');
 
-        if (chatType === 'group') { // Only show "Add Member" for group chats for now
+        if (chatType === 'group') {
             const addMemberBtn = document.createElement('button');
             addMemberBtn.className = 'add-member-btn-header';
             addMemberBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Add Member';
@@ -654,13 +805,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openAddMembersModal(chatId, currentParticipants) {
-        if (!studentSelectModal || !studentsListForModalUl || !studentSearchModalInput || !closeStudentSelectModalBtn) {
+        if (!studentSelectModal || !studentsListForModalUl || !studentSearchModalInput || !closeStudentSelectModalBtn || !confirmStudentSelectionBtnModal) {
             console.error("One or more modal elements for 'add members' are missing.");
             return;
         }
         console.log("Request to add members to chat:", chatId, "Current Participants:", currentParticipants);
         studentSelectModal.dataset.mode = 'addMembers';
         studentSelectModal.dataset.chatId = chatId;
+        selectedStudentsForModal.clear(); // Clear previous selections
+        if (groupNameInputModal) groupNameInputModal.style.display = 'none'; // Not needed for add members
+        if (studentSearchModalInput) studentSearchModalInput.value = '';
 
         const modalTitle = studentSelectModal.querySelector('.modal-header h2');
         if (modalTitle) {
@@ -670,55 +824,46 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentParticipantMysqlIds = (currentParticipants || []).map(p => p.mysqlUserId);
         console.log("Current participant MySQL IDs:", currentParticipantMysqlIds);
 
-
         const renderFilteredList = (searchTerm = '') => {
             const filteredStudents = allStudents.filter(student => {
-                const isNotCurrentUser = student.id !== window.chatAppData.currentUserId;
-                const isNotAlreadyParticipant = !currentParticipantMysqlIds.includes(student.id);
-                const nameMatches = `${student.firstname} ${student.lastname}`.toLowerCase().includes(searchTerm.toLowerCase());
-                return isNotCurrentUser && isNotAlreadyParticipant && nameMatches;
+                const isAlreadyMember = currentParticipantMysqlIds.includes(student.id);
+                if (isAlreadyMember) return false; // Don't show current members
+                const nameMatch = `${student.firstname} ${student.lastname}`.toLowerCase().includes(searchTerm.toLowerCase());
+                const idMatch = student.id.toString().includes(searchTerm);
+                return nameMatch || idMatch;
             });
             console.log("Filtered students for adding:", filteredStudents.length, "from total:", allStudents.length);
             renderStudentListInModal(filteredStudents, 'addMembers');
         };
 
-
         if (allStudents.length === 0) {
-            fetchStudentsForNewChat((students) => { // Assuming this fetches ALL students excluding self
-                if (students && Array.isArray(students)) {
-                    allStudents = students; // Cache them
-                    renderFilteredList();
-                } else {
-                    allStudents = [];
-                    renderStudentListInModal([], 'addMembers'); // Show "No students" or error
-                }
+            fetchStudentsForNewChat((students) => {
+                allStudents = students.filter(s => s.id !== window.chatAppData.currentUserId); // Exclude self
+                renderFilteredList();
             });
         } else {
             renderFilteredList();
         }
-        studentSelectModal.style.display = 'flex'; // Use flex as per your CSS for modals
+        studentSelectModal.style.display = 'flex';
         studentSearchModalInput.value = '';
-        setTimeout(() => studentSearchModalInput.focus(), 50); // Delay focus slightly
+        setTimeout(() => studentSearchModalInput.focus(), 50);
     }
-
 
     function displayMessage(msgData, isSender) {
         if (!chatMessagesDiv) {
             console.error("CRITICAL: chatMessagesDiv is null in displayMessage. Cannot append message.");
             return;
         }
-        if (!msgData || !msgData.senderId || !msgData.content) { // Added check for content
+        if (!msgData || !msgData.senderId || !msgData.content) {
             console.error("displayMessage: msgData, msgData.senderId, or msgData.content is missing.", msgData);
             return;
         }
 
-        // console.log("Displaying message:", JSON.stringify(msgData, null, 2), "Is sender:", isSender);
-
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('message', isSender ? 'message-sent' : 'message-received');
-        messageDiv.dataset.messageId = msgData._id; // Store MongoDB message ID
+        messageDiv.dataset.messageId = msgData._id;
 
-        const sender = msgData.senderId; // This should be the populated User object
+        const sender = msgData.senderId;
         let senderName = 'Unknown User';
 
         if (isSender) {
@@ -729,27 +874,23 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (sender && sender.email) {
             senderName = sender.email;
         }
-        
+
         const avatarInitial = sender ? `${(sender.firstname || '?').charAt(0)}${(sender.lastname || '?').charAt(0)}`.toUpperCase() : '??';
         const userStatus = sender ? (sender.status || 'offline') : 'offline';
-        // Ensure sender._id is available and a string for data-user-id
         const senderMongoId = sender && sender._id ? sender._id.toString() : (sender ? 'unknown-mongo-id' : 'unknown-sender');
-        
+
         const statusIndicatorClass = getStatusIndicatorClass(userStatus);
         let avatarHtml = '';
 
         const avatarClass = isSender ? 'message-avatar-sent' : 'message-avatar-received';
-        // Ensure data-user-id is correctly set
         avatarHtml = `
             <div class="message-avatar ${avatarClass}" data-user-id="${senderMongoId}" title="${senderName} (${userStatus})">
                 <span>${avatarInitial}</span>
                 <span class="status-dot-message ${statusIndicatorClass}" title="${userStatus}"></span>
             </div>`;
-        
+
         const time = msgData.timestamp ? new Date(msgData.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
-        // Sanitize content before injecting as HTML if it could ever contain user-input HTML
-        // For plain text to HTML (like newlines to <br>), this is okay.
         const messageContentHtml = msgData.content.replace(/\n/g, '<br>');
 
         messageDiv.innerHTML = `
@@ -767,7 +908,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function scrollToBottom(element) {
         if (element) {
             element.scrollTop = element.scrollHeight;
-            // console.log("Scrolled to bottom of:", element.id || element.className);
         } else {
             console.warn("Attempted to scroll a null element.");
         }
@@ -775,70 +915,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getStatusIndicatorClass(status) {
         if (status === 'online') return 'status-online';
-        if (status === 'away') return 'status-away'; // Assuming you have 'away'
-        return 'status-offline'; // Default
+        if (status === 'away') return 'status-away';
+        return 'status-offline';
     }
 
-    function handleNotification(message) { // Basic example
-        console.log("Handling notification for message:", message);
-        const isChatPageActive = window.location.pathname.includes('messages/index'); // Adjust if URL changes
-        
-        // Don't show browser notification if user is on chat page AND viewing the specific chat
-        if (isChatPageActive && !document.hidden && message.chatId === currentOpenChatId) {
-            console.log("User is active in the current chat. No browser notification needed.");
-            return; 
+    function updateNotificationBadgeCount() {
+        if (!badge || !notifyContentElement) {
+            return;
         }
 
-        // Update unread badge (example)
-        const badge = document.querySelector('.icon-button-badge'); // Assuming this is your notification badge
-        if (badge) {
-            let count = parseInt(badge.textContent || '0');
-            if (isNaN(count)) count = 0;
-            badge.textContent = count + 1;
-            badge.style.display = 'flex'; // Make it visible
-            badge.classList.add('show'); // If you use a class to show
+        const storedNotifications = localStorage.getItem(NOTIFICATIONS_LS_KEY);
+        let count = 0;
+        if (storedNotifications) {
+            try {
+                const notifications = JSON.parse(storedNotifications);
+                count = notifications.filter(n => !(isOnMessagesView && n.chatId === currentOpenChatId)).length;
+            } catch (e) {
+                count = 0;
+            }
         }
+        badge.textContent = count > 0 ? count : '';
+        badge.classList.toggle('show', count > 0);
 
-        // Add to notification dropdown (example)
-        const notifyContent = document.querySelector('.notify-content'); // Your notification dropdown
-        if (notifyContent) {
-            const newItem = document.createElement('a');
-            newItem.href = `/lab1/index.php?url=messages/index&chat=${message.chatId}`; // Link to the chat
-            const senderName = message.senderId ? `${message.senderId.firstname} ${message.senderId.lastname}` : 'Someone';
-            newItem.textContent = `New message from ${senderName}: ${message.content.substring(0, 20)}...`;
-            newItem.classList.add('notification-item'); // Add a class for styling
-            notifyContent.prepend(newItem); // Add to top of list
-        }
-
-        // Browser notification (if permission granted)
-        if (Notification.permission === "granted") {
-            const senderName = message.senderId ? `${message.senderId.firstname} ${message.senderId.lastname}` : 'New message';
-            const notification = new Notification(senderName, {
-                body: message.content,
-                icon: '/lab1/public/images/favicon-96x96.png' // Optional: path to an icon
-            });
-            notification.onclick = () => {
-                window.open(`/lab1/index.php?url=messages/index&chat=${message.chatId}`); // Open chat on click
-            };
-        } else if (Notification.permission !== "denied") {
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    // Call handleNotification again or directly create notification
-                    const senderName = message.senderId ? `${message.senderId.firstname} ${message.senderId.lastname}` : 'New message';
-                    const notification = new Notification(senderName, { body: message.content });
-                    notification.onclick = () => {
-                        window.open(`/lab1/index.php?url=messages/index&chat=${message.chatId}`);
-                    };
-                }
-            });
-        }
-        
-        // Bell animation
-        const bellIcon = document.querySelector('#bellIcon');
-        if (bellIcon) {
-            bellIcon.classList.add('bell-animation');
-            setTimeout(() => bellIcon.classList.remove('bell-animation'), 1000); // Duration of animation
+        const placeholder = notifyContentElement.querySelector('.no-notifications-placeholder');
+        if (notifyContentElement.children.length === 0 || (notifyContentElement.children.length === 1 && placeholder)) {
+            if (!placeholder) {
+                notifyContentElement.innerHTML = '<p class="no-notifications-placeholder">No new notifications.</p>';
+            }
+        } else if (placeholder && notifyContentElement.children.length > 1) {
+            placeholder.remove();
         }
     }
-
-}); // End of DOMContentLoaded
+});

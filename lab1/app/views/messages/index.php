@@ -81,7 +81,7 @@ if (!$loggedIn) {
                 <div class="chat-header">
                     <h3>Chat Room</h3>
                     <div class="chat-actions">
-                        <button class="new-chat-btn" id="addBtn">
+                        <button class="new-chat-btn" id="initiateNewChatBtn">
                             <i class="fa-solid fa-plus"></i>
                             New chat
                         </button>
@@ -115,8 +115,12 @@ if (!$loggedIn) {
         </div>
         <div class="modal-body">
             <input type="text" id="studentSearchInputModal" class="student-search" placeholder="Search students...">
+            <input type="text" id="groupNameInputModal" class="student-search" placeholder="Enter group name (for 2+ users)" style="display:none; margin-top:10px;">
             <ul id="studentsListForModal" class="students-list">
                 </ul>
+        </div>
+        <div class="modal-footer" style="padding-top: 10px; border-top: 1px solid #eee; display: flex; justify-content: flex-end;">
+            <button id="confirmStudentSelectionBtnModal" class="okBtn">Confirm</button>
         </div>
     </div>
 </div>

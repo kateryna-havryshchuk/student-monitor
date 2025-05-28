@@ -25,16 +25,7 @@ header {
     z-index: 100;
     box-shadow: 0 2px 5px #0000001a;
 }
-/* 
-header h4 {
-    margin: 0;
-    font-size: 20px;
-    font-weight: normal;
-} */
 
-/* ... (existing styles) ... */
-
-/* STATUS INDICATORS */
 .status-dot { /* For chat list */
     height: 10px;
     width: 10px;
@@ -80,8 +71,6 @@ header h4 {
 .status-offline { background-color: #ccc; /* Grey */ }
 .status-away { background-color: #ffc107; /* Yellow/Orange */ }
 
-
-/* CHAT MAIN HEADER MODIFICATIONS */
 #chatMainHeader {
     display: flex;
     justify-content: space-between;
@@ -185,8 +174,6 @@ header h4 {
     }
 }
 
-
-/* Ensure badge display is flex for centering text if needed */
 .icon-button-badge {
     /* ... existing styles ... */
     display: flex; /* Change from none initially to flex when shown */
@@ -202,9 +189,6 @@ header h4 {
     display: flex;
 }
 
-/* ... (rest of existing styles) ... */
-
-/*LOGOTYPE*/
 .logo {
     margin-left: 1%;
     font-size: 25px;
@@ -450,10 +434,6 @@ main h1 {
     }
 }
 
-
-
-/* CHAT SPECIFIC STYLES */
-
 .chat-container {
     display: flex;
     height: calc(100vh - 130px); /* Або інша висота, яка вам потрібна */
@@ -594,7 +574,7 @@ main h1 {
     border-radius: 18px;
     background-color: #f0f0f0;
     word-wrap: break-word; /* Already present, good for breaking long words */
-    max-width: 70%; /* Бульбашка може займати всю доступну ширину в межах батьківського .message */
+    max-width: 100%; /* Бульбашка може займати всю доступну ширину в межах батьківського .message */
 }
 
 /* ADD THESE STYLES FOR THE SENDER'S NAME */
@@ -1131,69 +1111,51 @@ main h1 {
     }
 }
 
-/* Notification Animations and Styles */
+/* Підсвічування чату в списку, якщо є нове повідомлення */
+.chat-item.new-message-indicator .chat-item-name,
+.chat-item.new-message-indicator .chat-item-info span {
+    font-weight: bold;
+    color: #0056b3; /* Або інший колір для підсвічування */
+}
+
+/* Анімація для дзвіночка */
 @keyframes bellShake {
-    0% { transform: rotate(0); }
-    15% { transform: rotate(5deg); }
-    30% { transform: rotate(-5deg); }
-    45% { transform: rotate(4deg); }
-    60% { transform: rotate(-4deg); }
-    75% { transform: rotate(2deg); }
-    85% { transform: rotate(-2deg); }
-    92% { transform: rotate(1deg); }
-    100% { transform: rotate(0); }
+    0%, 100% { transform: rotate(0); }
+    10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+    20%, 40%, 60%, 80% { transform: rotate(10deg); }
 }
 
-.bell-animation {
-    animation: bellShake 1s cubic-bezier(.36,.07,.19,.97) both;
+.bell-ringing { 
+    animation: bellShake 0.7s ease-in-out;
 }
 
-.notification-item {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
-}
-
-.notification-item:hover {
-    background-color: #f5f5f5;
-}
-
-.notification-message {
-    font-size: 0.9em;
-    color: #333;
-}
-
-/* Модальне вікно */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Full screen overlay */
+    display: none;
+    position: fixed;
     z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0,0,0,0.4); /* Semi-transparent background */
+    background-color: rgba(0,0,0,0.4);
 }
-
-/* Styles for #studentSelectModal when used as a dropdown */
 #studentSelectModal.dropdown-mode {
-    position: absolute; /* Override fixed */
-    left: auto; /* Reset */
-    top: auto; /* Reset */
-    width: 300px; /* Or desired width for dropdown */
-    height: auto; /* Fit content */
-    overflow: visible; /* Allow content to define size */
-    background-color: #fff; /* Dropdown background */
+    position: absolute; 
+    left: auto; 
+    top: auto; 
+    width: 300px; 
+    height: auto; 
+    overflow: visible;
+    background-color: #fff; 
     border: 1px solid #ccc;
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     border-radius: 4px;
-    /* z-index still 1000 or higher */
 }
 
 .modal-content {
     background-color: #fefefe;
-    margin: 10% auto; /* Centered by default for standard modal */
+    margin: 10% auto; 
     padding: 20px;
     border: 1px solid #888;
     width: 80%;
@@ -1203,39 +1165,338 @@ main h1 {
 }
 
 #studentSelectModal.dropdown-mode .modal-content {
-    margin: 0; /* Remove auto margin for dropdown mode */
-    padding: 0; /* Remove padding, let inner elements control */
-    border: none; /* Remove border, parent has one */
-    width: 100%; /* Fill the .dropdown-mode container */
-    max-width: none; /* Override max-width */
-    box-shadow: none; /* Remove inner shadow if any */
-    border-radius: 0; /* Optional: remove inner radius if parent has one */
+    margin: 0;
+    padding: 0; 
+    border: none; 
+    width: 100%; 
+    max-width: none; 
+    box-shadow: none;
+    border-radius: 0; 
 }
 
 #studentSelectModal.dropdown-mode .modal-header {
-    padding: 10px 15px; /* Adjust padding for dropdown */
+    padding: 10px 15px; 
     border-bottom: 1px solid #eee;
 }
 #studentSelectModal.dropdown-mode .modal-body {
-    padding: 0; /* Search and list will have their own */
+    padding: 0;
 }
 #studentSelectModal.dropdown-mode #studentsListForModal {
-    max-height: 250px; /* Adjust max height for dropdown */
+    max-height: 250px; 
 }
-
-
-/* Ensure parent containers of trigger buttons can be positioning contexts */
 .chat-sidebar .chat-actions {
     position: relative;
 }
 
 #chatMainHeader .chat-members-display, 
-#chatMainHeader .add-member-btn-header { /* The button itself or its direct container */
-    position: relative; /* If the button is directly appended to chatMainHeader, then chatMainHeader needs it */
+#chatMainHeader .add-member-btn-header {
+    position: relative;
 }
-/* If add-member-btn-header is wrapped, the wrapper needs position: relative */
-/* Making chatMainHeader relative is safer if button is direct child */
 #chatMainHeader {
-    /* ... existing flex styles ... */
-    position: relative; /* For positioning dropdowns from header buttons */
+    position: relative;
+}
+.notification-item {
+    padding: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+    text-decoration: none;
+    color: #333;
+}
+
+.notification-item:hover {
+    background-color: #f5f5f5;
+}
+
+.notification-item i {
+    color: #4CAF50;
+    margin-top: 3px;
+}
+
+.notification-item div {
+    flex-grow: 1;
+}
+
+.notification-item strong {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.notification-item p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.no-notifications-placeholder {
+    padding: 15px;
+    text-align: center;
+    color: #999;
+    font-style: italic;
+}
+
+
+
+
+
+
+/* MODAL STYLES */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 0;
+    border: 1px solid #ddd;
+    width: 80%;
+    max-width: 400px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    overflow: hidden;
+}
+
+#studentSelectModal.dropdown-mode {
+    position: absolute;
+    left: auto;
+    top: auto;
+    width: 300px;
+    height: auto;
+    overflow: visible;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 0;
+}
+
+#studentSelectModal.dropdown-mode .modal-content {
+    margin: 0;
+    padding: 0;
+    border: none;
+    width: 100%;
+    max-width: none;
+    box-shadow: none;
+    border-radius: inherit;
+    max-height: 70vh; /* Increased to give more room */
+    background: transparent;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    background-color: #f8f9fa;
+}
+
+.close-btn {
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #bd5467;
+    transition: all 0.2s ease-in-out;
+}
+
+.close-btn:hover {
+    background-color: #d4a7a7;
+    transform: scale(1.1);
+}
+
+.modal-body {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #ddd #f8f9fa;
+    max-height: 400px;
+}
+
+#studentSelectModal.dropdown-mode .modal-body {
+    padding: 0;
+    max-height: 350px;
+}
+
+#studentSearchInputModal,
+#groupNameInputModal {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    outline: none;
+    background: #f8f9fa;
+    box-sizing: border-box;
+}
+
+#studentSearchInputModal:focus,
+#groupNameInputModal:focus {
+    background: white;
+    border-bottom-color: #4CAF50;
+}
+
+#studentsListForModal {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 8px 0;
+    margin: 0;
+    list-style: none;
+}
+
+#studentSelectModal.dropdown-mode #studentsListForModal {
+    max-height: 280px; /* Increased to ensure all students are visible */
+}
+
+.modal-footer {
+    padding: 10px 15px;
+    border-top: 1px solid #eee;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+#confirmStudentSelectionBtnModal {
+    background-color: #4CAF50;
+    color: #ffffff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+#confirmStudentSelectionBtnModal:hover {
+    background-color: #3d8140;
+    transform: scale(1.05);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Scrollbar styles for students list */
+#studentsListForModal::-webkit-scrollbar {
+    width: 6px;
+}
+
+#studentsListForModal::-webkit-scrollbar-track {
+    background: #f8f9fa;
+}
+
+#studentsListForModal::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 3px;
+}
+
+#studentsListForModal::-webkit-scrollbar-thumb:hover {
+    background: #bbb;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .modal-content {
+        width: 90%;
+        max-width: 350px;
+        max-height: 75vh;
+    }
+
+    #studentSelectModal.dropdown-mode {
+        width: 280px;
+    }
+
+    .modal-header {
+        padding: 10px 12px;
+    }
+
+    .close-btn {
+        font-size: 18px;
+        width: 28px;
+        height: 28px;
+    }
+
+    #confirmStudentSelectionBtnModal {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+
+    .modal-body {
+        padding: 12px;
+        max-height: 350px;
+    }
+
+    #studentSelectModal.dropdown-mode .modal-body {
+        max-height: 300px;
+    }
+
+    #studentSelectModal.dropdown-mode #studentsListForModal {
+        max-height: 230px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .modal-content {
+        width: 95%;
+        max-width: 300px;
+        max-height: 70vh;
+    }
+
+    #studentSelectModal.dropdown-mode {
+        width: 260px;
+    }
+
+    .modal-header h2 {
+        font-size: 18px;
+    }
+
+    .close-btn {
+        font-size: 16px;
+        width: 24px;
+        height: 24px;
+    }
+
+    #confirmStudentSelectionBtnModal {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    #studentSearchInputModal,
+    #groupNameInputModal {
+        font-size: 13px;
+        padding: 10px 12px;
+    }
+
+    .modal-body {
+        max-height: 300px;
+    }
+
+    #studentSelectModal.dropdown-mode .modal-body {
+        max-height: 250px;
+    }
+
+    #studentSelectModal.dropdown-mode #studentsListForModal {
+        max-height: 180px;
+    }
 }

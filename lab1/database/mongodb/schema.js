@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
     mysqlUserId: {
         type: Number,
         unique: true,
-        sparse: true // Allows null if not all chat users map to MySQL, but required if they do
+        sparse: true
     },
     firstname: { type: String, required: true },
     lastname: { type: String, required: true },
@@ -16,8 +16,6 @@ const userSchema = new mongoose.Schema({
         default: 'offline'
     },
     lastSeen: { type: Date, default: Date.now },
-    // 'chats' field can be removed if not actively maintained or if chats are primarily queried via Chat.participants
-    // chats: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Chat' }]
 }, { timestamps: true });
 
 const messageSchema = new mongoose.Schema({
@@ -29,21 +27,19 @@ const messageSchema = new mongoose.Schema({
 
 const chatSchema = new mongoose.Schema({
     type: { type: String, enum: ['private', 'group'], default: 'private' },
-    name: { // Name for group chats
+    name: {
         type: String,
         trim: true,
-        // Not strictly required for private chats, but can be set to a concatenation of participant names
         required: function() { return this.type === 'group'; }
     },
     participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    admins: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // For group chat admin controls
+    admins: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     lastMessage: { type: mongoose.Schema.Types.ObjectId, ref: 'Message' },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } // Good to know who initiated
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 
-chatSchema.index({ participants: 1 }); // Efficiently find chats by participants
+chatSchema.index({ participants: 1 });
 
-// This schema might be simplified or integrated if MySQL sync is primarily for notifications
 const messageSyncSchema = new mongoose.Schema({
     messageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Message', required: true },
     mysqlSenderId: { type: Number, required: true },

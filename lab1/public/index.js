@@ -135,17 +135,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Notification logic
     if (notificationBtn && notifyContent && notifyDropdown && badge) {
-        notifyDropdown.addEventListener('mouseover', function () {
-            badge.classList.add('show');
-        }, { once: true });
-
         notificationBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            notifyContent.style.display = notifyContent.style.display === 'block' ? 'none' : 'block';
+            e.preventDefault(); // Запобігаємо стандартній дії кнопки
+            // Перенаправляємо на сторінку повідомлень
+            window.location.href = '/lab1/index.php?url=messages/index';
+
+            // Логіка очищення значка та показу/приховування випадаючого списку
+            // тепер обробляється chatClient.js при завантаженні сторінки повідомлень
+            // та CSS для відображення при наведенні.
         });
 
         document.addEventListener('click', function (e) {
-            if (!notificationBtn.contains(e.target) && !notifyContent.contains(e.target)) {
+            // Check if notifyDropdown exists before trying to access its properties
+            if (notifyDropdown && !notifyDropdown.contains(e.target) && notifyContent.style.display === 'block') {
                 notifyContent.style.display = 'none';
             }
         });
